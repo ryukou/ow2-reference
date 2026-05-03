@@ -7,17 +7,17 @@ const PATCH_UPDATES = [
     title: "4v4 Evolved",
     date: "2026-04-28",
     tone: "info",
-    summary: "Emreだけで戦う期間限定4v4 Team Deathmatch。開催期間は4月28日から5月11日。",
-    details: ["全員Emreの同条件ルール", "リプレイコードはこの更新でワイプ", "スコアボード中にジャンプできない不具合などを修正"],
+    summary: "エムレだけで戦う期間限定4v4チーム・デスマッチ。開催期間は4月28日から5月11日。",
+    details: ["全員エムレの同条件ルール", "リプレイコードはこの更新でワイプ", "スコアボード中にジャンプできない不具合などを修正"],
     href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
   },
   {
     type: "Buff",
-    title: "Roadhog / Sombra / Vendetta",
+    title: "ロードホッグ / ソンブラ / ヴェンデッタ",
     date: "2026-04-23",
     tone: "buff",
     summary: "Season 2開始後に落ちすぎた勝率を戻すための小規模強化。",
-    details: ["Roadhog: Chain HookのCD 8秒から7秒", "Sombra: 被ダメージ露見中の速度低下が50%から33%", "Vendetta: 体力175から200、合計250から275"],
+    details: ["ロードホッグ: チェイン・フックのCD 8秒から7秒", "ソンブラ: 被ダメージ露見中の速度低下が50%から33%", "ヴェンデッタ: 体力175から200、合計250から275"],
     href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
   },
   {
@@ -26,7 +26,7 @@ const PATCH_UPDATES = [
     date: "2026-04-23",
     tone: "nerf",
     summary: "強すぎるStadiumビルドを抑えつつ、一部ビルドを強化。",
-    details: ["Hazard/Junker Queen/Orisa/Wuyang系の強い構成を弱体化", "Ramattraは一部弱体化と武器系強化が混在", "Junoの武器系ビルドは強化"],
+    details: ["ハザード/ジャンカー・クイーン/オリーサ/ウーヤン系の強い構成を弱体化", "ラマットラは一部弱体化と武器系強化が混在", "ジュノの武器系ビルドは強化"],
     href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
   },
   {
@@ -34,8 +34,8 @@ const PATCH_UPDATES = [
     title: "Season 2: Summit",
     date: "2026-04-14",
     tone: "info",
-    summary: "新DamageヒーローSierra、Operation: Grand Mesa、Antarctic Peninsulaリワークなどが追加。",
-    details: ["新ヒーローSierra登場", "Operation: Grand Mesaイベント", "Post Match Accolades復帰とPerksミニ更新"],
+    summary: "新ダメージヒーローのシエラ、Operation: Grand Mesa、Antarctic Peninsulaリワークなどが追加。",
+    details: ["新ヒーローのシエラ登場", "Operation: Grand Mesaイベント", "Post Match Accolades復帰とパークのミニ更新"],
     href: "https://overwatch.blizzard.com/news/24266793/reach-heroic-heights-in-reign-of-talon-season-2-summit",
   },
 ];
@@ -213,6 +213,100 @@ const MAP_STYLE_COMPOSITION_EXAMPLES = [
     ],
   },
 ];
+const COMP_CATEGORY_LABELS = {
+  style: "戦い方",
+  rule: "ルール",
+  map: "ステージ",
+  data: "Stats",
+};
+const COMP_RULE_OPTIONS = ["Control", "Escort", "Hybrid", "Push", "Flashpoint", "Clash"];
+const COMP_MAP_OPTIONS = ["長射線", "高台", "狭所乱戦", "広い移動"];
+const COMP_METADATA = {
+  Dive: {
+    category: "style",
+    rules: ["Hybrid", "Flashpoint"],
+    maps: ["高台", "広い移動"],
+    reasons: ["ウィンストンが高台や後衛に先に入って、トレーサー/ゲンジが同じ相手を削り切る。", "アナの阻害とルシオのスピードで、入るタイミングと帰るタイミングを合わせやすい。"],
+  },
+  "Rush / Brawl": {
+    category: "style",
+    rules: ["Control", "Clash"],
+    maps: ["狭所乱戦"],
+    reasons: ["ラインハルト、メイ、リーパーで近距離の面を作り、ルシオで強制的に距離を詰める。", "バティストのイモータリティで、固まった時の被弾リスクを一度受けられる。"],
+  },
+  Poke: {
+    category: "style",
+    rules: ["Escort", "Hybrid"],
+    maps: ["長射線", "高台"],
+    reasons: ["シグマの盾と遠距離火力で、相手が入る前にリソースを削れる。", "バティスト/ゼニヤッタは射線を維持しながら火力も出せるため、長いマップで強い。"],
+  },
+  Pick: {
+    category: "style",
+    rules: ["Escort", "Hybrid"],
+    maps: ["長射線", "高台"],
+    reasons: ["ウィドウメイカー/ハンゾーで先に1人落とし、D.Vaが高台や射線の圧を消す。", "マーシーのダメージブーストと蘇生、キリコの鈴でワンピック勝負を支えやすい。"],
+  },
+  Control: {
+    category: "rule",
+    rules: ["Control"],
+    maps: ["狭所乱戦"],
+    reasons: ["拠点内での当たり合いが多いため、ラマットラとメイで前線を押し返しやすい。", "ルシオで先入りと再集合を速くし、キリコで阻害やスタン系の事故を消せる。"],
+  },
+  Escort: {
+    category: "rule",
+    rules: ["Escort"],
+    maps: ["長射線", "高台"],
+    reasons: ["ペイロード周辺は長い射線が生まれやすく、シグマと中長距離DPSが火力を出しやすい。", "ゼニヤッタの不和でタンクを下げ、バティストで射線を維持したまま支える。"],
+  },
+  Hybrid: {
+    category: "rule",
+    rules: ["Hybrid"],
+    maps: ["高台", "長射線"],
+    reasons: ["第一拠点は高台や後衛への圧が重要なので、ウィンストンとトレーサーで崩しに行ける。", "第二以降はソジョーンが射線を広げ、アナ/キリコで遠めの味方も支えやすい。"],
+  },
+  Push: {
+    category: "rule",
+    rules: ["Push"],
+    maps: ["広い移動"],
+    reasons: ["ロボット周辺で当たり直しが多く、ジャンカー・クイーンと機動力DPSがテンポを作りやすい。", "ルシオ/ジュノで移動速度を補い、負けた後の戻りも速い。"],
+  },
+  Flashpoint: {
+    category: "rule",
+    rules: ["Flashpoint"],
+    maps: ["広い移動"],
+    reasons: ["拠点間の移動が長いため、D.Va、トレーサー、ベンチャーの自己完結力が活きる。", "ルシオ/キリコで移動と離脱を支え、孤立した味方を助けやすい。"],
+  },
+  Clash: {
+    category: "rule",
+    rules: ["Clash"],
+    maps: ["狭所乱戦"],
+    reasons: ["連続拠点戦では前線維持が重要で、オリーサとメイが押し返しに強い。", "バティスト/キリコで耐久を厚くして、勝った後の前出過ぎによる事故を減らす。"],
+  },
+  長射線マップ: {
+    category: "map",
+    rules: ["Escort", "Hybrid"],
+    maps: ["長射線"],
+    reasons: ["Circuit RoyalやHavana系は先に射線を置く側が有利になりやすい。", "シグマが盾で相手の射線を切り、ウィドウメイカー/アッシュが遠距離から先に人数差を作る。"],
+  },
+  高台マップ: {
+    category: "map",
+    rules: ["Escort", "Hybrid"],
+    maps: ["高台"],
+    reasons: ["GibraltarやNumbani系は高台を取るだけで相手の進行ルートを制限できる。", "ウィンストン、ゲンジ、トレーサーで高台に触り、アナ/ジュノが遠くから支援する。"],
+  },
+  狭所乱戦マップ: {
+    category: "map",
+    rules: ["Control", "Clash", "Hybrid"],
+    maps: ["狭所乱戦"],
+    reasons: ["King's RowやLijiang系は角待ちと近距離戦が多く、ラッシュ構成が噛み合いやすい。", "メイの壁で分断し、リーパーとラインハルトで短時間に落とす狙いが明確。"],
+  },
+  広い移動マップ: {
+    category: "map",
+    rules: ["Push", "Flashpoint"],
+    maps: ["広い移動"],
+    reasons: ["SuravasaやNew Junk City系は次の当たり合いまでの移動が長い。", "レッキング・ボール、ソンブラ、トレーサーで広く触り、ルシオ/キリコで合流を速くする。"],
+  },
+};
 const CACHE_KEY = "ow2-reference-cache-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
 
@@ -224,6 +318,12 @@ const state = {
   selectedHeroKey: null,
   role: "all",
   query: "",
+  compFilters: {
+    category: "all",
+    rule: "all",
+    map: "all",
+    hero: "all",
+  },
   loadingDetails: false,
 };
 
@@ -247,6 +347,10 @@ function cacheElements() {
   els.metaStats = document.querySelector("#metaStats");
   els.updateGrid = document.querySelector("#updateGrid");
   els.compGrid = document.querySelector("#compGrid");
+  els.compCategoryFilter = document.querySelector("#compCategoryFilter");
+  els.compRuleFilter = document.querySelector("#compRuleFilter");
+  els.compMapFilter = document.querySelector("#compMapFilter");
+  els.compHeroFilter = document.querySelector("#compHeroFilter");
 }
 
 function bindEvents() {
@@ -264,6 +368,17 @@ function bindEvents() {
     });
   });
 
+  [
+    [els.compCategoryFilter, "category"],
+    [els.compRuleFilter, "rule"],
+    [els.compMapFilter, "map"],
+    [els.compHeroFilter, "hero"],
+  ].forEach(([select, key]) => {
+    select.addEventListener("change", () => {
+      state.compFilters[key] = select.value;
+      renderComps();
+    });
+  });
 }
 
 async function bootstrap() {
@@ -474,32 +589,96 @@ function renderUpdateCard(update) {
 }
 
 function renderComps() {
-  const comps = [
-    ...buildStaticComps(COMPOSITION_EXAMPLES),
-    ...buildStaticComps(MODE_COMPOSITION_EXAMPLES),
-    ...buildStaticComps(MAP_STYLE_COMPOSITION_EXAMPLES),
-    ...buildRecommendedComps(),
-  ];
-  if (!comps.length) {
-    els.compGrid.innerHTML = renderEmpty("構成例を準備中です。");
+  const comps = buildAllComps();
+  renderCompFilterOptions(comps);
+
+  const filtered = comps.filter((comp) => {
+    const filters = state.compFilters;
+    const categoryMatches = filters.category === "all" || comp.category === filters.category;
+    const ruleMatches = filters.rule === "all" || comp.rules.includes(filters.rule);
+    const mapMatches = filters.map === "all" || comp.maps.includes(filters.map);
+    const heroMatches =
+      filters.hero === "all" ||
+      comp.members.some((member) => (member.hero?.key || member.key) === filters.hero);
+    return categoryMatches && ruleMatches && mapMatches && heroMatches;
+  });
+
+  if (!filtered.length) {
+    els.compGrid.innerHTML = renderEmpty("条件に合う構成例がありません。フィルタをゆるめてください。");
     return;
   }
 
-  els.compGrid.innerHTML = comps.map(renderCompCard).join("");
+  els.compGrid.innerHTML = filtered.map(renderCompCard).join("");
   els.compGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
 }
 
+function buildAllComps() {
+  return [
+    ...buildStaticComps(COMPOSITION_EXAMPLES),
+    ...buildStaticComps(MODE_COMPOSITION_EXAMPLES),
+    ...buildStaticComps(MAP_STYLE_COMPOSITION_EXAMPLES),
+    ...buildRecommendedComps(),
+  ];
+}
+
+function renderCompFilterOptions(comps) {
+  const selected = { ...state.compFilters };
+  setSelectOptions(
+    els.compRuleFilter,
+    [{ value: "all", label: "すべて" }, ...COMP_RULE_OPTIONS.map((rule) => ({ value: rule, label: rule }))],
+    selected.rule,
+  );
+  setSelectOptions(
+    els.compMapFilter,
+    [{ value: "all", label: "すべて" }, ...COMP_MAP_OPTIONS.map((map) => ({ value: map, label: map }))],
+    selected.map,
+  );
+
+  const heroOptions = new Map();
+  comps.forEach((comp) => {
+    comp.members.forEach((member) => {
+      const key = member.hero?.key || member.key;
+      const name = member.hero?.name || member.fallback || member.key;
+      if (key && name) {
+        heroOptions.set(key, name);
+      }
+    });
+  });
+  setSelectOptions(
+    els.compHeroFilter,
+    [
+      { value: "all", label: "すべて" },
+      ...[...heroOptions.entries()]
+        .sort((a, b) => a[1].localeCompare(b[1], "ja"))
+        .map(([value, label]) => ({ value, label })),
+    ],
+    selected.hero,
+  );
+}
+
 function buildStaticComps(comps) {
   return comps.map((comp) => ({
     ...comp,
+    ...normalizeCompMeta(comp),
     members: comp.members.map((member) => ({
       ...member,
       hero: state.heroes.find((hero) => hero.key === member.key),
       source: "example",
     })),
   }));
+}
+
+function normalizeCompMeta(comp) {
+  const meta = COMP_METADATA[comp.title] || {};
+  return {
+    category: meta.category || "style",
+    categoryLabel: COMP_CATEGORY_LABELS[meta.category] || COMP_CATEGORY_LABELS.style,
+    rules: meta.rules || [],
+    maps: meta.maps || [],
+    reasons: meta.reasons || [comp.note],
+  };
 }
 
 function buildRecommendedComps() {
@@ -539,18 +718,33 @@ function buildRecommendedComps() {
       title: "Stats安定",
       note: "Console AsiaのPickとWinから自動生成。",
       tag: "Data",
+      category: "data",
+      categoryLabel: COMP_CATEGORY_LABELS.data,
+      rules: COMP_RULE_OPTIONS,
+      maps: COMP_MAP_OPTIONS,
+      reasons: ["Console AsiaのPick RateとWin Rateを両方見て、極端に尖りすぎない候補を選ぶ。", "身内で迷った時の初期案として使い、マップに合わせてDPSかサポートを差し替える。"],
       members: makeMembers("balanced").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
     {
       title: "Stats勝率",
       note: "Win Rateを少し強めに評価した候補。",
       tag: "Data",
+      category: "data",
+      categoryLabel: COMP_CATEGORY_LABELS.data,
+      rules: COMP_RULE_OPTIONS,
+      maps: COMP_MAP_OPTIONS,
+      reasons: ["勝率寄りなので、刺さる状況では強いが操作難度や相性の偏りも出やすい。", "敵構成に刺さらない時は、同じロール内で得意キャラに替える前提で見る。"],
       members: makeMembers("win").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
     {
       title: "Stats合わせやすさ",
       note: "Pick Rate高めで合わせやすい候補。",
       tag: "Data",
+      category: "data",
+      categoryLabel: COMP_CATEGORY_LABELS.data,
+      rules: COMP_RULE_OPTIONS,
+      maps: COMP_MAP_OPTIONS,
+      reasons: ["Pick Rateを高めに見るため、野良や身内で合わせやすいヒーローが出やすい。", "強さの最大値よりも、全員が役割を理解しやすいことを優先した候補。"],
       members: makeMembers("pick").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
   ].filter((comp) => comp.members.length === 5);
@@ -566,8 +760,19 @@ function renderCompCard(comp) {
         </div>
         <span class="comp-tag">${escapeHtml(comp.tag || "Comp")}</span>
       </div>
+      <div class="comp-meta">
+        <span>${escapeHtml(comp.categoryLabel || COMP_CATEGORY_LABELS[comp.category] || "構成")}</span>
+        ${comp.rules.map((rule) => `<span>${escapeHtml(rule)}</span>`).join("")}
+        ${comp.maps.map((map) => `<span>${escapeHtml(map)}</span>`).join("")}
+      </div>
       <div class="comp-members">
         ${comp.members.map(renderCompMember).join("")}
+      </div>
+      <div class="comp-reasons">
+        <strong>理由</strong>
+        <ul>
+          ${comp.reasons.map((reason) => `<li>${escapeHtml(reason)}</li>`).join("")}
+        </ul>
       </div>
     </article>
   `;
@@ -900,6 +1105,27 @@ function setStatus(message) {
 
 function setProgress(message) {
   els.detailProgress.textContent = message;
+}
+
+function setSelectOptions(select, options, selectedValue) {
+  const values = new Set(options.map((option) => option.value));
+  const nextValue = values.has(selectedValue) ? selectedValue : "all";
+  if (nextValue !== selectedValue) {
+    if (select === els.compRuleFilter) {
+      state.compFilters.rule = nextValue;
+    } else if (select === els.compMapFilter) {
+      state.compFilters.map = nextValue;
+    } else if (select === els.compHeroFilter) {
+      state.compFilters.hero = nextValue;
+    }
+  }
+
+  select.innerHTML = options
+    .map((option) => {
+      const selected = option.value === nextValue ? " selected" : "";
+      return `<option value="${escapeAttr(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
+    })
+    .join("");
 }
 
 function labelRole(role) {

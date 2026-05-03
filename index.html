@@ -105,7 +105,38 @@
               <span class="eyebrow">Recommended Comps</span>
               <h2>キャラ組み合わせ例</h2>
             </div>
-            <span class="section-note">定番構成例 + Console AsiaのPick/Win候補</span>
+            <span class="section-note">ルール、ステージ傾向、ヒーローで絞り込み</span>
+          </div>
+
+          <div class="comp-filters" aria-label="Composition filters">
+            <label>
+              <span>種類</span>
+              <select id="compCategoryFilter">
+                <option value="all">すべて</option>
+                <option value="style">戦い方</option>
+                <option value="rule">ルール別</option>
+                <option value="map">ステージ別</option>
+                <option value="data">Stats候補</option>
+              </select>
+            </label>
+            <label>
+              <span>ルール</span>
+              <select id="compRuleFilter">
+                <option value="all">すべて</option>
+              </select>
+            </label>
+            <label>
+              <span>ステージ傾向</span>
+              <select id="compMapFilter">
+                <option value="all">すべて</option>
+              </select>
+            </label>
+            <label>
+              <span>ヒーロー</span>
+              <select id="compHeroFilter">
+                <option value="all">すべて</option>
+              </select>
+            </label>
           </div>
 
           <div id="compGrid" class="comp-grid" aria-live="polite"></div>
