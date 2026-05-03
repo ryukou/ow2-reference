@@ -37,6 +37,18 @@ python3 -m http.server 4173
 
 最大10人程度の利用ならDBも認証も不要です。APIキーや秘密情報もありません。
 
+## GitHub Pagesで公開
+
+GitHub CLIにログインしてから、以下を実行します。
+
+```sh
+gh repo create ow2-reference --public --source=. --remote=origin --push
+gh api --method POST repos/ryukou/ow2-reference/pages -f build_type=workflow
+gh workflow run pages.yml
+```
+
+GitHub Freeで無料公開する場合、GitHub Pagesは公開リポジトリが前提です。公開リポジトリでは静的サイト内の簡易パスワードもソースから見えます。パスワードを隠したい場合は、非公開リポジトリ連携が使えるCloudflare PagesやVercelを使ってください。
+
 ## 簡易パスワード
 
 初期パスワードは `1234567890` です。ブラウザ保存を有効にすると、同じブラウザでは次回から入力不要です。
