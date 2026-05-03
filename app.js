@@ -1,8 +1,44 @@
 const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
-const ACCESS_PASSWORD = "1234567890";
-const ACCESS_KEY = "ow2-reference-access-v1";
+const PATCH_UPDATES = [
+  {
+    type: "Event",
+    title: "4v4 Evolved",
+    date: "2026-04-28",
+    tone: "info",
+    summary: "Emreだけで戦う期間限定4v4 Team Deathmatch。開催期間は4月28日から5月11日。",
+    details: ["全員Emreの同条件ルール", "リプレイコードはこの更新でワイプ", "スコアボード中にジャンプできない不具合などを修正"],
+    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
+  },
+  {
+    type: "Buff",
+    title: "Roadhog / Sombra / Vendetta",
+    date: "2026-04-23",
+    tone: "buff",
+    summary: "Season 2開始後に落ちすぎた勝率を戻すための小規模強化。",
+    details: ["Roadhog: Chain HookのCD 8秒から7秒", "Sombra: 被ダメージ露見中の速度低下が50%から33%", "Vendetta: 体力175から200、合計250から275"],
+    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
+  },
+  {
+    type: "Stadium",
+    title: "Stadium調整",
+    date: "2026-04-23",
+    tone: "nerf",
+    summary: "強すぎるStadiumビルドを抑えつつ、一部ビルドを強化。",
+    details: ["Hazard/Junker Queen/Orisa/Wuyang系の強い構成を弱体化", "Ramattraは一部弱体化と武器系強化が混在", "Junoの武器系ビルドは強化"],
+    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
+  },
+  {
+    type: "Season",
+    title: "Season 2: Summit",
+    date: "2026-04-14",
+    tone: "info",
+    summary: "新DamageヒーローSierra、Operation: Grand Mesa、Antarctic Peninsulaリワークなどが追加。",
+    details: ["新ヒーローSierra登場", "Operation: Grand Mesaイベント", "Post Match Accolades復帰とPerksミニ更新"],
+    href: "https://overwatch.blizzard.com/news/24266793/reach-heroic-heights-in-reign-of-talon-season-2-summit",
+  },
+];
 const COMPOSITION_EXAMPLES = [
   {
     title: "Dive",
@@ -196,18 +232,11 @@ const els = {};
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   bindEvents();
-  if (hasSavedAccess()) {
-    unlockApp({ remember: true });
-  }
+  bootstrap();
 });
 
 function cacheElements() {
-  els.authForm = document.querySelector("#authForm");
-  els.authPassword = document.querySelector("#authPassword");
-  els.rememberAccess = document.querySelector("#rememberAccess");
-  els.authError = document.querySelector("#authError");
   els.syncStatus = document.querySelector("#syncStatus");
-  els.lockButton = document.querySelector("#lockButton");
   els.refreshButton = document.querySelector("#refreshButton");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
@@ -216,22 +245,11 @@ function cacheElements() {
   els.heroCount = document.querySelector("#heroCount");
   els.detailProgress = document.querySelector("#detailProgress");
   els.metaStats = document.querySelector("#metaStats");
+  els.updateGrid = document.querySelector("#updateGrid");
   els.compGrid = document.querySelector("#compGrid");
 }
 
 function bindEvents() {
-  els.authForm.addEventListener("submit", (event) => {
-    event.preventDefault();
-    const password = els.authPassword.value;
-    if (password !== ACCESS_PASSWORD) {
-      els.authError.textContent = "パスワードが違います。";
-      els.authPassword.select();
-      return;
-    }
-    unlockApp({ remember: els.rememberAccess.checked });
-  });
-
-  els.lockButton.addEventListener("click", lockApp);
   els.refreshButton.addEventListener("click", () => loadRemoteData({ force: true }));
   els.heroSearch.addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();
@@ -267,30 +285,6 @@ async function bootstrap() {
   }
 
   await loadRemoteData({ force: false });
-}
-
-function hasSavedAccess() {
-  return localStorage.getItem(ACCESS_KEY) === "unlocked";
-}
-
-function unlockApp({ remember }) {
-  if (remember) {
-    localStorage.setItem(ACCESS_KEY, "unlocked");
-  } else {
-    localStorage.removeItem(ACCESS_KEY);
-  }
-  els.authError.textContent = "";
-  els.authPassword.value = "";
-  document.body.classList.remove("is-locked");
-  bootstrap();
-}
-
-function lockApp() {
-  localStorage.removeItem(ACCESS_KEY);
-  document.body.classList.add("is-locked");
-  setStatus("ロック中");
-  window.scrollTo({ top: 0, behavior: "auto" });
-  els.authPassword.focus();
 }
 
 function renderInitialLoading() {
@@ -428,6 +422,7 @@ async function fetchJson(path, params = {}) {
 
 function renderAll() {
   renderMetaStats();
+  renderUpdates();
   renderComps();
   renderHeroList();
   renderHeroDetail();
@@ -454,6 +449,27 @@ function renderMetaStats() {
       <span>Heroes</span>
       <strong>${state.heroes.length || "-"}</strong>
     </div>
+  `;
+}
+
+function renderUpdates() {
+  els.updateGrid.innerHTML = PATCH_UPDATES.map(renderUpdateCard).join("");
+}
+
+function renderUpdateCard(update) {
+  return `
+    <article class="update-card is-${escapeAttr(update.tone)}">
+      <div class="update-head">
+        <span class="update-type">${escapeHtml(update.type)}</span>
+        <time datetime="${escapeAttr(update.date)}">${escapeHtml(update.date)}</time>
+      </div>
+      <h3>${escapeHtml(update.title)}</h3>
+      <p>${escapeHtml(update.summary)}</p>
+      <ul>
+        ${update.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join("")}
+      </ul>
+      <a href="${safeUrl(update.href)}" target="_blank" rel="noreferrer">公式で確認</a>
+    </article>
   `;
 }
 

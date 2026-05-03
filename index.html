@@ -15,31 +15,7 @@
     <link rel="stylesheet" href="./styles.css">
     <script src="./app.js" defer></script>
   </head>
-  <body class="is-locked">
-    <section class="auth-gate" aria-label="Access gate">
-      <form id="authForm" class="auth-panel">
-        <span class="brand-mark">OW2</span>
-        <h1>OW2 Reference</h1>
-        <label>
-          <span>簡易パスワード</span>
-          <input
-            id="authPassword"
-            type="password"
-            inputmode="numeric"
-            autocomplete="current-password"
-            placeholder="Password"
-            required
-          >
-        </label>
-        <label class="remember-row">
-          <input id="rememberAccess" type="checkbox" checked>
-          <span>このブラウザに保存</span>
-        </label>
-        <p id="authError" class="auth-error" role="alert"></p>
-        <button type="submit">入る</button>
-      </form>
-    </section>
-
+  <body>
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="#heroes" aria-label="OW2 Reference">
@@ -51,8 +27,8 @@
         </a>
         <nav class="top-actions" aria-label="Main">
           <a href="#heroes">Heroes</a>
+          <a href="#updates">Updates</a>
           <a href="#comps">Comps</a>
-          <button id="lockButton" class="ghost-button" type="button">ロック</button>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -77,6 +53,18 @@
               <strong>-</strong>
             </div>
           </div>
+        </section>
+
+        <section id="updates" class="updates-section" aria-label="Patch notes and news">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Patch & News</span>
+              <h2>パッチ・イベント・ニュース</h2>
+            </div>
+            <span class="section-note">公式情報を短く整理</span>
+          </div>
+
+          <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
 
         <section id="heroes" class="workspace" aria-label="Heroes">
