@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=fav-stage-perks">
-    <script src="./app.js?v=fav-stage-perks" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=comp-diagnosis">
+    <script src="./app.js?v=comp-diagnosis" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -53,18 +53,6 @@
               <strong>-</strong>
             </div>
           </div>
-        </section>
-
-        <section id="updates" class="updates-section" aria-label="Patch notes and news">
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">Patch & News</span>
-              <h2>パッチ・イベント・ニュース</h2>
-            </div>
-            <span class="section-note">公式情報を短く整理</span>
-          </div>
-
-          <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
 
         <section id="heroes" class="workspace" aria-label="Heroes">
@@ -146,7 +134,52 @@
             </label>
           </div>
 
+          <div class="comp-helper" aria-label="Composition diagnosis">
+            <div class="section-head compact">
+              <div>
+                <span class="eyebrow">Comp Check</span>
+                <h3>組み合わせ診断</h3>
+              </div>
+              <span class="section-note">アンチパターンを確認</span>
+            </div>
+            <div class="diagnosis-controls">
+              <label>
+                <span>Tank</span>
+                <select id="diagTank"></select>
+              </label>
+              <label>
+                <span>Damage 1</span>
+                <select id="diagDamage1"></select>
+              </label>
+              <label>
+                <span>Damage 2</span>
+                <select id="diagDamage2"></select>
+              </label>
+              <label>
+                <span>Support 1</span>
+                <select id="diagSupport1"></select>
+              </label>
+              <label>
+                <span>Support 2</span>
+                <select id="diagSupport2"></select>
+              </label>
+            </div>
+            <div id="compDiagnosis" class="diagnosis-result" aria-live="polite"></div>
+          </div>
+
           <div id="compGrid" class="comp-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="updates" class="updates-section" aria-label="Patch notes and news">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Patch & News</span>
+              <h2>パッチ・イベント・ニュース</h2>
+            </div>
+            <span class="section-note">公式情報を短く整理</span>
+          </div>
+
+          <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
       </main>
     </div>

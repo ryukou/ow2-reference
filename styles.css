@@ -193,6 +193,8 @@ a {
 .metric,
 .perk-card,
 .ability-card,
+.comp-helper,
+.diagnosis-summary,
 .empty-state,
 .error-state {
   border: 1px solid var(--line);
@@ -232,6 +234,15 @@ a {
   justify-content: space-between;
   gap: 18px;
   margin-bottom: 14px;
+}
+
+.section-head.compact {
+  margin-bottom: 10px;
+}
+
+.section-head.compact h3 {
+  margin: 0;
+  font-size: 1.12rem;
 }
 
 .search-field {
@@ -360,6 +371,13 @@ a {
 .favorite-mark {
   flex: 0 0 auto;
   color: var(--orange);
+}
+
+.hero-row-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hero-row small,
@@ -639,19 +657,33 @@ a {
   margin-bottom: 14px;
 }
 
-.comp-filters label {
+.comp-helper {
+  margin-bottom: 14px;
+  padding: 14px;
+}
+
+.diagnosis-controls {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.comp-filters label,
+.diagnosis-controls label {
   display: grid;
   gap: 7px;
 }
 
-.comp-filters span {
+.comp-filters span,
+.diagnosis-controls span {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 900;
   text-transform: uppercase;
 }
 
-.comp-filters select {
+.comp-filters select,
+.diagnosis-controls select {
   width: 100%;
   min-height: 42px;
   border: 1px solid var(--line);
@@ -660,10 +692,67 @@ a {
   padding: 0 12px;
 }
 
-.comp-filters select:focus {
+.comp-filters select:focus,
+.diagnosis-controls select:focus {
   border-color: var(--cyan);
   outline: none;
   box-shadow: 0 0 0 3px rgba(56, 201, 222, 0.14);
+}
+
+.diagnosis-result {
+  margin-top: 12px;
+}
+
+.diagnosis-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px;
+}
+
+.diagnosis-summary strong {
+  color: var(--green);
+}
+
+.diagnosis-summary.is-warn strong {
+  color: var(--orange);
+}
+
+.diagnosis-summary span {
+  color: var(--muted);
+}
+
+.diagnosis-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.diagnosis-grid section {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(14, 16, 20, 0.42);
+  padding: 12px;
+}
+
+.diagnosis-grid h4 {
+  margin: 0 0 8px;
+  font-size: 0.9rem;
+}
+
+.diagnosis-grid ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.diagnosis-grid li {
+  color: var(--muted);
+  line-height: 1.45;
 }
 
 .update-grid {
@@ -923,11 +1012,13 @@ a {
   .hero-layout,
   .content-grid,
   .update-grid,
-  .comp-grid {
+  .comp-grid,
+  .diagnosis-grid {
     grid-template-columns: 1fr;
   }
 
-  .comp-filters {
+  .comp-filters,
+  .diagnosis-controls {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
@@ -953,12 +1044,14 @@ a {
   .topbar,
   .hero-controls,
   .section-head,
-  .perk-card-head {
+  .perk-card-head,
+  .diagnosis-summary {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .comp-filters {
+  .comp-filters,
+  .diagnosis-controls {
     grid-template-columns: 1fr;
   }
 

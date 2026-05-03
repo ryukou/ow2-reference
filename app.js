@@ -41,6 +41,30 @@ const PATCH_UPDATES = [
 ];
 const COMPOSITION_EXAMPLES = [
   {
+    title: "迷ったらこれ",
+    note: "まず全員が役割を理解しやすい汎用安定。マップを見てDPSだけ差し替える。",
+    tag: "Default",
+    members: [
+      { role: "tank", key: "orisa", fallback: "オリーサ" },
+      { role: "damage", key: "soldier-76", fallback: "ソルジャー76" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "汎用ポーク寄り",
+    note: "射線を作って先に削る基本形。EscortやHybridで迷った時に使いやすい。",
+    tag: "Default",
+    members: [
+      { role: "tank", key: "sigma", fallback: "シグマ" },
+      { role: "damage", key: "ashe", fallback: "アッシュ" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
     title: "Dive",
     note: "高台や後衛に一気に飛び込む。フォーカスを合わせられる時向け。",
     tag: "Engage",
@@ -252,7 +276,25 @@ const FALLBACK_STAGES = [
   { name: "Runasapi", rule: "Push", style: "広い移動" },
   { name: "Throne of Anubis", rule: "Clash", style: "狭所乱戦" },
 ];
+const HERO_ARCHETYPES = {
+  brawl: ["reinhardt", "junker-queen", "ramattra", "orisa", "mei", "reaper", "cassidy", "lucio", "moira", "brigitte", "baptiste"],
+  dive: ["winston", "dva", "wrecking-ball", "doomfist", "tracer", "genji", "sombra", "venture", "lucio", "ana", "kiriko", "juno"],
+  poke: ["sigma", "ashe", "widowmaker", "hanzo", "soldier-76", "sojourn", "cassidy", "baptiste", "zenyatta", "illari", "ana"],
+  pick: ["dva", "widowmaker", "hanzo", "ashe", "sombra", "tracer", "mercy", "kiriko"],
+};
 const COMP_METADATA = {
+  迷ったらこれ: {
+    category: "style",
+    rules: COMP_RULE_OPTIONS,
+    maps: ["長射線", "高台", "狭所乱戦"],
+    reasons: ["オリーサで前線を安定させ、ソルジャー76/ソジョーンで中距離の火力を出しやすい。", "バティストとキリコで回復、無敵、鈴を持てるため、事故を戻しやすく初心者にも説明しやすい。"],
+  },
+  汎用ポーク寄り: {
+    category: "style",
+    rules: ["Escort", "Hybrid"],
+    maps: ["長射線", "高台"],
+    reasons: ["シグマとバティストで射線を維持し、アッシュ/ソジョーンが先に削る基本形。", "迷ったら高台と角を使い、倒し切れない時も相手のリソースを先に使わせやすい。"],
+  },
   Dive: {
     category: "style",
     rules: ["Hybrid", "Flashpoint"],
@@ -390,6 +432,12 @@ function cacheElements() {
   els.compMapFilter = document.querySelector("#compMapFilter");
   els.compStageFilter = document.querySelector("#compStageFilter");
   els.compHeroFilter = document.querySelector("#compHeroFilter");
+  els.diagTank = document.querySelector("#diagTank");
+  els.diagDamage1 = document.querySelector("#diagDamage1");
+  els.diagDamage2 = document.querySelector("#diagDamage2");
+  els.diagSupport1 = document.querySelector("#diagSupport1");
+  els.diagSupport2 = document.querySelector("#diagSupport2");
+  els.compDiagnosis = document.querySelector("#compDiagnosis");
 }
 
 function bindEvents() {
@@ -424,6 +472,10 @@ function bindEvents() {
       state.compFilters[key] = select.value;
       renderComps();
     });
+  });
+
+  [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
+    select.addEventListener("change", renderCompDiagnosis);
   });
 }
 
@@ -590,6 +642,7 @@ async function fetchJson(path, params = {}) {
 function renderAll() {
   renderMetaStats();
   renderUpdates();
+  renderCompDiagnosisControls();
   renderComps();
   renderHeroList();
   renderHeroDetail();
@@ -725,6 +778,152 @@ function renderCompFilterOptions(comps) {
     ],
     selected.hero,
   );
+}
+
+function renderCompDiagnosisControls() {
+  setHeroSelectOptions(els.diagTank, "tank", "orisa");
+  setHeroSelectOptions(els.diagDamage1, "damage", "soldier-76");
+  setHeroSelectOptions(els.diagDamage2, "damage", "sojourn");
+  setHeroSelectOptions(els.diagSupport1, "support", "baptiste");
+  setHeroSelectOptions(els.diagSupport2, "support", "kiriko");
+  renderCompDiagnosis();
+}
+
+function setHeroSelectOptions(select, role, preferredKey) {
+  const current = select.value;
+  const heroes = state.heroes
+    .filter((hero) => hero.role === role)
+    .sort((a, b) => a.name.localeCompare(b.name, "ja"));
+  const fallback = heroes.find((hero) => hero.key === preferredKey)?.key || heroes[0]?.key || "";
+  const selected = heroes.some((hero) => hero.key === current) ? current : fallback;
+  select.innerHTML = heroes
+    .map((hero) => {
+      const isSelected = hero.key === selected ? " selected" : "";
+      return `<option value="${escapeAttr(hero.key)}"${isSelected}>${escapeHtml(hero.name)}</option>`;
+    })
+    .join("");
+}
+
+function renderCompDiagnosis() {
+  const selectedKeys = [
+    els.diagTank.value,
+    els.diagDamage1.value,
+    els.diagDamage2.value,
+    els.diagSupport1.value,
+    els.diagSupport2.value,
+  ].filter(Boolean);
+
+  if (selectedKeys.length < 5) {
+    els.compDiagnosis.innerHTML = renderEmpty("ヒーローデータ取得後に診断できます。");
+    return;
+  }
+
+  const result = diagnoseComposition(selectedKeys);
+  els.compDiagnosis.innerHTML = `
+    <div class="diagnosis-summary is-${escapeAttr(result.tone)}">
+      <strong>${escapeHtml(result.title)}</strong>
+      <span>${escapeHtml(result.summary)}</span>
+    </div>
+    <div class="diagnosis-grid">
+      ${renderDiagnosisList("良い点", result.good)}
+      ${renderDiagnosisList("アンチパターン", result.bad)}
+      ${renderDiagnosisList("次に直すなら", result.next)}
+    </div>
+  `;
+}
+
+function renderDiagnosisList(title, items) {
+  return `
+    <section>
+      <h4>${escapeHtml(title)}</h4>
+      <ul>
+        ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+      </ul>
+    </section>
+  `;
+}
+
+function diagnoseComposition(keys) {
+  const counts = Object.fromEntries(Object.keys(HERO_ARCHETYPES).map((type) => [type, 0]));
+  keys.forEach((key) => {
+    Object.entries(HERO_ARCHETYPES).forEach(([type, heroKeys]) => {
+      if (heroKeys.includes(key)) {
+        counts[type] += 1;
+      }
+    });
+  });
+
+  const sortedTypes = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+  const mainType = sortedTypes[0][1] >= 3 ? sortedTypes[0][0] : "mixed";
+  const good = [];
+  const bad = [];
+  const next = [];
+  const has = (key) => keys.includes(key);
+  const hasAny = (...heroKeys) => heroKeys.some((key) => keys.includes(key));
+
+  if (mainType !== "mixed") {
+    good.push(`${labelArchetype(mainType)}の方向性が3人以上そろっている。`);
+  } else {
+    bad.push("構成の勝ち方が散っている。先に「固まる」「飛び込む」「射線で削る」のどれかを決める。");
+  }
+
+  if (hasAny("lucio", "juno")) {
+    good.push("移動補助があり、当たり始めと引き際を合わせやすい。");
+  } else if (mainType === "brawl" || mainType === "dive") {
+    bad.push("ラッシュ/ダイブ寄りなのに移動補助が薄い。入るタイミングがずれやすい。");
+    next.push("ルシオかジュノを入れて、全員で同じタイミングで動ける形にする。");
+  }
+
+  if (has("winston") && !hasAny("tracer", "genji", "sombra", "venture")) {
+    bad.push("ウィンストンだけが飛び込む形。後衛に触っても倒し切れない。");
+    next.push("トレーサー、ゲンジ、ソンブラ、ベンチャーのどれかを合わせる。");
+  }
+
+  if (hasAny("widowmaker", "hanzo", "ashe") && hasAny("reinhardt", "reaper", "mei")) {
+    bad.push("長射線DPSと近距離前進の要求が混ざっている。立ち位置が分かれやすい。");
+    next.push("射線で戦うならシグマ寄り、近距離で戦うならルシオ/メイ/リーパー寄りに寄せる。");
+  }
+
+  if (hasAny("baptiste", "kiriko", "ana")) {
+    good.push("事故を戻せるサポートがいて、初動のミスをカバーしやすい。");
+  }
+
+  if (has("mercy") && !hasAny("ashe", "sojourn", "soldier-76", "widowmaker", "pharah", "echo")) {
+    bad.push("マーシーのダメージブースト先が弱い。支援先が決まらない。");
+    next.push("アッシュ、ソジョーン、ソルジャー76、ファラ、エコーなど火力を伸ばせるDPSを置く。");
+  }
+
+  if (hasAny("zenyatta", "ana", "baptiste") && !hasAny("sigma", "orisa", "ramattra", "dva")) {
+    bad.push("足が遅いサポートを守る前線が薄い。ダイブに狙われやすい。");
+    next.push("シグマ、オリーサ、ラマットラ、D.Vaなどで射線や高台を守る。");
+  }
+
+  if (!bad.length) {
+    good.push("大きなアンチパターンは少ない。マップに合わせた射線と集合を意識すれば使いやすい。");
+    next.push("負けた時はヒーロー全替えより、DPSかサポートを1枠だけマップに合わせて差し替える。");
+  }
+  if (!next.length) {
+    next.push("まずタンクの動きに合わせて、DPSとサポートを同じ戦い方へ寄せる。");
+  }
+
+  return {
+    tone: bad.length >= 2 ? "warn" : "good",
+    title: bad.length >= 2 ? "要調整" : "使いやすい構成",
+    summary: mainType === "mixed" ? "勝ち方が混ざりやすい構成です。" : `${labelArchetype(mainType)}寄りの構成です。`,
+    good,
+    bad: bad.length ? bad : ["目立つアンチパターンは少ない。"],
+    next,
+  };
+}
+
+function labelArchetype(type) {
+  const labels = {
+    brawl: "ラッシュ/ブロール",
+    dive: "ダイブ",
+    poke: "ポーク",
+    pick: "ピック",
+  };
+  return labels[type] || "混合";
 }
 
 function buildStaticComps(comps) {
@@ -938,7 +1137,7 @@ function renderHeroRow(hero) {
     <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}">
       <img src="${safeUrl(hero.portrait)}" alt="">
       <span>
-        <strong>${favoriteMark}${escapeHtml(hero.name)}</strong>
+        <strong>${favoriteMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
         <small>${escapeHtml(labelRole(hero.role))} · Pick ${pickRate} · Win ${winRate}</small>
       </span>
       <span class="role-badge">${escapeHtml(shortRole(hero.role))}</span>
@@ -1086,13 +1285,15 @@ function renderMetric(label, value) {
 }
 
 function renderPerkGroup(label, perks, type, hero, stat) {
-  const analyses = perks.map((perk, index) => analyzePerk(perk, index, type, hero, stat));
-  const recommendedIndex = pickRecommendedPerkIndex(analyses);
+  const entries = perks
+    .map((perk, index) => ({ perk, index, analysis: analyzePerk(perk, index, type, hero, stat) }))
+    .sort((a, b) => b.analysis.score - a.analysis.score || a.index - b.index);
+  const recommendedOriginalIndex = entries[0]?.index ?? -1;
   return `
     <div class="perk-group">
       <span class="perk-type">${escapeHtml(label)}</span>
       <div class="perk-grid">
-        ${perks.length ? perks.map((perk, index) => renderPerkCard(perk, analyses[index], index === recommendedIndex)).join("") : renderEmpty("パークを取得できませんでした。")}
+        ${entries.length ? entries.map((entry) => renderPerkCard(entry.perk, entry.analysis, entry.index === recommendedOriginalIndex)).join("") : renderEmpty("パークを取得できませんでした。")}
       </div>
     </div>
   `;
@@ -1118,22 +1319,6 @@ function renderPerkCard(perk, analysis, recommended) {
       </div>
     </article>
   `;
-}
-
-function pickRecommendedPerkIndex(analyses) {
-  if (!analyses.length) {
-    return -1;
-  }
-  let bestIndex = 0;
-  let bestScore = -Infinity;
-  analyses.forEach((analysis, index) => {
-    const score = analysis.score - index * 0.05;
-    if (score > bestScore) {
-      bestIndex = index;
-      bestScore = score;
-    }
-  });
-  return bestIndex;
 }
 
 function analyzePerk(perk, index, type, hero, stat) {
