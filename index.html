@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta
       name="description"
-      content="OW2 hero, perk, and player stats reference for a small group."
+      content="OW2 hero, perk, and team composition reference for a small group."
     >
     <title>OW2 Reference</title>
     <link
@@ -52,7 +52,6 @@
         <nav class="top-actions" aria-label="Main">
           <a href="#heroes">Heroes</a>
           <a href="#comps">Comps</a>
-          <a href="#players">Players</a>
           <button id="lockButton" class="ghost-button" type="button">ロック</button>
           <button id="refreshButton" type="button">更新</button>
         </nav>
@@ -62,7 +61,7 @@
         <section class="quick-board" aria-label="Hero meta stats">
           <div>
             <span class="eyebrow">Competitive Console Asia</span>
-            <h1>ヒーロー性能、パーク、身内Stats</h1>
+            <h1>ヒーロー性能、パーク、構成例</h1>
           </div>
           <div id="metaStats" class="meta-stats" aria-live="polite">
             <div class="mini-stat">
@@ -116,41 +115,12 @@
           <div class="section-head">
             <div>
               <span class="eyebrow">Recommended Comps</span>
-              <h2>おすすめ構成</h2>
+              <h2>キャラ組み合わせ例</h2>
             </div>
-            <span class="section-note">Competitive Console Asia のPick/Winから自動生成</span>
+            <span class="section-note">定番構成例 + Console AsiaのPick/Win候補</span>
           </div>
 
           <div id="compGrid" class="comp-grid" aria-live="polite"></div>
-        </section>
-
-        <section id="players" class="players-section" aria-label="Player stats">
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">Tracked Players</span>
-              <h2>RYUKO / ZEPPLI0204 / YUUKINGMAX</h2>
-            </div>
-            <div class="player-filters">
-              <label>
-                <span>Mode</span>
-                <select id="playerMode">
-                  <option value="competitive" selected>Competitive</option>
-                  <option value="quickplay">Quick Play</option>
-                  <option value="all">All</option>
-                </select>
-              </label>
-              <label>
-                <span>Platform</span>
-                <select id="playerPlatform">
-                  <option value="pc">PC</option>
-                  <option value="console" selected>Console</option>
-                  <option value="all">All</option>
-                </select>
-              </label>
-            </div>
-          </div>
-
-          <div id="playerGrid" class="player-grid" aria-live="polite"></div>
         </section>
       </main>
     </div>

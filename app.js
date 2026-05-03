@@ -3,11 +3,179 @@ const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const ACCESS_PASSWORD = "1234567890";
 const ACCESS_KEY = "ow2-reference-access-v1";
-const PLAYER_SNAPSHOT_KEY = "ow2-reference-player-snapshots-v1";
-const TRACKED_PLAYERS = [
-  { label: "自分 RYUKO", name: "RYUKO" },
-  { label: "ゆうき(弟) ZEPPLI0204", name: "ZEPPLI0204" },
-  { label: "ゆうき(MAX) YUUKINGMAX", name: "YUUKINGMAX" },
+const COMPOSITION_EXAMPLES = [
+  {
+    title: "Dive",
+    note: "高台や後衛に一気に飛び込む。フォーカスを合わせられる時向け。",
+    tag: "Engage",
+    members: [
+      { role: "tank", key: "winston", fallback: "ウィンストン" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "damage", key: "genji", fallback: "ゲンジ" },
+      { role: "support", key: "ana", fallback: "アナ" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+    ],
+  },
+  {
+    title: "Rush / Brawl",
+    note: "固まって前に出る。スピードで距離を詰めて近距離戦を作る。",
+    tag: "Close",
+    members: [
+      { role: "tank", key: "reinhardt", fallback: "ラインハルト" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "damage", key: "reaper", fallback: "リーパー" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+    ],
+  },
+  {
+    title: "Poke",
+    note: "射線と高台で削る。無理に詰めず、相手のリソースを先に使わせる。",
+    tag: "Range",
+    members: [
+      { role: "tank", key: "sigma", fallback: "シグマ" },
+      { role: "damage", key: "ashe", fallback: "アッシュ" },
+      { role: "damage", key: "soldier-76", fallback: "ソルジャー76" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "zenyatta", fallback: "ゼニヤッタ" },
+    ],
+  },
+  {
+    title: "Pick",
+    note: "単発キルを作る。射線管理と蘇生/阻害のケアが大事。",
+    tag: "Open",
+    members: [
+      { role: "tank", key: "dva", fallback: "D.Va" },
+      { role: "damage", key: "widowmaker", fallback: "ウィドウメイカー" },
+      { role: "damage", key: "hanzo", fallback: "ハンゾー" },
+      { role: "support", key: "mercy", fallback: "マーシー" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+];
+const MODE_COMPOSITION_EXAMPLES = [
+  {
+    title: "Control",
+    note: "拠点周りの当たり合い。先入りと再集合を速くする。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "ramattra", fallback: "ラマットラ" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "Escort",
+    note: "長い射線と高台を使って、ペイロード周辺を削る。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "sigma", fallback: "シグマ" },
+      { role: "damage", key: "ashe", fallback: "アッシュ" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "zenyatta", fallback: "ゼニヤッタ" },
+    ],
+  },
+  {
+    title: "Hybrid",
+    note: "第一は取り切り、第二以降は射線を広げて押す。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "winston", fallback: "ウィンストン" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "ana", fallback: "アナ" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "Push",
+    note: "ロボット周辺で当たり直しが多い。機動力と継戦力を優先。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "junker-queen", fallback: "ジャンカー・クイーン" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "juno", fallback: "ジュノ" },
+    ],
+  },
+  {
+    title: "Flashpoint",
+    note: "広いマップを移動し続ける。移動速度と自己完結力を重視。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "dva", fallback: "D.Va" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "damage", key: "venture", fallback: "ベンチャー" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "Clash",
+    note: "連続した拠点戦。勝った後に前へ出過ぎない構成。",
+    tag: "Rule",
+    members: [
+      { role: "tank", key: "orisa", fallback: "オリーサ" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "damage", key: "cassidy", fallback: "キャスディ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+];
+const MAP_STYLE_COMPOSITION_EXAMPLES = [
+  {
+    title: "長射線マップ",
+    note: "Circuit Royal / Havana系。角と高台から先に削る。",
+    tag: "Map",
+    members: [
+      { role: "tank", key: "sigma", fallback: "シグマ" },
+      { role: "damage", key: "widowmaker", fallback: "ウィドウメイカー" },
+      { role: "damage", key: "ashe", fallback: "アッシュ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "zenyatta", fallback: "ゼニヤッタ" },
+    ],
+  },
+  {
+    title: "高台マップ",
+    note: "Gibraltar / Numbani系。高台を先に取り、相手を下ろす。",
+    tag: "Map",
+    members: [
+      { role: "tank", key: "winston", fallback: "ウィンストン" },
+      { role: "damage", key: "genji", fallback: "ゲンジ" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "support", key: "ana", fallback: "アナ" },
+      { role: "support", key: "juno", fallback: "ジュノ" },
+    ],
+  },
+  {
+    title: "狭所乱戦マップ",
+    note: "King's Row / Lijiang系。固まって短い距離で勝負する。",
+    tag: "Map",
+    members: [
+      { role: "tank", key: "reinhardt", fallback: "ラインハルト" },
+      { role: "damage", key: "reaper", fallback: "リーパー" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+    ],
+  },
+  {
+    title: "広い移動マップ",
+    note: "Suravasa / New Junk City系。足の速さと孤立しにくさを優先。",
+    tag: "Map",
+    members: [
+      { role: "tank", key: "wrecking-ball", fallback: "レッキング・ボール" },
+      { role: "damage", key: "sombra", fallback: "ソンブラ" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
 ];
 const CACHE_KEY = "ow2-reference-cache-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
@@ -20,8 +188,6 @@ const state = {
   selectedHeroKey: null,
   role: "all",
   query: "",
-  playerMode: "competitive",
-  playerPlatform: "console",
   loadingDetails: false,
 };
 
@@ -51,9 +217,6 @@ function cacheElements() {
   els.detailProgress = document.querySelector("#detailProgress");
   els.metaStats = document.querySelector("#metaStats");
   els.compGrid = document.querySelector("#compGrid");
-  els.playerGrid = document.querySelector("#playerGrid");
-  els.playerMode = document.querySelector("#playerMode");
-  els.playerPlatform = document.querySelector("#playerPlatform");
 }
 
 function bindEvents() {
@@ -83,15 +246,6 @@ function bindEvents() {
     });
   });
 
-  els.playerMode.addEventListener("change", (event) => {
-    state.playerMode = event.target.value;
-    loadPlayers();
-  });
-
-  els.playerPlatform.addEventListener("change", (event) => {
-    state.playerPlatform = event.target.value;
-    loadPlayers();
-  });
 }
 
 async function bootstrap() {
@@ -99,7 +253,6 @@ async function bootstrap() {
     setStatus(state.heroes.length ? "表示中" : "起動中");
     setProgress(state.heroes.length ? "Ready" : "Waiting");
     renderAll();
-    await loadPlayers();
     return;
   }
   state.bootstrapped = true;
@@ -114,7 +267,6 @@ async function bootstrap() {
   }
 
   await loadRemoteData({ force: false });
-  await loadPlayers();
 }
 
 function hasSavedAccess() {
@@ -144,10 +296,7 @@ function lockApp() {
 function renderInitialLoading() {
   els.heroList.innerHTML = Array.from({ length: 7 }, () => '<div class="hero-row skeleton"></div>').join("");
   els.heroDetail.innerHTML = '<div class="empty-state skeleton"></div>';
-  els.compGrid.innerHTML = Array.from({ length: 3 }, () => '<article class="comp-card skeleton"></article>').join("");
-  els.playerGrid.innerHTML = TRACKED_PLAYERS.map(
-    () => '<article class="player-card skeleton"></article>',
-  ).join("");
+  renderComps();
 }
 
 async function loadRemoteData({ force }) {
@@ -309,9 +458,14 @@ function renderMetaStats() {
 }
 
 function renderComps() {
-  const comps = buildRecommendedComps();
+  const comps = [
+    ...buildStaticComps(COMPOSITION_EXAMPLES),
+    ...buildStaticComps(MODE_COMPOSITION_EXAMPLES),
+    ...buildStaticComps(MAP_STYLE_COMPOSITION_EXAMPLES),
+    ...buildRecommendedComps(),
+  ];
   if (!comps.length) {
-    els.compGrid.innerHTML = renderEmpty("ヒーローStatsを取得できるとおすすめ構成が表示されます。");
+    els.compGrid.innerHTML = renderEmpty("構成例を準備中です。");
     return;
   }
 
@@ -319,6 +473,17 @@ function renderComps() {
   els.compGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
+}
+
+function buildStaticComps(comps) {
+  return comps.map((comp) => ({
+    ...comp,
+    members: comp.members.map((member) => ({
+      ...member,
+      hero: state.heroes.find((hero) => hero.key === member.key),
+      source: "example",
+    })),
+  }));
 }
 
 function buildRecommendedComps() {
@@ -355,19 +520,22 @@ function buildRecommendedComps() {
 
   return [
     {
-      title: "安定構成",
-      note: "PickとWinのバランス重視",
-      members: makeMembers("balanced"),
+      title: "Stats安定",
+      note: "Console AsiaのPickとWinから自動生成。",
+      tag: "Data",
+      members: makeMembers("balanced").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
     {
-      title: "勝率重視",
-      note: "Win Rateを少し強めに評価",
-      members: makeMembers("win"),
+      title: "Stats勝率",
+      note: "Win Rateを少し強めに評価した候補。",
+      tag: "Data",
+      members: makeMembers("win").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
     {
-      title: "合わせやすさ重視",
-      note: "Pick Rate高めで野良にも合わせやすい",
-      members: makeMembers("pick"),
+      title: "Stats合わせやすさ",
+      note: "Pick Rate高めで合わせやすい候補。",
+      tag: "Data",
+      members: makeMembers("pick").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
   ].filter((comp) => comp.members.length === 5);
 }
@@ -376,8 +544,11 @@ function renderCompCard(comp) {
   return `
     <article class="comp-card">
       <div class="comp-head">
-        <h3>${escapeHtml(comp.title)}</h3>
-        <p>${escapeHtml(comp.note)}</p>
+        <div>
+          <h3>${escapeHtml(comp.title)}</h3>
+          <p>${escapeHtml(comp.note)}</p>
+        </div>
+        <span class="comp-tag">${escapeHtml(comp.tag || "Comp")}</span>
       </div>
       <div class="comp-members">
         ${comp.members.map(renderCompMember).join("")}
@@ -386,14 +557,24 @@ function renderCompCard(comp) {
   `;
 }
 
-function renderCompMember(hero) {
-  const stat = state.heroStats.get(hero.key);
+function renderCompMember(member) {
+  const hero = member.hero;
+  const stat = hero ? state.heroStats.get(hero.key) : null;
+  const key = hero?.key || "";
+  const name = hero?.name || member.fallback || member.key || "Unknown";
+  const portrait = hero?.portrait ? `<img src="${safeUrl(hero.portrait)}" alt="">` : '<span class="comp-placeholder"></span>';
+  const detail = member.source === "stats" && hero
+    ? `Pick ${formatPercent(numberFromStat(stat, ["pickrate", "pick_rate"]))} · Win ${formatPercent(numberFromStat(stat, ["winrate", "win_rate"]))}`
+    : "組み合わせ例";
+  const disabled = hero ? "" : " disabled";
+  const keyAttr = hero ? ` data-hero-key="${escapeAttr(key)}"` : "";
+
   return `
-    <button class="comp-member" type="button" data-hero-key="${escapeAttr(hero.key)}">
-      <img src="${safeUrl(hero.portrait)}" alt="">
+    <button class="comp-member" type="button"${keyAttr}${disabled}>
+      ${portrait}
       <span>
-        <strong>${escapeHtml(hero.name)}</strong>
-        <small>${escapeHtml(labelRole(hero.role))} · Pick ${formatPercent(numberFromStat(stat, ["pickrate", "pick_rate"]))} · Win ${formatPercent(numberFromStat(stat, ["winrate", "win_rate"]))}</small>
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(labelRole(member.role || hero?.role))} · ${escapeHtml(detail)}</small>
       </span>
     </button>
   `;
@@ -652,328 +833,6 @@ function normalizePerk(raw) {
     description: stringValue(raw.description || raw.effect || raw.summary || raw.tooltip),
     icon: stringValue(raw.icon || raw.image || raw.image_url),
   };
-}
-
-async function loadPlayers() {
-  els.playerGrid.innerHTML = TRACKED_PLAYERS.map(
-    () => '<article class="player-card skeleton"></article>',
-  ).join("");
-
-  const results = await Promise.all(TRACKED_PLAYERS.map((player) => loadPlayer(player)));
-  els.playerGrid.innerHTML = results.map(renderPlayerCard).join("");
-  savePlayerSnapshots(results);
-}
-
-async function loadPlayer(player) {
-  const inputName = player.name;
-  try {
-    const playerId = await resolvePlayerId(inputName);
-    const params = {
-      gamemode: state.playerMode,
-      platform: state.playerPlatform,
-    };
-
-    const [summaryResult, statsResult] = await Promise.allSettled([
-      fetchJson(`/players/${encodeURIComponent(playerId)}/summary`),
-      fetchJson(`/players/${encodeURIComponent(playerId)}/stats/summary`, params),
-    ]);
-
-    const summary = summaryResult.status === "fulfilled" ? summaryResult.value : null;
-    if (statsResult.status !== "fulfilled") {
-      throw statsResult.reason;
-    }
-
-    return {
-      inputName,
-      label: player.label,
-      playerId,
-      summary,
-      stats: statsResult.value,
-      error: null,
-    };
-  } catch (error) {
-    return {
-      inputName,
-      label: player.label,
-      playerId: inputName,
-      summary: null,
-      stats: null,
-      error: error.message,
-    };
-  }
-}
-
-async function resolvePlayerId(inputName) {
-  try {
-    const search = await fetchJson("/players", { name: inputName, limit: 10 });
-    const results = extractSearchResults(search);
-    if (!results.length) {
-      if (/-\d{3,}$/.test(inputName)) {
-        return inputName;
-      }
-      throw new Error(`${inputName} が見つかりません。BattleTagの番号まで指定してください。`);
-    }
-    const exact = results.find((item) => {
-      const name = stringValue(item.name || item.player_name || item.player_id);
-      return name.toLowerCase() === inputName.toLowerCase();
-    });
-    const best = exact || results[0];
-    return stringValue(best?.player_id || best?.id || best?.name || inputName);
-  } catch (error) {
-    if (/-\d{3,}$/.test(inputName)) {
-      return inputName;
-    }
-    throw error;
-  }
-}
-
-function extractSearchResults(search) {
-  if (Array.isArray(search)) {
-    return search;
-  }
-  return search?.results || search?.players || search?.data || search?.items || [];
-}
-
-function renderPlayerCard(result) {
-  if (result.error) {
-    return `
-      <article class="player-card">
-        <div class="player-head">
-          <div></div>
-          <div>
-            <h3>${escapeHtml(result.label || result.inputName)}</h3>
-            <div class="chips"><span class="rank-chip">Not available</span></div>
-          </div>
-        </div>
-        <div class="player-body">
-          <div class="error-state">
-            <p>${escapeHtml(result.error)}</p>
-            <p>公開プロフィール、BattleTagの表記、API制限を確認してください。BattleTag#1234 は BattleTag-1234 として扱われます。</p>
-          </div>
-        </div>
-      </article>
-    `;
-  }
-
-  const summary = result.summary || {};
-  const stats = result.stats || {};
-  const general = stats.general || stats.summary || stats;
-  const avatar = safeUrl(summary.avatar || summary.icon || "");
-  const displayName = result.label || summary.name || result.playerId || result.inputName;
-  const recent = recentWinRate(result, general);
-  const metrics = playerMetrics(general, recent);
-  const ranks = rankChips(summary);
-  const roles = roleStats(stats);
-  const topHeroes = topHeroStats(stats);
-
-  return `
-    <article class="player-card">
-      <div class="player-head">
-        ${avatar ? `<img src="${avatar}" alt="">` : "<div></div>"}
-        <div>
-          <h3>${escapeHtml(displayName)}</h3>
-          <div class="chips">
-            ${ranks.length ? ranks.map((rank) => `<span class="rank-chip">${escapeHtml(rank)}</span>`).join("") : '<span class="rank-chip">Rank N/A</span>'}
-          </div>
-        </div>
-      </div>
-      <div class="player-body">
-        <div class="metric-grid">
-          ${metrics.map((item) => renderMetric(item.label, item.value)).join("")}
-        </div>
-
-        <section>
-          <div class="panel-title"><h3>Role</h3></div>
-          <div class="role-grid">
-            ${roles.length ? roles.map(renderRoleStat).join("") : renderEmpty("ロール統計を取得できませんでした。")}
-          </div>
-        </section>
-
-        <section>
-          <div class="panel-title"><h3>Top Heroes</h3></div>
-          <div class="top-heroes">
-            ${topHeroes.length ? topHeroes.map(renderTopHero).join("") : renderEmpty("ヒーロー別統計を取得できませんでした。")}
-          </div>
-        </section>
-      </div>
-    </article>
-  `;
-}
-
-function playerMetrics(general, recent) {
-  return [
-    {
-      label: "Win Rate",
-      value: formatPercent(numberFromStat(general, ["winrate", "win_rate"])),
-    },
-    {
-      label: "Recent",
-      value: recent.label,
-    },
-    {
-      label: "KDA",
-      value: formatDecimal(numberFromStat(general, ["kda", "kda_ratio"]), 2),
-    },
-    {
-      label: "Time",
-      value: formatDuration(numberFromStat(general, ["time_played", "timePlayed", "playtime"])),
-    },
-    {
-      label: "Games",
-      value: formatNumber(numberFromStat(general, ["games", "games_played", "played"])),
-    },
-    {
-      label: "Elims/10",
-      value: formatDecimal(numberFromNested(general, [["average", "eliminations"], ["average_eliminations"], ["eliminations_avg"]]), 1),
-    },
-    {
-      label: "Deaths/10",
-      value: formatDecimal(numberFromNested(general, [["average", "deaths"], ["average_deaths"], ["deaths_avg"]]), 1),
-    },
-    {
-      label: "Damage/10",
-      value: formatNumber(numberFromNested(general, [["average", "damage"], ["average_damage"], ["damage_avg"]])),
-    },
-  ];
-}
-
-function recentWinRate(result, general) {
-  const current = playerSnapshot(result, general);
-  if (!current) {
-    return { label: "-", deltaGames: 0 };
-  }
-
-  const previous = readPlayerSnapshots()[current.key];
-  if (!previous || !Number.isFinite(previous.games) || current.games <= previous.games) {
-    return { label: "次回から", deltaGames: 0 };
-  }
-
-  const deltaGames = current.games - previous.games;
-  const deltaWins = current.wins - previous.wins;
-  if (deltaGames <= 0 || !Number.isFinite(deltaWins)) {
-    return { label: "-", deltaGames: 0 };
-  }
-
-  return {
-    label: `${formatPercent((deltaWins / deltaGames) * 100)} / ${formatNumber(deltaGames)}G`,
-    deltaGames,
-  };
-}
-
-function savePlayerSnapshots(results) {
-  const snapshots = readPlayerSnapshots();
-  results.forEach((result) => {
-    if (result.error || !result.stats) {
-      return;
-    }
-    const general = result.stats.general || result.stats.summary || result.stats;
-    const snapshot = playerSnapshot(result, general);
-    if (snapshot) {
-      snapshots[snapshot.key] = snapshot;
-    }
-  });
-  localStorage.setItem(PLAYER_SNAPSHOT_KEY, JSON.stringify(snapshots));
-}
-
-function readPlayerSnapshots() {
-  try {
-    return JSON.parse(localStorage.getItem(PLAYER_SNAPSHOT_KEY)) || {};
-  } catch {
-    return {};
-  }
-}
-
-function playerSnapshot(result, general) {
-  const games = numberFromStat(general, ["games", "games_played", "played"]);
-  const winrate = numberFromStat(general, ["winrate", "win_rate"]);
-  if (!Number.isFinite(games) || games <= 0 || !Number.isFinite(winrate)) {
-    return null;
-  }
-
-  const normalizedWinrate = winrate > 0 && winrate <= 1 ? winrate * 100 : winrate;
-  return {
-    key: [result.playerId || result.inputName, state.playerMode, state.playerPlatform].join("|"),
-    playerId: result.playerId || result.inputName,
-    mode: state.playerMode,
-    platform: state.playerPlatform,
-    games,
-    wins: (normalizedWinrate / 100) * games,
-    timestamp: Date.now(),
-  };
-}
-
-function roleStats(stats) {
-  const roles = stats.roles || {};
-  const entries = Array.isArray(roles)
-    ? roles.map((item) => [item.role || item.name, item])
-    : Object.entries(roles);
-
-  return entries
-    .filter(([role, value]) => role && value)
-    .map(([role, value]) => ({
-      role,
-      time: numberFromStat(value, ["time_played", "timePlayed", "playtime"]),
-      winrate: numberFromStat(value, ["winrate", "win_rate"]),
-    }))
-    .sort((a, b) => b.time - a.time);
-}
-
-function renderRoleStat(item) {
-  return `
-    <div class="role-stat">
-      <strong>${escapeHtml(labelRole(item.role))}</strong>
-      <span>${formatDuration(item.time)} · ${formatPercent(item.winrate)}</span>
-    </div>
-  `;
-}
-
-function topHeroStats(stats) {
-  const heroes = stats.heroes || {};
-  const entries = Array.isArray(heroes)
-    ? heroes.map((item) => [item.hero || item.name || item.key, item])
-    : Object.entries(heroes);
-
-  return entries
-    .filter(([hero, value]) => hero && value)
-    .map(([hero, value]) => ({
-      hero,
-      time: numberFromStat(value, ["time_played", "timePlayed", "playtime"]),
-      winrate: numberFromStat(value, ["winrate", "win_rate"]),
-      games: numberFromStat(value, ["games", "games_played", "played"]),
-    }))
-    .sort((a, b) => b.time - a.time || b.games - a.games)
-    .slice(0, 6);
-}
-
-function renderTopHero(item) {
-  return `
-    <div class="top-hero">
-      <strong>${escapeHtml(heroName(item.hero))}</strong>
-      <span>${formatDuration(item.time)} · ${formatPercent(item.winrate)}</span>
-    </div>
-  `;
-}
-
-function rankChips(summary) {
-  const chips = [];
-  const competitive = summary.competitive || summary.ranks || {};
-  const walk = (node, trail = []) => {
-    if (!node || typeof node !== "object" || chips.length >= 6) {
-      return;
-    }
-
-    const division = node.division || node.rank || node.tier || node.name;
-    const role = node.role || trail.find((part) => ["tank", "damage", "support", "open"].includes(part));
-    if (division && (node.tier || node.division || node.rank_icon || node.icon)) {
-      chips.push(`${role ? `${labelRole(role)} ` : ""}${division}${node.tier ? ` ${node.tier}` : ""}`);
-      return;
-    }
-
-    Object.entries(node).forEach(([key, value]) => walk(value, [...trail, key]));
-  };
-
-  walk(competitive);
-  return [...new Set(chips)];
 }
 
 function readCache() {
