@@ -1,11 +1,18 @@
 const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
-const TRACKED_PLAYERS = ["ryukou0109", "Zeppri0204"];
+const ACCESS_PASSWORD = "1234567890";
+const ACCESS_KEY = "ow2-reference-access-v1";
+const TRACKED_PLAYERS = [
+  { label: "自分 RYUKO", name: "RYUKO" },
+  { label: "ゆうき(弟) ZEPPRLI0204", name: "ZEPPRLI0204" },
+  { label: "ゆうき(MAX) YUKINGMAX", name: "YUKINGMAX" },
+];
 const CACHE_KEY = "ow2-reference-cache-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
 
 const state = {
+  bootstrapped: false,
   heroes: [],
   heroDetails: new Map(),
   heroStats: new Map(),
@@ -22,11 +29,18 @@ const els = {};
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   bindEvents();
-  bootstrap();
+  if (hasSavedAccess()) {
+    unlockApp({ remember: true });
+  }
 });
 
 function cacheElements() {
+  els.authForm = document.querySelector("#authForm");
+  els.authPassword = document.querySelector("#authPassword");
+  els.rememberAccess = document.querySelector("#rememberAccess");
+  els.authError = document.querySelector("#authError");
   els.syncStatus = document.querySelector("#syncStatus");
+  els.lockButton = document.querySelector("#lockButton");
   els.refreshButton = document.querySelector("#refreshButton");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
@@ -35,12 +49,25 @@ function cacheElements() {
   els.heroCount = document.querySelector("#heroCount");
   els.detailProgress = document.querySelector("#detailProgress");
   els.metaStats = document.querySelector("#metaStats");
+  els.compGrid = document.querySelector("#compGrid");
   els.playerGrid = document.querySelector("#playerGrid");
   els.playerMode = document.querySelector("#playerMode");
   els.playerPlatform = document.querySelector("#playerPlatform");
 }
 
 function bindEvents() {
+  els.authForm.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const password = els.authPassword.value;
+    if (password !== ACCESS_PASSWORD) {
+      els.authError.textContent = "パスワードが違います。";
+      els.authPassword.select();
+      return;
+    }
+    unlockApp({ remember: els.rememberAccess.checked });
+  });
+
+  els.lockButton.addEventListener("click", lockApp);
   els.refreshButton.addEventListener("click", () => loadRemoteData({ force: true }));
   els.heroSearch.addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();
@@ -67,6 +94,14 @@ function bindEvents() {
 }
 
 async function bootstrap() {
+  if (state.bootstrapped) {
+    setStatus(state.heroes.length ? "表示中" : "起動中");
+    setProgress(state.heroes.length ? "Ready" : "Waiting");
+    renderAll();
+    await loadPlayers();
+    return;
+  }
+  state.bootstrapped = true;
   renderInitialLoading();
 
   const cached = readCache();
@@ -81,9 +116,34 @@ async function bootstrap() {
   await loadPlayers();
 }
 
+function hasSavedAccess() {
+  return localStorage.getItem(ACCESS_KEY) === "unlocked";
+}
+
+function unlockApp({ remember }) {
+  if (remember) {
+    localStorage.setItem(ACCESS_KEY, "unlocked");
+  } else {
+    localStorage.removeItem(ACCESS_KEY);
+  }
+  els.authError.textContent = "";
+  els.authPassword.value = "";
+  document.body.classList.remove("is-locked");
+  bootstrap();
+}
+
+function lockApp() {
+  localStorage.removeItem(ACCESS_KEY);
+  document.body.classList.add("is-locked");
+  setStatus("ロック中");
+  window.scrollTo({ top: 0, behavior: "auto" });
+  els.authPassword.focus();
+}
+
 function renderInitialLoading() {
   els.heroList.innerHTML = Array.from({ length: 7 }, () => '<div class="hero-row skeleton"></div>').join("");
   els.heroDetail.innerHTML = '<div class="empty-state skeleton"></div>';
+  els.compGrid.innerHTML = Array.from({ length: 3 }, () => '<article class="comp-card skeleton"></article>').join("");
   els.playerGrid.innerHTML = TRACKED_PLAYERS.map(
     () => '<article class="player-card skeleton"></article>',
   ).join("");
@@ -218,6 +278,7 @@ async function fetchJson(path, params = {}) {
 
 function renderAll() {
   renderMetaStats();
+  renderComps();
   renderHeroList();
   renderHeroDetail();
 }
@@ -244,6 +305,108 @@ function renderMetaStats() {
       <strong>${state.heroes.length || "-"}</strong>
     </div>
   `;
+}
+
+function renderComps() {
+  const comps = buildRecommendedComps();
+  if (!comps.length) {
+    els.compGrid.innerHTML = renderEmpty("ヒーローStatsを取得できるとおすすめ構成が表示されます。");
+    return;
+  }
+
+  els.compGrid.innerHTML = comps.map(renderCompCard).join("");
+  els.compGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
+}
+
+function buildRecommendedComps() {
+  if (!state.heroes.length || !state.heroStats.size) {
+    return [];
+  }
+
+  const score = (hero, mode) => {
+    const stat = state.heroStats.get(hero.key);
+    const pick = numberFromStat(stat, ["pickrate", "pick_rate"]);
+    const win = numberFromStat(stat, ["winrate", "win_rate"]);
+    const safePick = Number.isFinite(pick) ? pick : 0;
+    const safeWin = Number.isFinite(win) ? win : 0;
+
+    if (mode === "pick") {
+      return safePick * 1.2 + safeWin * 0.2;
+    }
+    if (mode === "win") {
+      return safeWin * 1.1 + safePick * 0.25;
+    }
+    return safePick * 0.65 + safeWin * 0.55;
+  };
+
+  const ranked = (role, mode) =>
+    state.heroes
+      .filter((hero) => hero.role === role)
+      .sort((a, b) => score(b, mode) - score(a, mode));
+
+  const makeMembers = (mode) => [
+    ...ranked("tank", mode).slice(0, 1),
+    ...ranked("damage", mode).slice(0, 2),
+    ...ranked("support", mode).slice(0, 2),
+  ];
+
+  return [
+    {
+      title: "安定構成",
+      note: "PickとWinのバランス重視",
+      members: makeMembers("balanced"),
+    },
+    {
+      title: "勝率重視",
+      note: "Win Rateを少し強めに評価",
+      members: makeMembers("win"),
+    },
+    {
+      title: "合わせやすさ重視",
+      note: "Pick Rate高めで野良にも合わせやすい",
+      members: makeMembers("pick"),
+    },
+  ].filter((comp) => comp.members.length === 5);
+}
+
+function renderCompCard(comp) {
+  return `
+    <article class="comp-card">
+      <div class="comp-head">
+        <h3>${escapeHtml(comp.title)}</h3>
+        <p>${escapeHtml(comp.note)}</p>
+      </div>
+      <div class="comp-members">
+        ${comp.members.map(renderCompMember).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderCompMember(hero) {
+  const stat = state.heroStats.get(hero.key);
+  return `
+    <button class="comp-member" type="button" data-hero-key="${escapeAttr(hero.key)}">
+      <img src="${safeUrl(hero.portrait)}" alt="">
+      <span>
+        <strong>${escapeHtml(hero.name)}</strong>
+        <small>${escapeHtml(labelRole(hero.role))} · Pick ${formatPercent(numberFromStat(stat, ["pickrate", "pick_rate"]))} · Win ${formatPercent(numberFromStat(stat, ["winrate", "win_rate"]))}</small>
+      </span>
+    </button>
+  `;
+}
+
+function selectHeroFromInline(heroKey) {
+  state.selectedHeroKey = heroKey;
+  state.role = "all";
+  state.query = "";
+  els.heroSearch.value = "";
+  els.roleButtons.forEach((item) => item.classList.toggle("is-active", item.dataset.role === "all"));
+  renderHeroList();
+  renderHeroDetail();
+  document.querySelector("#heroes").scrollIntoView({ behavior: "smooth", block: "start" });
 }
 
 function renderHeroList() {
@@ -495,11 +658,12 @@ async function loadPlayers() {
     () => '<article class="player-card skeleton"></article>',
   ).join("");
 
-  const results = await Promise.all(TRACKED_PLAYERS.map((name) => loadPlayer(name)));
+  const results = await Promise.all(TRACKED_PLAYERS.map((player) => loadPlayer(player)));
   els.playerGrid.innerHTML = results.map(renderPlayerCard).join("");
 }
 
-async function loadPlayer(inputName) {
+async function loadPlayer(player) {
+  const inputName = player.name;
   try {
     const playerId = await resolvePlayerId(inputName);
     const params = {
@@ -519,6 +683,7 @@ async function loadPlayer(inputName) {
 
     return {
       inputName,
+      label: player.label,
       playerId,
       summary,
       stats: statsResult.value,
@@ -527,6 +692,7 @@ async function loadPlayer(inputName) {
   } catch (error) {
     return {
       inputName,
+      label: player.label,
       playerId: inputName,
       summary: null,
       stats: null,
@@ -573,7 +739,7 @@ function renderPlayerCard(result) {
         <div class="player-head">
           <div></div>
           <div>
-            <h3>${escapeHtml(result.inputName)}</h3>
+            <h3>${escapeHtml(result.label || result.inputName)}</h3>
             <div class="chips"><span class="rank-chip">Not available</span></div>
           </div>
         </div>
@@ -591,7 +757,7 @@ function renderPlayerCard(result) {
   const stats = result.stats || {};
   const general = stats.general || stats.summary || stats;
   const avatar = safeUrl(summary.avatar || summary.icon || "");
-  const displayName = summary.name || result.playerId || result.inputName;
+  const displayName = result.label || summary.name || result.playerId || result.inputName;
   const metrics = playerMetrics(general);
   const ranks = rankChips(summary);
   const roles = roleStats(stats);

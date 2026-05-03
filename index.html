@@ -15,7 +15,31 @@
     <link rel="stylesheet" href="./styles.css">
     <script src="./app.js" defer></script>
   </head>
-  <body>
+  <body class="is-locked">
+    <section class="auth-gate" aria-label="Access gate">
+      <form id="authForm" class="auth-panel">
+        <span class="brand-mark">OW2</span>
+        <h1>OW2 Reference</h1>
+        <label>
+          <span>簡易パスワード</span>
+          <input
+            id="authPassword"
+            type="password"
+            inputmode="numeric"
+            autocomplete="current-password"
+            placeholder="Password"
+            required
+          >
+        </label>
+        <label class="remember-row">
+          <input id="rememberAccess" type="checkbox" checked>
+          <span>このブラウザに保存</span>
+        </label>
+        <p id="authError" class="auth-error" role="alert"></p>
+        <button type="submit">入る</button>
+      </form>
+    </section>
+
     <div class="app-shell">
       <header class="topbar">
         <a class="brand" href="#heroes" aria-label="OW2 Reference">
@@ -27,7 +51,9 @@
         </a>
         <nav class="top-actions" aria-label="Main">
           <a href="#heroes">Heroes</a>
+          <a href="#comps">Comps</a>
           <a href="#players">Players</a>
+          <button id="lockButton" class="ghost-button" type="button">ロック</button>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -86,11 +112,23 @@
           </div>
         </section>
 
+        <section id="comps" class="comps-section" aria-label="Recommended compositions">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Recommended Comps</span>
+              <h2>おすすめ構成</h2>
+            </div>
+            <span class="section-note">Competitive PC Asia のPick/Winから自動生成</span>
+          </div>
+
+          <div id="compGrid" class="comp-grid" aria-live="polite"></div>
+        </section>
+
         <section id="players" class="players-section" aria-label="Player stats">
           <div class="section-head">
             <div>
               <span class="eyebrow">Tracked Players</span>
-              <h2>ryukou0109 / Zeppri0204</h2>
+              <h2>RYUKO / ZEPPRLI0204 / YUKINGMAX</h2>
             </div>
             <div class="player-filters">
               <label>
