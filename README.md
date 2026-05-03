@@ -50,16 +50,20 @@ python3 -m http.server 4173
 ```js
 const TRACKED_PLAYERS = [
   { label: "自分 RYUKO", name: "RYUKO" },
-  { label: "ゆうき(弟) ZEPPRLI0204", name: "ZEPPRLI0204" },
-  { label: "ゆうき(MAX) YUKINGMAX", name: "YUKINGMAX" },
+  { label: "ゆうき(弟) ZEPPLI0204", name: "ZEPPLI0204" },
+  { label: "ゆうき(MAX) YUUKINGMAX", name: "YUUKINGMAX" },
 ];
 ```
 
 BattleTagを使う場合は `Name#1234` ではなく、OverFast APIの形式に合わせて `Name-1234` にします。統計が出ない場合は、OW2側のキャリアプロフィールが公開になっているか確認してください。
 
+Platformの初期値は `Console` です。
+
+`Recent` はOverFast APIに直近試合履歴がないため、同じブラウザで前回取得したStatsとの差分から推定します。初回は `次回から` と表示されます。
+
 ## おすすめ構成
 
-`/heroes/stats` のCompetitive PC Asiaデータを使い、Role Queue想定の `Tank 1 / Damage 2 / Support 2` を自動生成します。
+`/heroes/stats` のCompetitive Console Asiaデータを使い、Role Queue想定の `Tank 1 / Damage 2 / Support 2` を自動生成します。
 
 - 安定構成: PickとWinのバランス
 - 勝率重視: Win Rateを少し強めに評価

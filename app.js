@@ -3,10 +3,11 @@ const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const ACCESS_PASSWORD = "1234567890";
 const ACCESS_KEY = "ow2-reference-access-v1";
+const PLAYER_SNAPSHOT_KEY = "ow2-reference-player-snapshots-v1";
 const TRACKED_PLAYERS = [
   { label: "自分 RYUKO", name: "RYUKO" },
-  { label: "ゆうき(弟) ZEPPRLI0204", name: "ZEPPRLI0204" },
-  { label: "ゆうき(MAX) YUKINGMAX", name: "YUKINGMAX" },
+  { label: "ゆうき(弟) ZEPPLI0204", name: "ZEPPLI0204" },
+  { label: "ゆうき(MAX) YUUKINGMAX", name: "YUUKINGMAX" },
 ];
 const CACHE_KEY = "ow2-reference-cache-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
@@ -20,7 +21,7 @@ const state = {
   role: "all",
   query: "",
   playerMode: "competitive",
-  playerPlatform: "pc",
+  playerPlatform: "console",
   loadingDetails: false,
 };
 
@@ -203,7 +204,7 @@ async function fetchHeroDetail(heroKey) {
 
 function fetchHeroStats() {
   return fetchJson("/heroes/stats", {
-    platform: "pc",
+    platform: "console",
     gamemode: "competitive",
     region: "asia",
     order_by: "pickrate:desc",
@@ -660,6 +661,7 @@ async function loadPlayers() {
 
   const results = await Promise.all(TRACKED_PLAYERS.map((player) => loadPlayer(player)));
   els.playerGrid.innerHTML = results.map(renderPlayerCard).join("");
+  savePlayerSnapshots(results);
 }
 
 async function loadPlayer(player) {
@@ -758,7 +760,8 @@ function renderPlayerCard(result) {
   const general = stats.general || stats.summary || stats;
   const avatar = safeUrl(summary.avatar || summary.icon || "");
   const displayName = result.label || summary.name || result.playerId || result.inputName;
-  const metrics = playerMetrics(general);
+  const recent = recentWinRate(result, general);
+  const metrics = playerMetrics(general, recent);
   const ranks = rankChips(summary);
   const roles = roleStats(stats);
   const topHeroes = topHeroStats(stats);
@@ -797,11 +800,15 @@ function renderPlayerCard(result) {
   `;
 }
 
-function playerMetrics(general) {
+function playerMetrics(general, recent) {
   return [
     {
       label: "Win Rate",
       value: formatPercent(numberFromStat(general, ["winrate", "win_rate"])),
+    },
+    {
+      label: "Recent",
+      value: recent.label,
     },
     {
       label: "KDA",
@@ -827,11 +834,72 @@ function playerMetrics(general) {
       label: "Damage/10",
       value: formatNumber(numberFromNested(general, [["average", "damage"], ["average_damage"], ["damage_avg"]])),
     },
-    {
-      label: "Healing/10",
-      value: formatNumber(numberFromNested(general, [["average", "healing"], ["average_healing"], ["healing_avg"]])),
-    },
   ];
+}
+
+function recentWinRate(result, general) {
+  const current = playerSnapshot(result, general);
+  if (!current) {
+    return { label: "-", deltaGames: 0 };
+  }
+
+  const previous = readPlayerSnapshots()[current.key];
+  if (!previous || !Number.isFinite(previous.games) || current.games <= previous.games) {
+    return { label: "次回から", deltaGames: 0 };
+  }
+
+  const deltaGames = current.games - previous.games;
+  const deltaWins = current.wins - previous.wins;
+  if (deltaGames <= 0 || !Number.isFinite(deltaWins)) {
+    return { label: "-", deltaGames: 0 };
+  }
+
+  return {
+    label: `${formatPercent((deltaWins / deltaGames) * 100)} / ${formatNumber(deltaGames)}G`,
+    deltaGames,
+  };
+}
+
+function savePlayerSnapshots(results) {
+  const snapshots = readPlayerSnapshots();
+  results.forEach((result) => {
+    if (result.error || !result.stats) {
+      return;
+    }
+    const general = result.stats.general || result.stats.summary || result.stats;
+    const snapshot = playerSnapshot(result, general);
+    if (snapshot) {
+      snapshots[snapshot.key] = snapshot;
+    }
+  });
+  localStorage.setItem(PLAYER_SNAPSHOT_KEY, JSON.stringify(snapshots));
+}
+
+function readPlayerSnapshots() {
+  try {
+    return JSON.parse(localStorage.getItem(PLAYER_SNAPSHOT_KEY)) || {};
+  } catch {
+    return {};
+  }
+}
+
+function playerSnapshot(result, general) {
+  const games = numberFromStat(general, ["games", "games_played", "played"]);
+  const winrate = numberFromStat(general, ["winrate", "win_rate"]);
+  if (!Number.isFinite(games) || games <= 0 || !Number.isFinite(winrate)) {
+    return null;
+  }
+
+  const normalizedWinrate = winrate > 0 && winrate <= 1 ? winrate * 100 : winrate;
+  return {
+    key: [result.playerId || result.inputName, state.playerMode, state.playerPlatform].join("|"),
+    playerId: result.playerId || result.inputName,
+    mode: state.playerMode,
+    platform: state.playerPlatform,
+    games,
+    wins: (normalizedWinrate / 100) * games,
+    timestamp: Date.now(),
+  };
 }
 
 function roleStats(stats) {
