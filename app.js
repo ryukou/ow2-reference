@@ -3,6 +3,24 @@ const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const PATCH_UPDATES = [
   {
+    type: "Esports",
+    title: "OWCS 2026 主要大会",
+    date: "2026-01-29",
+    tone: "esports",
+    summary: "公式開幕前ガイドで、2026年のStage制と国際大会スケジュールが公開。",
+    details: ["Champions Clash: 5月23日から25日", "Midseason Championship: 7月30日から8月3日", "World Finals: 12月3日から7日"],
+    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
+  },
+  {
+    type: "YouTube",
+    title: "Overwatch 2026 Spotlight",
+    date: "2026-02-04",
+    tone: "video",
+    summary: "公式YouTubeで2026年の新ヒーロー、コスメ、ゲームプレイ更新を紹介。",
+    details: ["Season 1: Conquestの開始前に公開", "新ヒーローやストーリー関連コンテンツを紹介", "CS/PC向けの今後の更新をまとめて確認できる"],
+    href: "https://www.youtube.com/watch?v=N8Sgnn72e9Y",
+  },
+  {
     type: "Event",
     title: "4v4 Evolved",
     date: "2026-04-28",
@@ -243,6 +261,67 @@ const COMP_CATEGORY_LABELS = {
   map: "ステージ",
   data: "Stats",
 };
+const SENSITIVITY_PRESETS = {
+  balanced: {
+    title: "バランス",
+    horizontal: [45, 65],
+    verticalRatio: 0.82,
+    scoped: [38, 50],
+    assistWindow: [25, 45],
+    smoothing: [85, 100],
+    easeIn: [10, 30],
+    note: "中距離DPS、タンク、サポートを広く触る人向け。",
+  },
+  tracking: {
+    title: "トラッキング重視",
+    horizontal: [38, 58],
+    verticalRatio: 0.82,
+    scoped: [35, 48],
+    assistWindow: [35, 55],
+    smoothing: [90, 100],
+    easeIn: [18, 35],
+    note: "ソルジャー76、ソジョーン、トレーサーなどで追い続ける人向け。",
+  },
+  flick: {
+    title: "フリック重視",
+    horizontal: [55, 78],
+    verticalRatio: 0.86,
+    scoped: [42, 58],
+    assistWindow: [18, 36],
+    smoothing: [70, 92],
+    easeIn: [0, 18],
+    note: "キャスディ、アッシュ、ウィドウメイカーなどで初動を速くしたい人向け。",
+  },
+  scoped: {
+    title: "スコープ重視",
+    horizontal: [42, 62],
+    verticalRatio: 0.8,
+    scoped: [38, 52],
+    assistWindow: [22, 42],
+    smoothing: [82, 96],
+    easeIn: [8, 25],
+    note: "アナ、アッシュ、ウィドウメイカーのADS中の安定を優先。",
+  },
+};
+const HERO_AIM_PROFILES = {
+  "soldier-76": { style: "tracking", horizontal: [45, 60], scoped: [40, 48], note: "横移動を追い続ける時間が長いので、行き過ぎない水平感度を優先。" },
+  sojourn: { style: "tracking", horizontal: [45, 62], scoped: [42, 50], note: "通常射撃の追従とレールガンの止めを両立する中速寄り。" },
+  tracer: { style: "tracking", horizontal: [55, 75], scoped: [40, 48], note: "近距離で視点移動が多いので水平感度は高め、細かい追従はアシストウィンドウで支える。" },
+  sombra: { style: "tracking", horizontal: [52, 70], scoped: [40, 48], note: "裏取り後の初弾合わせと近距離追従を両方見る。" },
+  reaper: { style: "tracking", horizontal: [50, 68], scoped: [40, 48], note: "近距離で大きく振るため低すぎる水平感度は避ける。" },
+  bastion: { style: "tracking", horizontal: [38, 55], scoped: [38, 46], note: "変形中の追いエイムを安定させるため低中速寄り。" },
+  cassidy: { style: "flick", horizontal: [50, 68], scoped: [42, 52], note: "初動を速くしすぎると止めづらいので、水平は中速から上げる。" },
+  ashe: { style: "scoped", horizontal: [45, 62], scoped: [42, 52], note: "ADS中の頭の高さをなぞれるスコープ相対感度を優先。" },
+  widowmaker: { style: "scoped", horizontal: [42, 60], scoped: [38, 50], note: "スコープ時の微調整が最優先。通常感度は振り向き用として詰める。" },
+  ana: { style: "scoped", horizontal: [42, 58], scoped: [38, 50], note: "味方追従と敵への一瞬のスリープを両立する低中速寄り。" },
+  hanzo: { style: "flick", horizontal: [48, 66], scoped: [40, 50], note: "溜め中の微調整と近距離フリックを両方確認する。" },
+  genji: { style: "flick", horizontal: [58, 78], scoped: [40, 48], note: "振り向きと上下移動が多いので、縦感度を低くしすぎない。" },
+  pharah: { style: "flick", horizontal: [52, 72], scoped: [40, 48], note: "空中からの大きい視点移動に合わせ、水平と垂直の差を小さめにする。" },
+  echo: { style: "tracking", horizontal: [50, 68], scoped: [40, 48], note: "空中追従が多いので縦横比を0.85以上から試す。" },
+  baptiste: { style: "tracking", horizontal: [42, 58], scoped: [40, 48], note: "回復弾と3点バーストの両方を安定させる中低速。" },
+  illari: { style: "flick", horizontal: [45, 62], scoped: [42, 52], note: "チャージ射撃の止めを優先し、行き過ぎるなら水平を下げる。" },
+  zenyatta: { style: "flick", horizontal: [45, 62], scoped: [40, 48], note: "不和後の単発精度を重視。速すぎる設定は避ける。" },
+};
 const COMP_RULE_OPTIONS = ["Control", "Escort", "Hybrid", "Push", "Flashpoint", "Clash"];
 const COMP_MAP_OPTIONS = ["長射線", "高台", "狭所乱戦", "広い移動"];
 const FALLBACK_STAGES = [
@@ -402,10 +481,23 @@ const state = {
     stage: "all",
     hero: "all",
   },
+  sensitivity: {
+    hero: "all",
+    style: "balanced",
+    result: "stable",
+    horizontal: 55,
+    vertical: 45,
+    scoped: 45,
+    assist: 100,
+    window: 35,
+    smoothing: 95,
+    easeIn: 20,
+  },
   loadingDetails: false,
 };
 
 const els = {};
+let lastScrollY = 0;
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
@@ -417,6 +509,7 @@ document.addEventListener("DOMContentLoaded", () => {
 function cacheElements() {
   els.syncStatus = document.querySelector("#syncStatus");
   els.refreshButton = document.querySelector("#refreshButton");
+  els.topbar = document.querySelector(".topbar");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
@@ -438,6 +531,11 @@ function cacheElements() {
   els.diagSupport1 = document.querySelector("#diagSupport1");
   els.diagSupport2 = document.querySelector("#diagSupport2");
   els.compDiagnosis = document.querySelector("#compDiagnosis");
+  els.sensitivityResult = document.querySelector("#sensitivityResult");
+  els.sensHero = document.querySelector("#sensHero");
+  els.sensInputs = document.querySelectorAll(
+    "#sensHero, #sensStyle, #sensResult, #sensHorizontal, #sensVertical, #sensScoped, #sensAssist, #sensWindow, #sensSmoothing, #sensEaseIn",
+  );
 }
 
 function bindEvents() {
@@ -477,6 +575,17 @@ function bindEvents() {
   [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
     select.addEventListener("change", renderCompDiagnosis);
   });
+
+  els.sensInputs.forEach((input) => {
+    const syncSensitivity = () => {
+      readSensitivityInputs();
+      renderSensitivity();
+    };
+    input.addEventListener("input", syncSensitivity);
+    input.addEventListener("change", syncSensitivity);
+  });
+
+  window.addEventListener("scroll", updateTopbarVisibility, { passive: true });
 }
 
 async function bootstrap() {
@@ -504,6 +613,7 @@ function renderInitialLoading() {
   els.heroList.innerHTML = Array.from({ length: 7 }, () => '<div class="hero-row skeleton"></div>').join("");
   els.heroDetail.innerHTML = '<div class="empty-state skeleton"></div>';
   renderComps();
+  renderSensitivity();
 }
 
 async function loadRemoteData({ force }) {
@@ -644,8 +754,209 @@ function renderAll() {
   renderUpdates();
   renderCompDiagnosisControls();
   renderComps();
+  renderSensitivityControls();
+  renderSensitivity();
   renderHeroList();
   renderHeroDetail();
+}
+
+function renderSensitivityControls() {
+  const current = els.sensHero.value || state.sensitivity.hero;
+  const options = [
+    { value: "all", label: "共通" },
+    ...state.heroes
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+      .map((hero) => ({ value: hero.key, label: `${hero.name} / ${labelRole(hero.role)}` })),
+  ];
+  setSelectOptions(els.sensHero, options, current);
+  state.sensitivity.hero = els.sensHero.value;
+}
+
+function readSensitivityInputs() {
+  const numberValue = (id, fallback) => {
+    const input = document.querySelector(`#${id}`);
+    const min = Number(input.min);
+    const max = Number(input.max);
+    return clamp(Number(input.value), min, max, fallback);
+  };
+
+  state.sensitivity = {
+    hero: document.querySelector("#sensHero").value,
+    style: document.querySelector("#sensStyle").value,
+    result: document.querySelector("#sensResult").value,
+    horizontal: numberValue("sensHorizontal", 55),
+    vertical: numberValue("sensVertical", 45),
+    scoped: numberValue("sensScoped", 45),
+    assist: numberValue("sensAssist", 100),
+    window: numberValue("sensWindow", 35),
+    smoothing: numberValue("sensSmoothing", 95),
+    easeIn: numberValue("sensEaseIn", 20),
+  };
+}
+
+function renderSensitivity() {
+  if (!els.sensitivityResult) {
+    return;
+  }
+
+  const analysis = analyzeSensitivity(state.sensitivity);
+  els.sensitivityResult.innerHTML = `
+    <div class="sens-summary is-${escapeAttr(analysis.tone)}">
+      <div>
+        <span>${escapeHtml(analysis.preset.title)}</span>
+        <strong>${escapeHtml(analysis.title)}</strong>
+      </div>
+      <p>${escapeHtml(analysis.summary)}</p>
+    </div>
+    <div class="sens-metrics">
+      ${renderSensMetric("水平", analysis.recommendedHorizontal)}
+      ${renderSensMetric("垂直", analysis.recommendedVertical)}
+      ${renderSensMetric("スコープ", analysis.recommendedScoped)}
+      ${renderSensMetric("縦横比", analysis.verticalRatio)}
+    </div>
+    <div class="sens-advice">
+      <section>
+        <h3>次に触る項目</h3>
+        <p>${escapeHtml(analysis.primaryAction)}</p>
+      </section>
+      <section>
+        <h3>射撃場チェック</h3>
+        <ul>
+          ${analysis.checks.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
+        </ul>
+      </section>
+    </div>
+  `;
+}
+
+function renderSensMetric(label, value) {
+  return `
+    <div class="metric">
+      <span class="stat-label">${escapeHtml(label)}</span>
+      <strong>${escapeHtml(String(value))}</strong>
+    </div>
+  `;
+}
+
+function analyzeSensitivity(settings) {
+  const heroProfile = getHeroAimProfile(settings.hero);
+  const preset = heroProfile?.preset || SENSITIVITY_PRESETS[settings.style] || SENSITIVITY_PRESETS.balanced;
+  const horizontalRange = heroProfile?.horizontal || preset.horizontal;
+  const scopedRange = heroProfile?.scoped || preset.scoped;
+  const ratio = settings.horizontal > 0 ? settings.vertical / settings.horizontal : preset.verticalRatio;
+  const targetVertical = clamp(Math.round(settings.horizontal * preset.verticalRatio), 1, 100, settings.vertical);
+  const recommendedHorizontal = recommendAround(settings.horizontal, horizontalRange);
+  const recommendedVertical = recommendAround(targetVertical, [Math.max(1, targetVertical - 4), Math.min(100, targetVertical + 4)]);
+  const recommendedScoped = recommendAround(settings.scoped, scopedRange);
+  const actions = buildSensitivityActions(settings, { ...preset, horizontal: horizontalRange, scoped: scopedRange }, targetVertical);
+  const checks = [
+    "訓練場で近距離の左右移動ボットを30秒追い、行き過ぎるか届かないかだけを見る。",
+    "次に中距離で180度振り向きから照準を戻し、水平感度だけを2から4刻みで調整する。",
+    "最後にスコープヒーローで頭の高さをなぞり、スコープ相対感度を2刻みで合わせる。",
+  ];
+
+  return {
+    preset,
+    tone: actions.warning ? "warn" : "good",
+    title: actions.title,
+    summary: `${heroProfile?.label || preset.title}: ${heroProfile?.note || preset.note} 現在の縦横比は${formatDecimal(ratio, 2)}です。`,
+    recommendedHorizontal,
+    recommendedVertical,
+    recommendedScoped,
+    verticalRatio: `${formatDecimal(ratio, 2)}x`,
+    primaryAction: actions.primary,
+    checks,
+  };
+}
+
+function getHeroAimProfile(heroKey) {
+  if (!heroKey || heroKey === "all") {
+    return null;
+  }
+  const hero = state.heroes.find((item) => item.key === heroKey);
+  const explicit = HERO_AIM_PROFILES[heroKey];
+  if (explicit) {
+    return {
+      label: hero?.name || heroName(heroKey),
+      preset: SENSITIVITY_PRESETS[explicit.style] || SENSITIVITY_PRESETS.balanced,
+      horizontal: explicit.horizontal,
+      scoped: explicit.scoped,
+      note: explicit.note,
+    };
+  }
+  const role = hero?.role || "";
+  const fallbackStyle = role === "tank" ? "balanced" : role === "support" ? "scoped" : "tracking";
+  return {
+    label: hero?.name || heroName(heroKey),
+    preset: SENSITIVITY_PRESETS[fallbackStyle],
+    note:
+      role === "tank"
+        ? "タンクは視点移動と前線確認が多いので、振り向ける水平感度を保ちつつ行き過ぎを抑える。"
+        : role === "support"
+          ? "サポートは味方追従と自衛を両立するため、中低速から安定を優先。"
+          : "DPSは交戦距離に合わせ、まず追いエイムが崩れない水平感度から合わせる。",
+  };
+}
+
+function buildSensitivityActions(settings, preset, targetVertical) {
+  if (settings.assist < 80) {
+    return {
+      title: "アシスト強度を戻す",
+      primary: `CS版の基準作りでは、まずエイムアシスト強度を80以上に戻す。低いまま感度を詰めると、追いエイムとフリックの判断がぶれやすい。`,
+      warning: true,
+    };
+  }
+  if (settings.result === "overshoot") {
+    return {
+      title: "行き過ぎを抑える",
+      primary: `水平感度を${clamp(settings.horizontal - 4, 1, 100, settings.horizontal)}前後まで下げる。まだ止まらない場合だけ、アシストウィンドウを${recommendAround(settings.window + 5, preset.assistWindow)}へ寄せる。`,
+      warning: true,
+    };
+  }
+  if (settings.result === "undershoot") {
+    return {
+      title: "届かなさを減らす",
+      primary: `水平感度を${clamp(settings.horizontal + 4, 1, 100, settings.horizontal)}前後まで上げる。細かい追従が崩れるならエイムイーズインを${recommendAround(settings.easeIn + 3, preset.easeIn)}へ戻す。`,
+      warning: true,
+    };
+  }
+  if (settings.result === "shaky") {
+    return {
+      title: "微振動を落ち着かせる",
+      primary: `水平感度は触らず、エイムスムージングを${recommendAround(settings.smoothing + 4, preset.smoothing)}、アシストウィンドウを${recommendAround(settings.window + 4, preset.assistWindow)}に寄せる。`,
+      warning: true,
+    };
+  }
+  if (settings.result === "slow-turn") {
+    return {
+      title: "振り向きを速くする",
+      primary: `水平感度を${clamp(settings.horizontal + 6, 1, 100, settings.horizontal)}前後まで上げる。縦感度は${targetVertical}付近にして、上下だけ速すぎる状態を避ける。`,
+      warning: true,
+    };
+  }
+
+  const horizontalInRange = inRange(settings.horizontal, preset.horizontal);
+  const scopedInRange = inRange(settings.scoped, preset.scoped);
+  if (!horizontalInRange) {
+    return {
+      title: "基準レンジに寄せる",
+      primary: `まず水平感度を${recommendedBoundary(settings.horizontal, preset.horizontal)}へ寄せる。垂直感度は${targetVertical}付近から始める。`,
+      warning: true,
+    };
+  }
+  if (!scopedInRange) {
+    return {
+      title: "ADSだけ調整",
+      primary: `通常感度は維持し、スコープ相対感度だけ${recommendAround(settings.scoped, preset.scoped)}に寄せる。`,
+      warning: false,
+    };
+  }
+  return {
+    title: "大きく変えなくてよい",
+    primary: `現在値は${preset.title}の目安内。変更するなら水平感度を2刻み、スコープ相対感度を1から2刻みで片方ずつ試す。`,
+    warning: false,
+  };
 }
 
 function renderMetaStats() {
@@ -673,7 +984,10 @@ function renderMetaStats() {
 }
 
 function renderUpdates() {
-  els.updateGrid.innerHTML = PATCH_UPDATES.map(renderUpdateCard).join("");
+  els.updateGrid.innerHTML = PATCH_UPDATES.slice()
+    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))
+    .map(renderUpdateCard)
+    .join("");
 }
 
 function renderUpdateCard(update) {
@@ -1523,6 +1837,23 @@ function setProgress(message) {
   els.detailProgress.textContent = message;
 }
 
+function updateTopbarVisibility() {
+  if (!els.topbar) {
+    return;
+  }
+  const current = window.scrollY || 0;
+  const isMobile = window.matchMedia("(max-width: 700px)").matches;
+  const delta = current - lastScrollY;
+  const shouldHide = isMobile && current > 120 && delta > 4;
+  const shouldShow = !isMobile || delta < -2 || current < 80;
+  if (shouldHide) {
+    els.topbar.classList.add("is-hidden");
+  } else if (shouldShow) {
+    els.topbar.classList.remove("is-hidden");
+  }
+  lastScrollY = current;
+}
+
 function setSelectOptions(select, options, selectedValue) {
   const values = new Set(options.map((option) => option.value));
   const nextValue = values.has(selectedValue) ? selectedValue : "all";
@@ -1744,6 +2075,27 @@ function formatDecimal(value, digits) {
   return value.toFixed(digits);
 }
 
+function recommendAround(value, range) {
+  const adjusted = clamp(value, range[0], range[1], value);
+  if (adjusted === value && inRange(value, range)) {
+    return `${range[0]}-${range[1]}`;
+  }
+  return `${adjusted} (${range[0]}-${range[1]})`;
+}
+
+function recommendedBoundary(value, range) {
+  return value < range[0] ? `${range[0]}以上` : `${range[1]}以下`;
+}
+
+function inRange(value, range) {
+  return Number.isFinite(value) && value >= range[0] && value <= range[1];
+}
+
+function clamp(value, min, max, fallback) {
+  const number = Number.isFinite(value) ? value : fallback;
+  return Math.min(max, Math.max(min, Math.round(number)));
+}
+
 function formatNumber(value) {
   if (!Number.isFinite(value)) {
     return "-";
@@ -1767,6 +2119,11 @@ function formatClock(date) {
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
+}
+
+function updateTimestamp(update) {
+  const timestamp = Date.parse(update?.date);
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 function toArray(value) {

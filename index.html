@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=comp-diagnosis">
-    <script src="./app.js?v=comp-diagnosis" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=hero-sens-news">
+    <script src="./app.js?v=hero-sens-news" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -27,8 +27,9 @@
         </a>
         <nav class="top-actions" aria-label="Main">
           <a href="#heroes">Heroes</a>
-          <a href="#updates">Updates</a>
           <a href="#comps">Comps</a>
+          <a href="#sensitivity">Sens</a>
+          <a href="#updates">Updates</a>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -168,6 +169,76 @@
           </div>
 
           <div id="compGrid" class="comp-grid" aria-live="polite"></div>
+        </section>
+
+        <section id="sensitivity" class="sensitivity-section" aria-label="Console sensitivity helper">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Console Aim</span>
+              <h2>感度調整補助</h2>
+            </div>
+            <span class="section-note">射撃場で1項目ずつ詰めるための目安</span>
+          </div>
+
+          <div class="sensitivity-tool">
+            <div class="sens-controls" aria-label="Sensitivity inputs">
+              <label>
+                <span>ヒーロー</span>
+                <select id="sensHero">
+                  <option value="all">共通</option>
+                </select>
+              </label>
+              <label>
+                <span>操作タイプ</span>
+                <select id="sensStyle">
+                  <option value="balanced">バランス</option>
+                  <option value="tracking">トラッキング重視</option>
+                  <option value="flick">フリック重視</option>
+                  <option value="scoped">スコープ重視</option>
+                </select>
+              </label>
+              <label>
+                <span>テスト結果</span>
+                <select id="sensResult">
+                  <option value="stable">大きな違和感なし</option>
+                  <option value="overshoot">行き過ぎる</option>
+                  <option value="undershoot">届かない</option>
+                  <option value="shaky">細かく震える</option>
+                  <option value="slow-turn">振り向きが遅い</option>
+                </select>
+              </label>
+              <label>
+                <span>水平感度</span>
+                <input id="sensHorizontal" type="number" min="1" max="100" step="1" value="55">
+              </label>
+              <label>
+                <span>垂直感度</span>
+                <input id="sensVertical" type="number" min="1" max="100" step="1" value="45">
+              </label>
+              <label>
+                <span>スコープ相対感度</span>
+                <input id="sensScoped" type="number" min="1" max="100" step="1" value="45">
+              </label>
+              <label>
+                <span>エイムアシスト強度</span>
+                <input id="sensAssist" type="number" min="0" max="100" step="1" value="100">
+              </label>
+              <label>
+                <span>アシストウィンドウ</span>
+                <input id="sensWindow" type="number" min="0" max="100" step="1" value="35">
+              </label>
+              <label>
+                <span>エイムスムージング</span>
+                <input id="sensSmoothing" type="number" min="0" max="100" step="1" value="95">
+              </label>
+              <label>
+                <span>エイムイーズイン</span>
+                <input id="sensEaseIn" type="number" min="0" max="100" step="1" value="20">
+              </label>
+            </div>
+
+            <div id="sensitivityResult" class="sensitivity-result" aria-live="polite"></div>
+          </div>
         </section>
 
         <section id="updates" class="updates-section" aria-label="Patch notes and news">
