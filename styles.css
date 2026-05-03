@@ -276,6 +276,11 @@ a {
   font-weight: 900;
 }
 
+.segmented [data-favorite-filter].is-active {
+  border-color: rgba(243, 161, 58, 0.86);
+  background: var(--orange);
+}
+
 .hero-layout {
   display: grid;
   grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
@@ -525,6 +530,11 @@ a {
   padding: 13px;
 }
 
+.perk-card.is-recommended {
+  border-color: rgba(243, 161, 58, 0.5);
+  background: rgba(243, 161, 58, 0.08);
+}
+
 .perk-card img,
 .ability-card img {
   width: 48px;
@@ -536,8 +546,26 @@ a {
 
 .perk-card h4,
 .ability-card h4 {
-  margin: 0 0 5px;
+  margin: 0;
   font-size: 1rem;
+}
+
+.perk-card-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 5px;
+}
+
+.popular-perk {
+  flex: 0 0 auto;
+  border: 1px solid rgba(243, 161, 58, 0.48);
+  background: rgba(243, 161, 58, 0.14);
+  color: var(--orange);
+  padding: 4px 6px;
+  font-size: 0.7rem;
+  font-weight: 900;
 }
 
 .perk-card p,
@@ -606,7 +634,7 @@ a {
 
 .comp-filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(150px, 1fr));
   gap: 10px;
   margin-bottom: 14px;
 }
@@ -895,9 +923,12 @@ a {
   .hero-layout,
   .content-grid,
   .update-grid,
-  .comp-grid,
-  .comp-filters {
+  .comp-grid {
     grid-template-columns: 1fr;
+  }
+
+  .comp-filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .hero-rail {
@@ -921,9 +952,14 @@ a {
 
   .topbar,
   .hero-controls,
-  .section-head {
+  .section-head,
+  .perk-card-head {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .comp-filters {
+    grid-template-columns: 1fr;
   }
 
   .top-actions {

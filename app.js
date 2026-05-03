@@ -221,6 +221,37 @@ const COMP_CATEGORY_LABELS = {
 };
 const COMP_RULE_OPTIONS = ["Control", "Escort", "Hybrid", "Push", "Flashpoint", "Clash"];
 const COMP_MAP_OPTIONS = ["長射線", "高台", "狭所乱戦", "広い移動"];
+const FALLBACK_STAGES = [
+  { name: "Antarctic Peninsula", rule: "Control", style: "狭所乱戦" },
+  { name: "Busan", rule: "Control", style: "狭所乱戦" },
+  { name: "Ilios", rule: "Control", style: "長射線" },
+  { name: "Lijiang Tower", rule: "Control", style: "狭所乱戦" },
+  { name: "Nepal", rule: "Control", style: "狭所乱戦" },
+  { name: "Oasis", rule: "Control", style: "広い移動" },
+  { name: "Circuit Royal", rule: "Escort", style: "長射線" },
+  { name: "Dorado", rule: "Escort", style: "高台" },
+  { name: "Havana", rule: "Escort", style: "長射線" },
+  { name: "Junkertown", rule: "Escort", style: "長射線" },
+  { name: "Rialto", rule: "Escort", style: "長射線" },
+  { name: "Route 66", rule: "Escort", style: "長射線" },
+  { name: "Shambali Monastery", rule: "Escort", style: "長射線" },
+  { name: "Watchpoint: Gibraltar", rule: "Escort", style: "高台" },
+  { name: "Blizzard World", rule: "Hybrid", style: "高台" },
+  { name: "Eichenwalde", rule: "Hybrid", style: "狭所乱戦" },
+  { name: "Hollywood", rule: "Hybrid", style: "高台" },
+  { name: "King's Row", rule: "Hybrid", style: "狭所乱戦" },
+  { name: "Midtown", rule: "Hybrid", style: "長射線" },
+  { name: "Numbani", rule: "Hybrid", style: "高台" },
+  { name: "Paraiso", rule: "Hybrid", style: "高台" },
+  { name: "Colosseo", rule: "Push", style: "広い移動" },
+  { name: "Esperanca", rule: "Push", style: "広い移動" },
+  { name: "New Queen Street", rule: "Push", style: "広い移動" },
+  { name: "New Junk City", rule: "Flashpoint", style: "広い移動" },
+  { name: "Suravasa", rule: "Flashpoint", style: "広い移動" },
+  { name: "Hanaoka", rule: "Clash", style: "狭所乱戦" },
+  { name: "Runasapi", rule: "Push", style: "広い移動" },
+  { name: "Throne of Anubis", rule: "Clash", style: "狭所乱戦" },
+];
 const COMP_METADATA = {
   Dive: {
     category: "style",
@@ -316,14 +347,17 @@ const state = {
   heroes: [],
   heroDetails: new Map(),
   heroStats: new Map(),
+  maps: FALLBACK_STAGES,
   selectedHeroKey: null,
   role: "all",
   query: "",
+  favoriteOnly: false,
   favoriteHeroKeys: new Set(),
   compFilters: {
     category: "all",
     rule: "all",
     map: "all",
+    stage: "all",
     hero: "all",
   },
   loadingDetails: false,
@@ -343,6 +377,7 @@ function cacheElements() {
   els.refreshButton = document.querySelector("#refreshButton");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
+  els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
   els.heroList = document.querySelector("#heroList");
   els.heroDetail = document.querySelector("#heroDetail");
   els.heroCount = document.querySelector("#heroCount");
@@ -353,6 +388,7 @@ function cacheElements() {
   els.compCategoryFilter = document.querySelector("#compCategoryFilter");
   els.compRuleFilter = document.querySelector("#compRuleFilter");
   els.compMapFilter = document.querySelector("#compMapFilter");
+  els.compStageFilter = document.querySelector("#compStageFilter");
   els.compHeroFilter = document.querySelector("#compHeroFilter");
 }
 
@@ -371,10 +407,17 @@ function bindEvents() {
     });
   });
 
+  els.favoriteFilterButton.addEventListener("click", () => {
+    state.favoriteOnly = !state.favoriteOnly;
+    els.favoriteFilterButton.classList.toggle("is-active", state.favoriteOnly);
+    renderHeroList();
+  });
+
   [
     [els.compCategoryFilter, "category"],
     [els.compRuleFilter, "rule"],
     [els.compMapFilter, "map"],
+    [els.compStageFilter, "stage"],
     [els.compHeroFilter, "hero"],
   ].forEach(([select, key]) => {
     select.addEventListener("change", () => {
@@ -421,13 +464,15 @@ async function loadRemoteData({ force }) {
   els.refreshButton.disabled = true;
 
   try {
-    const [heroes, heroStats] = await Promise.all([
+    const [heroes, heroStats, maps] = await Promise.all([
       fetchHeroes(),
       fetchHeroStats().catch(() => []),
+      fetchMaps().catch(() => FALLBACK_STAGES),
     ]);
 
     state.heroes = heroes;
     state.heroStats = new Map(heroStats.map((item) => [item.hero, item]));
+    state.maps = normalizeStages(maps);
     if (!state.selectedHeroKey && heroes[0]) {
       state.selectedHeroKey = heroes[0].key;
     }
@@ -470,6 +515,10 @@ function fetchHeroStats() {
     region: "asia",
     order_by: "pickrate:desc",
   });
+}
+
+function fetchMaps() {
+  return fetchJson("/maps");
 }
 
 async function loadHeroDetails(heroes) {
@@ -597,13 +646,19 @@ function renderComps() {
 
   const filtered = comps.filter((comp) => {
     const filters = state.compFilters;
+    const stage = getSelectedStage();
     const categoryMatches = filters.category === "all" || comp.category === filters.category;
     const ruleMatches = filters.rule === "all" || comp.rules.includes(filters.rule);
     const mapMatches = filters.map === "all" || comp.maps.includes(filters.map);
+    const stageMatches =
+      !stage ||
+      comp.rules.includes(stage.rule) ||
+      comp.maps.includes(stage.style) ||
+      comp.stageNames.includes(stage.name);
     const heroMatches =
       filters.hero === "all" ||
       comp.members.some((member) => (member.hero?.key || member.key) === filters.hero);
-    return categoryMatches && ruleMatches && mapMatches && heroMatches;
+    return categoryMatches && ruleMatches && mapMatches && stageMatches && heroMatches;
   });
 
   if (!filtered.length) {
@@ -637,6 +692,17 @@ function renderCompFilterOptions(comps) {
     els.compMapFilter,
     [{ value: "all", label: "すべて" }, ...COMP_MAP_OPTIONS.map((map) => ({ value: map, label: map }))],
     selected.map,
+  );
+  setSelectOptions(
+    els.compStageFilter,
+    [
+      { value: "all", label: "すべて" },
+      ...state.maps.map((stage) => ({
+        value: stage.key,
+        label: `${stage.name} / ${stage.rule}`,
+      })),
+    ],
+    selected.stage,
   );
 
   const heroOptions = new Map();
@@ -680,6 +746,7 @@ function normalizeCompMeta(comp) {
     categoryLabel: COMP_CATEGORY_LABELS[meta.category] || COMP_CATEGORY_LABELS.style,
     rules: meta.rules || [],
     maps: meta.maps || [],
+    stageNames: meta.stageNames || [],
     reasons: meta.reasons || [comp.note],
   };
 }
@@ -725,6 +792,7 @@ function buildRecommendedComps() {
       categoryLabel: COMP_CATEGORY_LABELS.data,
       rules: COMP_RULE_OPTIONS,
       maps: COMP_MAP_OPTIONS,
+      stageNames: state.maps.map((stage) => stage.name),
       reasons: ["Console AsiaのPick RateとWin Rateを両方見て、極端に尖りすぎない候補を選ぶ。", "身内で迷った時の初期案として使い、マップに合わせてDPSかサポートを差し替える。"],
       members: makeMembers("balanced").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
@@ -736,6 +804,7 @@ function buildRecommendedComps() {
       categoryLabel: COMP_CATEGORY_LABELS.data,
       rules: COMP_RULE_OPTIONS,
       maps: COMP_MAP_OPTIONS,
+      stageNames: state.maps.map((stage) => stage.name),
       reasons: ["勝率寄りなので、刺さる状況では強いが操作難度や相性の偏りも出やすい。", "敵構成に刺さらない時は、同じロール内で得意キャラに替える前提で見る。"],
       members: makeMembers("win").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
@@ -747,6 +816,7 @@ function buildRecommendedComps() {
       categoryLabel: COMP_CATEGORY_LABELS.data,
       rules: COMP_RULE_OPTIONS,
       maps: COMP_MAP_OPTIONS,
+      stageNames: state.maps.map((stage) => stage.name),
       reasons: ["Pick Rateを高めに見るため、野良や身内で合わせやすいヒーローが出やすい。", "強さの最大値よりも、全員が役割を理解しやすいことを優先した候補。"],
       members: makeMembers("pick").map((hero) => ({ hero, role: hero.role, source: "stats" })),
     },
@@ -767,6 +837,7 @@ function renderCompCard(comp) {
         <span>${escapeHtml(comp.categoryLabel || COMP_CATEGORY_LABELS[comp.category] || "構成")}</span>
         ${comp.rules.map((rule) => `<span>${escapeHtml(rule)}</span>`).join("")}
         ${comp.maps.map((map) => `<span>${escapeHtml(map)}</span>`).join("")}
+        ${renderStageMatchChips(comp)}
       </div>
       <div class="comp-members">
         ${comp.members.map(renderCompMember).join("")}
@@ -779,6 +850,18 @@ function renderCompCard(comp) {
       </div>
     </article>
   `;
+}
+
+function renderStageMatchChips(comp) {
+  const selected = getSelectedStage();
+  if (!selected) {
+    return "";
+  }
+  const matched =
+    comp.stageNames.includes(selected.name) ||
+    comp.rules.includes(selected.rule) ||
+    comp.maps.includes(selected.style);
+  return matched ? `<span>${escapeHtml(selected.name)}</span>` : "";
 }
 
 function renderCompMember(member) {
@@ -865,6 +948,10 @@ function renderHeroRow(hero) {
 
 function getFilteredHeroes() {
   return state.heroes.filter((hero) => {
+    if (state.favoriteOnly && !state.favoriteHeroKeys.has(hero.key)) {
+      return false;
+    }
+
     const roleMatches = state.role === "all" || hero.role === state.role;
     if (!roleMatches) {
       return false;
@@ -999,24 +1086,29 @@ function renderMetric(label, value) {
 }
 
 function renderPerkGroup(label, perks, type, hero, stat) {
+  const analyses = perks.map((perk, index) => analyzePerk(perk, index, type, hero, stat));
+  const recommendedIndex = pickRecommendedPerkIndex(analyses);
   return `
     <div class="perk-group">
       <span class="perk-type">${escapeHtml(label)}</span>
       <div class="perk-grid">
-        ${perks.length ? perks.map((perk, index) => renderPerkCard(perk, index, type, hero, stat)).join("") : renderEmpty("パークを取得できませんでした。")}
+        ${perks.length ? perks.map((perk, index) => renderPerkCard(perk, analyses[index], index === recommendedIndex)).join("") : renderEmpty("パークを取得できませんでした。")}
       </div>
     </div>
   `;
 }
 
-function renderPerkCard(perk, index, type, hero, stat) {
+function renderPerkCard(perk, analysis, recommended) {
   const icon = perk.icon ? `<img src="${safeUrl(perk.icon)}" alt="">` : '<span></span>';
-  const analysis = analyzePerk(perk, index, type, hero, stat);
+  const recommendedBadge = recommended ? '<span class="popular-perk">★ よく使う候補</span>' : "";
   return `
-    <article class="perk-card">
+    <article class="perk-card${recommended ? " is-recommended" : ""}">
       ${icon}
       <div>
-        <h4>${escapeHtml(perk.name || "Unknown")}</h4>
+        <div class="perk-card-head">
+          <h4>${escapeHtml(perk.name || "Unknown")}</h4>
+          ${recommendedBadge}
+        </div>
         <p>${escapeHtml(perk.description || "")}</p>
         <div class="perk-advice">
           <span class="advice-level is-${escapeAttr(analysis.levelKey)}">${escapeHtml(analysis.level)}</span>
@@ -1026,6 +1118,22 @@ function renderPerkCard(perk, index, type, hero, stat) {
       </div>
     </article>
   `;
+}
+
+function pickRecommendedPerkIndex(analyses) {
+  if (!analyses.length) {
+    return -1;
+  }
+  let bestIndex = 0;
+  let bestScore = -Infinity;
+  analyses.forEach((analysis, index) => {
+    const score = analysis.score - index * 0.05;
+    if (score > bestScore) {
+      bestIndex = index;
+      bestScore = score;
+    }
+  });
+  return bestIndex;
 }
 
 function analyzePerk(perk, index, type, hero, stat) {
@@ -1041,6 +1149,7 @@ function analyzePerk(perk, index, type, hero, stat) {
       keys: ["cooldown", "クールダウン", "短縮", "回復", "heal", "healing", "ライフ", "health", "armor", "shield"],
       levelKey: "high",
       level: "採用目安 高",
+      score: 3,
       situation: "迷った時・安定重視",
       reason: "生存力や回転率を上げる効果は、マップや敵構成に左右されにくく腐りにくい。",
     },
@@ -1048,6 +1157,7 @@ function analyzePerk(perk, index, type, hero, stat) {
       keys: ["speed", "移動", "movement", "dash", "jump", "加速", "スピード", "range", "射程"],
       levelKey: "medium",
       level: "採用目安 中",
+      score: 2,
       situation: "広いマップ・高台・当たり直し",
       reason: "位置取りや合流を助ける効果は、PushやFlashpoint、高台が多いステージで価値が上がる。",
     },
@@ -1055,6 +1165,7 @@ function analyzePerk(perk, index, type, hero, stat) {
       keys: ["damage", "ダメージ", "爆発", "追加", "critical", "クリティカル", "fire", "burn"],
       levelKey: "medium",
       level: "採用目安 中",
+      score: 2,
       situation: "火力を出せる時・味方が支えてくれる時",
       reason: "火力強化はキルにつながるが、立ち位置やエイム、味方の支援が噛み合うほど強くなる。",
     },
@@ -1062,6 +1173,7 @@ function analyzePerk(perk, index, type, hero, stat) {
       keys: ["ultimate", "アルティメット", "ult", "チャージ"],
       levelKey: "situational",
       level: "状況採用",
+      score: 1,
       situation: "長い集団戦・勝負所前",
       reason: "アルティメット関連はラウンドの流れに影響するが、短い当たり合いでは効果を感じにくいことがある。",
     },
@@ -1069,6 +1181,7 @@ function analyzePerk(perk, index, type, hero, stat) {
       keys: ["enemy", "敵", "revealed", "slow", "ノックバック", "stun", "阻害", "ハック"],
       levelKey: "situational",
       level: "状況採用",
+      score: 1,
       situation: "特定キャラ対策・狭い場所",
       reason: "妨害や対策寄りの効果は、刺さる相手には強い一方で、相手構成によって価値が変わる。",
     },
@@ -1083,6 +1196,7 @@ function analyzePerk(perk, index, type, hero, stat) {
     return {
       levelKey: "high",
       level: "採用目安 高",
+      score: 3,
       situation: "標準構成・まず試す候補",
       reason: "このヒーロー自体のPick/Winが悪くなく、最初の候補として試しやすい。",
     };
@@ -1091,6 +1205,7 @@ function analyzePerk(perk, index, type, hero, stat) {
   return {
     levelKey: isMajor ? "medium" : "situational",
     level: isMajor ? "採用目安 中" : "状況採用",
+    score: isMajor ? 2 : 1,
     situation: isMajor ? "構成に合わせて選択" : "相手やマップで選択",
     reason: "パーク単位の実測使用率は公開データがないため、効果文とヒーローStatsからの目安として表示している。",
   };
@@ -1162,6 +1277,7 @@ function hydrateFromCache(cached) {
   state.heroes = cached.heroes || [];
   state.heroDetails = new Map(cached.heroDetails || []);
   state.heroStats = new Map(cached.heroStats || []);
+  state.maps = normalizeStages(cached.maps || FALLBACK_STAGES);
   state.selectedHeroKey = state.heroes[0]?.key || null;
 }
 
@@ -1171,6 +1287,7 @@ function writeCache() {
     heroes: state.heroes,
     heroDetails: [...state.heroDetails.entries()],
     heroStats: [...state.heroStats.entries()],
+    maps: state.maps,
   };
   localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
 }
@@ -1229,6 +1346,8 @@ function setSelectOptions(select, options, selectedValue) {
       state.compFilters.rule = nextValue;
     } else if (select === els.compMapFilter) {
       state.compFilters.map = nextValue;
+    } else if (select === els.compStageFilter) {
+      state.compFilters.stage = nextValue;
     } else if (select === els.compHeroFilter) {
       state.compFilters.hero = nextValue;
     }
@@ -1240,6 +1359,89 @@ function setSelectOptions(select, options, selectedValue) {
       return `<option value="${escapeAttr(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
     })
     .join("");
+}
+
+function normalizeStages(rawMaps) {
+  const maps = Array.isArray(rawMaps) && rawMaps.length ? rawMaps : FALLBACK_STAGES;
+  const normalized = maps
+    .map((map) => {
+      const name = stringValue(map.name || map.label || map.title || map.key);
+      if (!name) {
+        return null;
+      }
+      const key = stringValue(map.key || slugify(name));
+      const rule = normalizeRule(readMapMode(map) || guessStageRule(name)) || "Control";
+      const style = normalizeStageStyle(map.style) || guessStageStyle(name, rule);
+      return { key, name, rule, style };
+    })
+    .filter(Boolean);
+
+  const byName = new Map();
+  [...FALLBACK_STAGES.map((stage) => ({ ...stage, key: slugify(stage.name) })), ...normalized].forEach((stage) => {
+    byName.set(stage.name, {
+      key: stage.key || slugify(stage.name),
+      name: stage.name,
+      rule: normalizeRule(stage.rule) || "Control",
+      style: normalizeStageStyle(stage.style) || guessStageStyle(stage.name, stage.rule),
+    });
+  });
+
+  return [...byName.values()].sort((a, b) => a.name.localeCompare(b.name, "ja"));
+}
+
+function readMapMode(map) {
+  const raw =
+    map.gamemode ||
+    map.game_mode ||
+    map.mode ||
+    map.rule ||
+    (Array.isArray(map.gamemodes) ? map.gamemodes[0] : null);
+  if (!raw || typeof raw !== "object") {
+    return raw;
+  }
+  return raw.key || raw.name || raw.label || raw.title || "";
+}
+
+function getSelectedStage() {
+  if (state.compFilters.stage === "all") {
+    return null;
+  }
+  return state.maps.find((stage) => stage.key === state.compFilters.stage) || null;
+}
+
+function normalizeRule(value) {
+  const text = stringValue(value).toLowerCase();
+  if (text.includes("control")) return "Control";
+  if (text.includes("escort")) return "Escort";
+  if (text.includes("hybrid")) return "Hybrid";
+  if (text.includes("push")) return "Push";
+  if (text.includes("flash")) return "Flashpoint";
+  if (text.includes("clash")) return "Clash";
+  return "";
+}
+
+function normalizeStageStyle(value) {
+  const text = stringValue(value);
+  return COMP_MAP_OPTIONS.includes(text) ? text : "";
+}
+
+function guessStageRule(name) {
+  const fallback = FALLBACK_STAGES.find((stage) => stage.name === name);
+  return fallback?.rule || "";
+}
+
+function guessStageStyle(name, rule) {
+  const fallback = FALLBACK_STAGES.find((stage) => stage.name === name);
+  if (fallback) {
+    return fallback.style;
+  }
+  if (rule === "Escort") {
+    return "長射線";
+  }
+  if (rule === "Hybrid" || rule === "Clash" || rule === "Control") {
+    return "狭所乱戦";
+  }
+  return "広い移動";
 }
 
 function labelRole(role) {
@@ -1391,6 +1593,13 @@ function toArray(value) {
 
 function stringValue(value) {
   return value === undefined || value === null ? "" : String(value);
+}
+
+function slugify(value) {
+  return stringValue(value)
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-|-$/g, "");
 }
 
 function readableError(value) {
