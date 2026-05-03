@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta
+      name="description"
+      content="OW2 hero, perk, and player stats reference for a small group."
+    >
+    <title>OW2 Reference</title>
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
+    >
+    <link rel="stylesheet" href="./styles.css">
+    <script src="./app.js" defer></script>
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <a class="brand" href="#heroes" aria-label="OW2 Reference">
+          <span class="brand-mark">OW2</span>
+          <span>
+            <strong>OW2 Reference</strong>
+            <small id="syncStatus">起動中</small>
+          </span>
+        </a>
+        <nav class="top-actions" aria-label="Main">
+          <a href="#heroes">Heroes</a>
+          <a href="#players">Players</a>
+          <button id="refreshButton" type="button">更新</button>
+        </nav>
+      </header>
+
+      <main>
+        <section class="quick-board" aria-label="Hero meta stats">
+          <div>
+            <span class="eyebrow">Competitive PC Asia</span>
+            <h1>ヒーロー性能、パーク、身内Stats</h1>
+          </div>
+          <div id="metaStats" class="meta-stats" aria-live="polite">
+            <div class="mini-stat">
+              <span>Pick</span>
+              <strong>-</strong>
+            </div>
+            <div class="mini-stat">
+              <span>Win</span>
+              <strong>-</strong>
+            </div>
+            <div class="mini-stat">
+              <span>Heroes</span>
+              <strong>-</strong>
+            </div>
+          </div>
+        </section>
+
+        <section id="heroes" class="workspace" aria-label="Heroes">
+          <div class="hero-controls">
+            <label class="search-field">
+              <span>Search</span>
+              <input
+                id="heroSearch"
+                type="search"
+                autocomplete="off"
+                placeholder="Hero / ability / perk"
+              >
+            </label>
+            <div class="segmented" aria-label="Role filter">
+              <button class="is-active" type="button" data-role="all">All</button>
+              <button type="button" data-role="tank">Tank</button>
+              <button type="button" data-role="damage">Damage</button>
+              <button type="button" data-role="support">Support</button>
+            </div>
+          </div>
+
+          <div class="hero-layout">
+            <aside class="hero-rail" aria-label="Hero list">
+              <div class="rail-head">
+                <strong id="heroCount">0 Heroes</strong>
+                <span id="detailProgress">Waiting</span>
+              </div>
+              <div id="heroList" class="hero-list" aria-live="polite"></div>
+            </aside>
+
+            <article id="heroDetail" class="hero-detail" aria-live="polite"></article>
+          </div>
+        </section>
+
+        <section id="players" class="players-section" aria-label="Player stats">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Tracked Players</span>
+              <h2>ryukou0109 / Zeppri0204</h2>
+            </div>
+            <div class="player-filters">
+              <label>
+                <span>Mode</span>
+                <select id="playerMode">
+                  <option value="competitive" selected>Competitive</option>
+                  <option value="quickplay">Quick Play</option>
+                  <option value="all">All</option>
+                </select>
+              </label>
+              <label>
+                <span>Platform</span>
+                <select id="playerPlatform">
+                  <option value="pc" selected>PC</option>
+                  <option value="console">Console</option>
+                  <option value="all">All</option>
+                </select>
+              </label>
+            </div>
+          </div>
+
+          <div id="playerGrid" class="player-grid" aria-live="polite"></div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>
