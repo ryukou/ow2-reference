@@ -308,6 +308,7 @@ const COMP_METADATA = {
   },
 };
 const CACHE_KEY = "ow2-reference-cache-v1";
+const FAVORITE_KEY = "ow2-reference-favorites-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
 
 const state = {
@@ -318,6 +319,7 @@ const state = {
   selectedHeroKey: null,
   role: "all",
   query: "",
+  favoriteHeroKeys: new Set(),
   compFilters: {
     category: "all",
     rule: "all",
@@ -331,6 +333,7 @@ const els = {};
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
+  readFavorites();
   bindEvents();
   bootstrap();
 });
@@ -845,12 +848,14 @@ function renderHeroRow(hero) {
   const pickRate = formatPercent(numberFromStat(stat, ["pickrate", "pick_rate"]));
   const winRate = formatPercent(numberFromStat(stat, ["winrate", "win_rate"]));
   const active = hero.key === state.selectedHeroKey ? " is-active" : "";
+  const favorite = state.favoriteHeroKeys.has(hero.key) ? " is-favorite" : "";
+  const favoriteMark = state.favoriteHeroKeys.has(hero.key) ? '<span class="favorite-mark">★</span>' : "";
 
   return `
-    <button class="hero-row${active}" type="button" data-hero-key="${escapeAttr(hero.key)}">
+    <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}">
       <img src="${safeUrl(hero.portrait)}" alt="">
       <span>
-        <strong>${escapeHtml(hero.name)}</strong>
+        <strong>${favoriteMark}${escapeHtml(hero.name)}</strong>
         <small>${escapeHtml(labelRole(hero.role))} · Pick ${pickRate} · Win ${winRate}</small>
       </span>
       <span class="role-badge">${escapeHtml(shortRole(hero.role))}</span>
@@ -928,10 +933,10 @@ function renderHeroDetail() {
       <section>
         <div class="panel-title">
           <h3>Perks</h3>
-          <span class="chip">Minor ${perks.minor.length} / Major ${perks.major.length}</span>
+          <span class="chip">実測使用率は公開データなし</span>
         </div>
-        ${renderPerkGroup("Minor Perk", perks.minor)}
-        ${renderPerkGroup("Major Perk", perks.major)}
+        ${renderPerkGroup("Minor Perk", perks.minor, "minor", hero, stat)}
+        ${renderPerkGroup("Major Perk", perks.major, "major", hero, stat)}
       </section>
 
       <section>
@@ -945,6 +950,10 @@ function renderHeroDetail() {
       </section>
     </div>
   `;
+
+  els.heroDetail.querySelector("[data-favorite-toggle]")?.addEventListener("click", () => {
+    toggleFavorite(hero.key);
+  });
 }
 
 function renderHeroVisual(hero, detail) {
@@ -953,6 +962,7 @@ function renderHeroVisual(hero, detail) {
   const location = detail?.location ? `<span class="chip">${escapeHtml(detail.location)}</span>` : "";
   const hp = hitpoints.label ? `<span class="chip">${escapeHtml(hitpoints.label)}</span>` : "";
   const subrole = hero.subrole ? `<span class="chip">${escapeHtml(hero.subrole)}</span>` : "";
+  const favorite = state.favoriteHeroKeys.has(hero.key);
 
   return `
     <section class="hero-visual" style="--hero-bg: url('${safeUrl(background)}')">
@@ -963,7 +973,13 @@ function renderHeroVisual(hero, detail) {
           ${hp}
           ${location}
         </div>
-        <h2>${escapeHtml(hero.name)}</h2>
+        <div class="hero-title-row">
+          <h2>${escapeHtml(hero.name)}</h2>
+          <button class="favorite-button${favorite ? " is-on" : ""}" type="button" data-favorite-toggle aria-pressed="${favorite ? "true" : "false"}">
+            <span>${favorite ? "★" : "☆"}</span>
+            ${favorite ? "お気に入り" : "お気に入り"}
+          </button>
+        </div>
         <p>${escapeHtml(detail?.description || "データ取得中")}</p>
       </div>
       <div class="portrait-wrap">
@@ -982,28 +998,102 @@ function renderMetric(label, value) {
   `;
 }
 
-function renderPerkGroup(label, perks) {
+function renderPerkGroup(label, perks, type, hero, stat) {
   return `
     <div class="perk-group">
       <span class="perk-type">${escapeHtml(label)}</span>
       <div class="perk-grid">
-        ${perks.length ? perks.map(renderPerkCard).join("") : renderEmpty("パークを取得できませんでした。")}
+        ${perks.length ? perks.map((perk, index) => renderPerkCard(perk, index, type, hero, stat)).join("") : renderEmpty("パークを取得できませんでした。")}
       </div>
     </div>
   `;
 }
 
-function renderPerkCard(perk) {
+function renderPerkCard(perk, index, type, hero, stat) {
   const icon = perk.icon ? `<img src="${safeUrl(perk.icon)}" alt="">` : '<span></span>';
+  const analysis = analyzePerk(perk, index, type, hero, stat);
   return `
     <article class="perk-card">
       ${icon}
       <div>
         <h4>${escapeHtml(perk.name || "Unknown")}</h4>
         <p>${escapeHtml(perk.description || "")}</p>
+        <div class="perk-advice">
+          <span class="advice-level is-${escapeAttr(analysis.levelKey)}">${escapeHtml(analysis.level)}</span>
+          <span>${escapeHtml(analysis.situation)}</span>
+        </div>
+        <p class="perk-reason">${escapeHtml(analysis.reason)}</p>
       </div>
     </article>
   `;
+}
+
+function analyzePerk(perk, index, type, hero, stat) {
+  const text = `${perk.name || ""} ${perk.description || ""}`.toLowerCase();
+  const pick = numberFromStat(stat, ["pickrate", "pick_rate"]);
+  const win = numberFromStat(stat, ["winrate", "win_rate"]);
+  const isPopularHero = Number.isFinite(pick) && pick >= 10;
+  const isWinningHero = Number.isFinite(win) && win >= 50;
+  const isMajor = type === "major";
+
+  const rules = [
+    {
+      keys: ["cooldown", "クールダウン", "短縮", "回復", "heal", "healing", "ライフ", "health", "armor", "shield"],
+      levelKey: "high",
+      level: "採用目安 高",
+      situation: "迷った時・安定重視",
+      reason: "生存力や回転率を上げる効果は、マップや敵構成に左右されにくく腐りにくい。",
+    },
+    {
+      keys: ["speed", "移動", "movement", "dash", "jump", "加速", "スピード", "range", "射程"],
+      levelKey: "medium",
+      level: "採用目安 中",
+      situation: "広いマップ・高台・当たり直し",
+      reason: "位置取りや合流を助ける効果は、PushやFlashpoint、高台が多いステージで価値が上がる。",
+    },
+    {
+      keys: ["damage", "ダメージ", "爆発", "追加", "critical", "クリティカル", "fire", "burn"],
+      levelKey: "medium",
+      level: "採用目安 中",
+      situation: "火力を出せる時・味方が支えてくれる時",
+      reason: "火力強化はキルにつながるが、立ち位置やエイム、味方の支援が噛み合うほど強くなる。",
+    },
+    {
+      keys: ["ultimate", "アルティメット", "ult", "チャージ"],
+      levelKey: "situational",
+      level: "状況採用",
+      situation: "長い集団戦・勝負所前",
+      reason: "アルティメット関連はラウンドの流れに影響するが、短い当たり合いでは効果を感じにくいことがある。",
+    },
+    {
+      keys: ["enemy", "敵", "revealed", "slow", "ノックバック", "stun", "阻害", "ハック"],
+      levelKey: "situational",
+      level: "状況採用",
+      situation: "特定キャラ対策・狭い場所",
+      reason: "妨害や対策寄りの効果は、刺さる相手には強い一方で、相手構成によって価値が変わる。",
+    },
+  ];
+
+  const matched = rules.find((rule) => rule.keys.some((key) => text.includes(key)));
+  if (matched) {
+    return matched;
+  }
+
+  if (isPopularHero && isWinningHero && index === 0) {
+    return {
+      levelKey: "high",
+      level: "採用目安 高",
+      situation: "標準構成・まず試す候補",
+      reason: "このヒーロー自体のPick/Winが悪くなく、最初の候補として試しやすい。",
+    };
+  }
+
+  return {
+    levelKey: isMajor ? "medium" : "situational",
+    level: isMajor ? "採用目安 中" : "状況採用",
+    situation: isMajor ? "構成に合わせて選択" : "相手やマップで選択",
+    reason: "パーク単位の実測使用率は公開データがないため、効果文とヒーローStatsからの目安として表示している。",
+  };
 }
 
 function renderAbilityCard(ability) {
@@ -1083,6 +1173,30 @@ function writeCache() {
     heroStats: [...state.heroStats.entries()],
   };
   localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+}
+
+function readFavorites() {
+  try {
+    const keys = JSON.parse(localStorage.getItem(FAVORITE_KEY));
+    state.favoriteHeroKeys = new Set(Array.isArray(keys) ? keys : []);
+  } catch {
+    state.favoriteHeroKeys = new Set();
+  }
+}
+
+function writeFavorites() {
+  localStorage.setItem(FAVORITE_KEY, JSON.stringify([...state.favoriteHeroKeys]));
+}
+
+function toggleFavorite(heroKey) {
+  if (state.favoriteHeroKeys.has(heroKey)) {
+    state.favoriteHeroKeys.delete(heroKey);
+  } else {
+    state.favoriteHeroKeys.add(heroKey);
+  }
+  writeFavorites();
+  renderHeroList();
+  renderHeroDetail();
 }
 
 function renderFatalError(error) {
