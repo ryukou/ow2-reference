@@ -1,6 +1,7 @@
 const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
+const RECENT_UPDATE_DAYS = 31;
 const PATCH_UPDATES = [
   {
     type: "Hero",
@@ -12,58 +13,58 @@ const PATCH_UPDATES = [
     href: "https://www.pcgamer.com/games/fps/overwatch-season-3-shion-release-date/",
   },
   {
-    type: "Esports",
-    title: "OWCS 2026 主要大会",
-    date: "2026-01-29",
-    tone: "esports",
-    summary: "公式開幕前ガイドで、2026年のStage制と国際大会スケジュールが公開。",
-    details: ["Champions Clash: 5月23日から25日", "Midseason Championship: 7月30日から8月3日", "World Finals: 12月3日から7日"],
-    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
-  },
-  {
-    type: "YouTube",
-    title: "Overwatch 2026 Spotlight",
-    date: "2026-02-04",
-    tone: "video",
-    summary: "公式YouTubeで2026年の新ヒーロー、コスメ、ゲームプレイ更新を紹介。",
-    details: ["Season 1: Conquestの開始前に公開", "新ヒーローやストーリー関連コンテンツを紹介", "CS/PC向けの今後の更新をまとめて確認できる"],
-    href: "https://www.youtube.com/watch?v=N8Sgnn72e9Y",
-  },
-  {
-    type: "Event",
-    title: "4v4 Evolved",
-    date: "2026-04-28",
-    tone: "info",
-    summary: "エムレだけで戦う期間限定4v4チーム・デスマッチ。開催期間は4月28日から5月11日。",
-    details: ["全員エムレの同条件ルール", "リプレイコードはこの更新でワイプ", "スコアボード中にジャンプできない不具合などを修正"],
-    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
-  },
-  {
-    type: "Buff",
-    title: "ロードホッグ / ソンブラ / ヴェンデッタ",
-    date: "2026-04-23",
-    tone: "buff",
-    summary: "Season 2開始後に落ちすぎた勝率を戻すための小規模強化。",
-    details: ["ロードホッグ: チェイン・フックのCD 8秒から7秒", "ソンブラ: 被ダメージ露見中の速度低下が50%から33%", "ヴェンデッタ: 体力175から200、合計250から275"],
-    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
-  },
-  {
-    type: "Stadium",
-    title: "Stadium調整",
-    date: "2026-04-23",
+    type: "Patch",
+    title: "Season 3 バランス調整",
+    date: "2026-06-16",
     tone: "nerf",
-    summary: "強すぎるStadiumビルドを抑えつつ、一部ビルドを強化。",
-    details: ["ハザード/ジャンカー・クイーン/オリーサ/ウーヤン系の強い構成を弱体化", "ラマットラは一部弱体化と武器系強化が混在", "ジュノの武器系ビルドは強化"],
-    href: "https://overwatch.blizzard.com/en-us/news/patch-notes/live/",
+    summary: "Season 3開始時のパッチ。高機動メタを抑えつつ、新環境向けの調整が入った。",
+    details: ["Jetpack Cat: 搬送中の燃料回復ペナルティが重くなり、Transport Shielding系も弱体化", "Jetpack Cat: Biotic PawjectilesやHeadbutt系は補填強化", "シオン追加に合わせてフランカー対策とCCの価値が上がりやすい"],
+    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-kicks-off-with-the-gift-of-jetpack-cat-nerfs-after-the-apache-helicopter-meta-dominated-the-world-cup/",
   },
   {
     type: "Season",
-    title: "Season 2: Summit",
-    date: "2026-04-14",
+    title: "Season 3: Into the Tiger's Den",
+    date: "2026-06-16",
     tone: "info",
-    summary: "新ダメージヒーローのシエラ、Operation: Grand Mesa、Antarctic Peninsulaリワークなどが追加。",
-    details: ["新ヒーローのシエラ登場", "Operation: Grand Mesaイベント", "Post Match Accolades復帰とパークのミニ更新"],
-    href: "https://overwatch.blizzard.com/news/24266793/reach-heroic-heights-in-reign-of-talon-season-2-summit",
+    summary: "シオン実装、新バトルパス、ストア更新、ミシックスキン予定を含む新シーズン。",
+    details: ["開催期間は6月16日から8月中旬見込み", "PC/コンソール/Switch 2で展開", "シオンはヒットスキャン寄りの高機動DPS"],
+    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-shion-release-date/",
+  },
+  {
+    type: "News",
+    title: "シオン開発情報",
+    date: "2026-06-15",
+    tone: "info",
+    summary: "開発初期にはコンボ評価メーターも検討されたが、実戦負荷を考えて見送られた。",
+    details: ["二丁拳銃、X字ボレー、ダッシュ、バイクを連携して戦う設計", "高いスキル上限のフランカー寄り", "準備された相手や妨害には弱い"],
+    href: "https://www.pcgamer.com/games/fps/blizzard-almost-put-devil-mays-style-rank-into-overwatch-for-its-newest-combo-heavy-hero-shion/",
+  },
+  {
+    type: "Preview",
+    title: "シオンのバイク能力公開",
+    date: "2026-06-12",
+    tone: "video",
+    summary: "Overwatch初の本格的な乗り物系アビリティとして、バイク移動と投げつけ攻撃が紹介された。",
+    details: ["Joyrideで素早く移動し、バイクを攻撃にも使う", "Evadeでオーバーシールド付きの離脱/接近", "近距離奇襲と逃げ道管理が重要"],
+    href: "https://www.gamesradar.com/games/fps/overwatch-gives-new-hero-shion-a-motorcycle-which-you-can-throw-at-people-when-youre-not-akira-sliding-all-over-the-place/",
+  },
+  {
+    type: "Esports",
+    title: "OWCS Champions Clash",
+    date: "2026-05-25",
+    tone: "esports",
+    summary: "5月23日から25日に開催された直近1か月内のOWCS主要大会。",
+    details: ["直近1か月の過去予定として表示", "次の大型大会はMidseason Championshipが7月30日から8月3日予定", "観戦メタの変化は構成例の見直し材料"],
+    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
+  },
+  {
+    type: "Upcoming",
+    title: "OWCS Midseason Championship",
+    date: "2026-07-30",
+    tone: "esports",
+    summary: "次の国際大会予定。7月30日から8月3日開催予定。",
+    details: ["今後の予定として表示", "Season 3環境での構成傾向を確認しやすい大会", "タンク相性やフランカー対策の参考にする"],
+    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
   },
 ];
 const EXTRA_HEROES = [
@@ -1113,10 +1114,14 @@ function renderMetaStats() {
 }
 
 function renderUpdates() {
-  els.updateGrid.innerHTML = PATCH_UPDATES.slice()
+  const updates = PATCH_UPDATES.slice()
+    .filter(isVisibleRecentUpdate)
     .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))
-    .map(renderUpdateCard)
-    .join("");
+    .map(renderUpdateCard);
+
+  els.updateGrid.innerHTML = updates.length
+    ? updates.join("")
+    : renderEmpty("直近1か月以内のイベント・ニュース・パッチ予定はありません。");
 }
 
 function renderUpdateCard(update) {
@@ -2329,6 +2334,15 @@ function formatClock(date) {
 function updateTimestamp(update) {
   const timestamp = Date.parse(update?.date);
   return Number.isFinite(timestamp) ? timestamp : 0;
+}
+
+function isVisibleRecentUpdate(update) {
+  const timestamp = updateTimestamp(update);
+  if (!timestamp) {
+    return false;
+  }
+  const cutoff = Date.now() - RECENT_UPDATE_DAYS * 24 * 60 * 60 * 1000;
+  return timestamp >= cutoff;
 }
 
 function toArray(value) {
