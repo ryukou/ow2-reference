@@ -3,6 +3,15 @@ const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const PATCH_UPDATES = [
   {
+    type: "Hero",
+    title: "シオン追加",
+    date: "2026-06-16",
+    tone: "info",
+    summary: "Season 3: Into the Tiger's Denで追加されたダメージヒーロー。高機動のフランカー寄り。",
+    details: ["二丁拳銃とバイクを使うダメージヒーロー", "EvadeとJoyrideで素早く接近/離脱", "準備できている相手やCCに弱い"],
+    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-shion-release-date/",
+  },
+  {
     type: "Esports",
     title: "OWCS 2026 主要大会",
     date: "2026-01-29",
@@ -57,6 +66,40 @@ const PATCH_UPDATES = [
     href: "https://overwatch.blizzard.com/news/24266793/reach-heroic-heights-in-reign-of-talon-season-2-summit",
   },
 ];
+const EXTRA_HEROES = [
+  {
+    key: "shion",
+    name: "シオン",
+    role: "damage",
+    portrait: "",
+    localDetail: true,
+  },
+];
+const EXTRA_HERO_DETAILS = {
+  shion: {
+    key: "shion",
+    description: "二丁拳銃とバイクで素早く仕掛ける高機動ダメージ。孤立した相手への奇襲が強い一方、準備された相手や妨害に弱い。",
+    location: "Japan",
+    hitpoints: { health: 250, total: 250 },
+    abilities: [
+      { name: "Kira Pistols", description: "左右のピストルを交互に撃つメイン武器。", icon: "" },
+      { name: "Execution", description: "X字のボレーで瞬間火力を出す。", icon: "" },
+      { name: "Evade", description: "素早くダッシュし、オーバーヘルスを得る。", icon: "" },
+      { name: "Joyride", description: "バイクで移動し、投げつけてダメージを狙う。", icon: "" },
+      { name: "Satsuriku Spree", description: "三方向へ連続突進しながら銃撃するアルティメット。", icon: "" },
+    ],
+    perks: {
+      minor: [
+        { name: "Refuel", description: "機動力を維持しやすく、離脱や再エンゲージを助ける。" },
+        { name: "X Machina", description: "Executionの火力や扱いやすさを伸ばす攻撃寄り候補。" },
+      ],
+      major: [
+        { name: "Faces of Death", description: "キル圧を高める強力な攻撃寄り候補。" },
+        { name: "Road Rash", description: "Joyride周りの圧力を伸ばし、奇襲性能を高める。" },
+      ],
+    },
+  },
+};
 const COMPOSITION_EXAMPLES = [
   {
     title: "迷ったらこれ",
@@ -357,9 +400,81 @@ const FALLBACK_STAGES = [
 ];
 const HERO_ARCHETYPES = {
   brawl: ["reinhardt", "junker-queen", "ramattra", "orisa", "mei", "reaper", "cassidy", "lucio", "moira", "brigitte", "baptiste"],
-  dive: ["winston", "dva", "wrecking-ball", "doomfist", "tracer", "genji", "sombra", "venture", "lucio", "ana", "kiriko", "juno"],
+  dive: ["winston", "dva", "wrecking-ball", "doomfist", "tracer", "genji", "sombra", "venture", "shion", "lucio", "ana", "kiriko", "juno"],
   poke: ["sigma", "ashe", "widowmaker", "hanzo", "soldier-76", "sojourn", "cassidy", "baptiste", "zenyatta", "illari", "ana"],
-  pick: ["dva", "widowmaker", "hanzo", "ashe", "sombra", "tracer", "mercy", "kiriko"],
+  pick: ["dva", "widowmaker", "hanzo", "ashe", "sombra", "tracer", "shion", "mercy", "kiriko"],
+};
+const HERO_COUNTERS = {
+  dva: [
+    ["zarya", "ビームでディフェンス・マトリックスを無視されやすい。"],
+    ["symmetra", "ビームとタレットで近距離の自由を奪われる。"],
+    ["mei", "ブースター後の逃げ道を壁とスローで止められる。"],
+  ],
+  doomfist: [
+    ["sombra", "ハックで機動力と防御のタイミングを崩される。"],
+    ["cassidy", "機動力を止められると一気に落とされやすい。"],
+    ["ana", "スリープと阻害で仕掛けのリスクが大きい。"],
+  ],
+  hazard: [
+    ["sombra", "飛び込みや壁展開の流れをハックで止められる。"],
+    ["ana", "自己耐久を阻害で崩されると前に残りにくい。"],
+    ["zarya", "近距離でビームを当て続けられると逃げにくい。"],
+  ],
+  "junker-queen": [
+    ["ana", "阻害で自己回復とランペイジ後の押し込みを止められる。"],
+    ["kiriko", "鈴でランペイジの価値を消されやすい。"],
+    ["pharah", "高所や空中から圧をかけられると届きにくい。"],
+  ],
+  mauga: [
+    ["ana", "阻害で回復と自己維持を止められる。"],
+    ["zenyatta", "不和で大きい体を削られやすい。"],
+    ["sigma", "射線管理と吸収で撃ち合いのテンポをずらされる。"],
+  ],
+  orisa: [
+    ["zarya", "ビームで防御を貫通され、近距離の圧を受けやすい。"],
+    ["zenyatta", "不和で硬さを崩される。"],
+    ["sojourn", "中距離から継続的に削られ、槍の届かない距離で戦われる。"],
+  ],
+  ramattra: [
+    ["ana", "ネメシス中の押し込みを阻害とスリープで止められる。"],
+    ["zenyatta", "不和で前に出る時間を短くされる。"],
+    ["bastion", "変形火力でブロック中も削られやすい。"],
+  ],
+  reinhardt: [
+    ["bastion", "盾と本体を高火力で削られる。"],
+    ["pharah", "空中から盾裏や後衛を狙われると触りにくい。"],
+    ["ramattra", "パンメルで盾越しに圧をかけられる。"],
+  ],
+  roadhog: [
+    ["ana", "阻害で自己回復を止められる。"],
+    ["zenyatta", "不和で大きい体を削られやすい。"],
+    ["reaper", "近距離で撃ち合われると体力差を活かしにくい。"],
+  ],
+  sigma: [
+    ["ramattra", "ネメシスで盾越しに圧をかけられる。"],
+    ["sombra", "ハックで吸収や岩のタイミングを崩される。"],
+    ["tracer", "裏から触られると正面の射線維持が難しい。"],
+  ],
+  winston: [
+    ["reaper", "近距離火力で飛び込みを咎められる。"],
+    ["bastion", "バリアを割られ、着地後に溶かされやすい。"],
+    ["dva", "飛び先を追われ、味方への圧を消されやすい。"],
+  ],
+  "wrecking-ball": [
+    ["sombra", "ハックで移動を止められると逃げにくい。"],
+    ["cassidy", "機動力を止められ、フォーカスを受けやすい。"],
+    ["ana", "スリープと阻害で戻りのテンポを崩される。"],
+  ],
+  zarya: [
+    ["reinhardt", "盾と近距離圧でエネルギー管理を難しくされる。"],
+    ["pharah", "高所や空中から射程外で削られる。"],
+    ["hanzo", "中距離からバリア後の本体を削られやすい。"],
+  ],
+  shion: [
+    ["cassidy", "近距離の動きを止められると離脱しづらい。"],
+    ["sombra", "ハックでEvadeやJoyrideのテンポを崩される。"],
+    ["winston", "奇襲先をバリアとジャンプで潰されやすい。"],
+  ],
 };
 const COMP_METADATA = {
   迷ったらこれ: {
@@ -655,11 +770,13 @@ async function loadRemoteData({ force }) {
 }
 
 async function fetchHeroes() {
+  let heroes;
   try {
-    return await fetchJson("/heroes", { locale: LOCALE });
+    heroes = await fetchJson("/heroes", { locale: LOCALE });
   } catch (error) {
-    return fetchJson("/heroes", { locale: FALLBACK_LOCALE });
+    heroes = await fetchJson("/heroes", { locale: FALLBACK_LOCALE });
   }
+  return mergeExtraHeroes(heroes);
 }
 
 async function fetchHeroDetail(heroKey) {
@@ -668,6 +785,16 @@ async function fetchHeroDetail(heroKey) {
   } catch (error) {
     return fetchJson(`/heroes/${encodeURIComponent(heroKey)}`, { locale: FALLBACK_LOCALE });
   }
+}
+
+function mergeExtraHeroes(heroes) {
+  const byKey = new Map(heroes.map((hero) => [hero.key, hero]));
+  EXTRA_HEROES.forEach((hero) => {
+    if (!byKey.has(hero.key)) {
+      byKey.set(hero.key, hero);
+    }
+  });
+  return [...byKey.values()];
 }
 
 function fetchHeroStats() {
@@ -696,7 +823,9 @@ async function loadHeroDetails(heroes) {
     }
 
     try {
-      const detail = await fetchHeroDetail(hero.key);
+      const detail = hero.localDetail && EXTRA_HERO_DETAILS[hero.key]
+        ? EXTRA_HERO_DETAILS[hero.key]
+        : await fetchHeroDetail(hero.key);
       state.heroDetails.set(hero.key, detail);
     } catch (error) {
       state.heroDetails.set(hero.key, { key: hero.key, error: error.message });
@@ -1446,10 +1575,13 @@ function renderHeroRow(hero) {
   const active = hero.key === state.selectedHeroKey ? " is-active" : "";
   const favorite = state.favoriteHeroKeys.has(hero.key) ? " is-favorite" : "";
   const favoriteMark = state.favoriteHeroKeys.has(hero.key) ? '<span class="favorite-mark">★</span>' : "";
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="hero-row-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
 
   return `
     <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}">
-      <img src="${safeUrl(hero.portrait)}" alt="">
+      ${portrait}
       <span>
         <strong>${favoriteMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
         <small>${escapeHtml(labelRole(hero.role))} · Pick ${pickRate} · Win ${winRate}</small>
@@ -1540,6 +1672,7 @@ function renderHeroDetail() {
       </section>
 
       <section>
+        ${renderCounterPanel(hero)}
         <div class="panel-title">
           <h3>Abilities</h3>
           <span class="chip">${abilities.length}</span>
@@ -1554,6 +1687,9 @@ function renderHeroDetail() {
   els.heroDetail.querySelector("[data-favorite-toggle]")?.addEventListener("click", () => {
     toggleFavorite(hero.key);
   });
+  els.heroDetail.querySelectorAll(".counter-card[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
 }
 
 function renderHeroVisual(hero, detail) {
@@ -1563,6 +1699,9 @@ function renderHeroVisual(hero, detail) {
   const hp = hitpoints.label ? `<span class="chip">${escapeHtml(hitpoints.label)}</span>` : "";
   const subrole = hero.subrole ? `<span class="chip">${escapeHtml(hero.subrole)}</span>` : "";
   const favorite = state.favoriteHeroKeys.has(hero.key);
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="${escapeAttr(hero.name)}">`
+    : `<span class="portrait-placeholder">${escapeHtml(hero.name)}</span>`;
 
   return `
     <section class="hero-visual" style="--hero-bg: url('${safeUrl(background)}')">
@@ -1583,7 +1722,7 @@ function renderHeroVisual(hero, detail) {
         <p>${escapeHtml(detail?.description || "データ取得中")}</p>
       </div>
       <div class="portrait-wrap">
-        <img src="${safeUrl(hero.portrait)}" alt="${escapeAttr(hero.name)}">
+        ${portrait}
       </div>
     </section>
   `;
@@ -1711,14 +1850,75 @@ function analyzePerk(perk, index, type, hero, stat) {
 }
 
 function renderAbilityCard(ability) {
+  const icon = ability.icon ? `<img src="${safeUrl(ability.icon)}" alt="">` : '<span class="ability-placeholder"></span>';
   return `
     <article class="ability-card">
-      <img src="${safeUrl(ability.icon)}" alt="">
+      ${icon}
       <div>
         <h4>${escapeHtml(ability.name || "Unknown")}</h4>
         <p>${escapeHtml(ability.description || "")}</p>
       </div>
     </article>
+  `;
+}
+
+function renderCounterPanel(hero) {
+  const counters = getHeroCounters(hero);
+  return `
+    <div class="counter-panel">
+      <div class="panel-title">
+        <h3>苦手な相手</h3>
+        <span class="chip">${hero.role === "tank" ? "Tank重視" : "目安"}</span>
+      </div>
+      <div class="counter-grid">
+        ${counters.map(renderCounterCard).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function getHeroCounters(hero) {
+  const direct = HERO_COUNTERS[hero.key];
+  if (direct) {
+    return direct.map(([key, reason]) => ({ key, reason }));
+  }
+
+  const fallback = {
+    damage: [
+      ["dva", "射線や高台への圧を消され、火力を通しにくい。"],
+      ["winston", "後衛や高台に直接触られると安全に撃ちにくい。"],
+      ["kiriko", "鈴と機動力でワンピックや状態異常を返されやすい。"],
+    ],
+    support: [
+      ["tracer", "横や裏から継続的に触られると回復の手が止まる。"],
+      ["sombra", "ハックと奇襲で自衛スキルのタイミングを崩される。"],
+      ["winston", "バリアで射線を切られ、味方から分断されやすい。"],
+    ],
+    tank: [
+      ["ana", "阻害とスリープで前に出る時間を止められる。"],
+      ["zenyatta", "不和で耐久を削られ、下がる判断を迫られる。"],
+      ["sombra", "重要な防御/移動スキルをハックで崩される。"],
+    ],
+  };
+  return fallback[hero.role] || fallback.damage;
+}
+
+function renderCounterCard(counter) {
+  const hero = state.heroes.find((item) => item.key === counter.key);
+  const name = hero?.name || heroName(counter.key);
+  const portrait = hero?.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="counter-placeholder">${escapeHtml(name.slice(0, 2))}</span>`;
+  const keyAttr = hero ? ` data-hero-key="${escapeAttr(hero.key)}"` : "";
+  const disabled = hero ? "" : " disabled";
+  return `
+    <button class="counter-card" type="button"${keyAttr}${disabled}>
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(counter.reason)}</small>
+      </span>
+    </button>
   `;
 }
 
@@ -1773,8 +1973,13 @@ function readCache() {
 }
 
 function hydrateFromCache(cached) {
-  state.heroes = cached.heroes || [];
+  state.heroes = mergeExtraHeroes(cached.heroes || []);
   state.heroDetails = new Map(cached.heroDetails || []);
+  Object.entries(EXTRA_HERO_DETAILS).forEach(([key, detail]) => {
+    if (state.heroes.find((hero) => hero.key === key)?.localDetail) {
+      state.heroDetails.set(key, detail);
+    }
+  });
   state.heroStats = new Map(cached.heroStats || []);
   state.maps = normalizeStages(cached.maps || FALLBACK_STAGES);
   state.selectedHeroKey = state.heroes[0]?.key || null;
