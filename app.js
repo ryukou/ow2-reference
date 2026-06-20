@@ -1597,7 +1597,7 @@ function renderHeroRow(hero) {
 }
 
 function getFilteredHeroes() {
-  return state.heroes.filter((hero) => {
+  return sortHeroesForList(state.heroes.filter((hero) => {
     if (state.favoriteOnly && !state.favoriteHeroKeys.has(hero.key)) {
       return false;
     }
@@ -1622,7 +1622,18 @@ function getFilteredHeroes() {
       ...perks.major.flatMap((perk) => [perk.name, perk.description]),
     ];
     return fields.filter(Boolean).join(" ").toLowerCase().includes(state.query);
-  });
+  }));
+}
+
+function sortHeroesForList(heroes) {
+  return heroes
+    .map((hero, index) => ({ hero, index }))
+    .sort((a, b) => {
+      const aFavorite = state.favoriteHeroKeys.has(a.hero.key) ? 1 : 0;
+      const bFavorite = state.favoriteHeroKeys.has(b.hero.key) ? 1 : 0;
+      return bFavorite - aFavorite || a.index - b.index;
+    })
+    .map((item) => item.hero);
 }
 
 function renderHeroDetail() {
