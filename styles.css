@@ -610,6 +610,54 @@ a {
   margin-bottom: 14px;
 }
 
+.tank-guide-panel {
+  display: grid;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.tank-map-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #10161d;
+  padding: 11px;
+}
+
+.tank-map-panel p {
+  margin: 0 0 10px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.tank-map-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.tank-map-chip {
+  display: grid;
+  gap: 2px;
+  min-width: min(160px, 100%);
+  border: 1px solid rgba(88, 215, 232, 0.24);
+  border-radius: 8px;
+  background: rgba(88, 215, 232, 0.07);
+  padding: 8px 9px;
+}
+
+.tank-map-chip strong,
+.tank-map-chip small {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.tank-map-chip small {
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
 .counter-card {
   display: grid;
   grid-template-columns: 46px minmax(0, 1fr);

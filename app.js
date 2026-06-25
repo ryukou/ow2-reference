@@ -477,6 +477,138 @@ const HERO_COUNTERS = {
     ["winston", "奇襲先をバリアとジャンプで潰されやすい。"],
   ],
 };
+const TANK_GUIDES = {
+  dva: {
+    allies: [
+      ["tracer", "同じ高台や後衛に触れて、D.Vaの圧をキルにつなげやすい。"],
+      ["genji", "ブースターで一緒に入ると、逃げる相手を追い切りやすい。"],
+      ["ana", "遠距離から回復と阻害を入れられ、D.Vaが高台で長く動ける。"],
+    ],
+    styles: ["高台", "広い移動"],
+    maps: ["Watchpoint: Gibraltar", "Dorado", "Numbani"],
+    note: "高台を取り返す、射線を消す、味方DPSの仕掛けを守る動きが強い。",
+  },
+  doomfist: {
+    allies: [
+      ["tracer", "同じ孤立相手に圧を重ねやすく、ワンピックを作りやすい。"],
+      ["sombra", "ハック後にドゥームフィストが入り、逃げスキルを使わせず倒しやすい。"],
+      ["kiriko", "鈴と瞬間移動で深い仕掛けの事故を戻しやすい。"],
+    ],
+    styles: ["広い移動", "高台"],
+    maps: ["New Junk City", "Suravasa", "Numbani"],
+    note: "遮蔽物を使って短く出入りできる広いマップで強い。",
+  },
+  hazard: {
+    allies: [
+      ["mei", "壁や足止めと合わせると、近距離で相手を逃がしにくい。"],
+      ["reaper", "狭い場所で一緒に前へ出ると、タンクへの圧が高い。"],
+      ["lucio", "入る速度と引く速度を補い、近距離戦を作りやすい。"],
+    ],
+    styles: ["狭所乱戦", "広い移動"],
+    maps: ["King's Row", "Lijiang Tower", "New Junk City"],
+    note: "角や狭所で相手を閉じ込め、短い距離で勝負する形が扱いやすい。",
+  },
+  "junker-queen": {
+    allies: [
+      ["lucio", "スピードで距離を詰め、斧とナイフの射程に入りやすい。"],
+      ["sojourn", "前線で削った相手を中距離から回収しやすい。"],
+      ["kiriko", "ランペイジ後の事故や阻害返しを鈴で支えられる。"],
+    ],
+    styles: ["狭所乱戦", "広い移動"],
+    maps: ["Colosseo", "Esperanca", "Lijiang Tower"],
+    note: "当たり直しが多いPushや、短い距離で殴り合うControlでテンポを作りやすい。",
+  },
+  mauga: {
+    allies: [
+      ["baptiste", "イモータリティと範囲回復で、撃ち合い時間を伸ばせる。"],
+      ["kiriko", "阻害を鈴で返せると、マウガの継戦力を活かしやすい。"],
+      ["bastion", "正面火力を重ねて、相手タンクを早く下げられる。"],
+    ],
+    styles: ["狭所乱戦", "長射線"],
+    maps: ["King's Row", "Midtown", "Rialto"],
+    note: "正面の射線が通り、味方サポートが見やすい場所で強い。",
+  },
+  orisa: {
+    allies: [
+      ["baptiste", "正面維持と相性がよく、イモータリティで押し切りやすい。"],
+      ["sojourn", "オリーサが前線を止めている間に中距離火力を出しやすい。"],
+      ["kiriko", "鈴で阻害やCCを返し、硬さをさらに伸ばせる。"],
+    ],
+    styles: ["狭所乱戦", "長射線"],
+    maps: ["King's Row", "Midtown", "Shambali Monastery"],
+    note: "正面を止める、角を守る、相手の突入を受けるマップで安定しやすい。",
+  },
+  ramattra: {
+    allies: [
+      ["lucio", "ネメシスフォーム中に距離を詰めやすく、押し引きが明確になる。"],
+      ["mei", "壁で分断した相手をパンメルで落としやすい。"],
+      ["baptiste", "固まった構成での範囲回復と火力補助が噛み合う。"],
+    ],
+    styles: ["狭所乱戦", "長射線"],
+    maps: ["King's Row", "Eichenwalde", "Shambali Monastery"],
+    note: "盾で射線を切り、ネメシスで角を押す展開が作れるマップ向き。",
+  },
+  reinhardt: {
+    allies: [
+      ["lucio", "必須級。スピードで接近し、盾を割られる前に近距離戦を作る。"],
+      ["mei", "壁で分断して、ラインハルトのハンマー範囲に閉じ込めやすい。"],
+      ["baptiste", "固まった味方を範囲回復し、イモータリティで押し込みを支える。"],
+    ],
+    styles: ["狭所乱戦"],
+    maps: ["King's Row", "Lijiang Tower", "Eichenwalde"],
+    note: "短い角、狭い門、曲がり角が多いマップで距離を詰めやすい。",
+  },
+  roadhog: {
+    allies: [
+      ["kiriko", "阻害を鈴で返せると、自己回復を通しやすい。"],
+      ["mei", "フック後に壁で逃げ道を塞ぎ、確定キルを作りやすい。"],
+      ["hanzo", "フックや壁裏への圧に合わせて、単発キルを狙いやすい。"],
+    ],
+    styles: ["狭所乱戦", "長射線"],
+    maps: ["Ilios", "Junkertown", "Rialto"],
+    note: "落下や角待ち、フック後に逃げられにくい通路があるマップで価値が上がる。",
+  },
+  sigma: {
+    allies: [
+      ["ashe", "長い射線で一緒に削り、相手が入る前にリソースを使わせる。"],
+      ["baptiste", "高台と射線維持を支えながら、火力も重ねやすい。"],
+      ["zenyatta", "不和とシグマの中距離圧で、相手タンクを下げやすい。"],
+    ],
+    styles: ["長射線", "高台"],
+    maps: ["Circuit Royal", "Havana", "Shambali Monastery"],
+    note: "長い射線、角、少しずつ下がれるルートがあるマップで強い。",
+  },
+  winston: {
+    allies: [
+      ["tracer", "飛び先に一緒に圧をかけ、後衛を倒し切りやすい。"],
+      ["genji", "高台やバックラインへ同時に入り、フォーカスを合わせやすい。"],
+      ["ana", "遠距離回復とナノで、深いジャンプの価値を上げられる。"],
+    ],
+    styles: ["高台", "広い移動"],
+    maps: ["Watchpoint: Gibraltar", "Numbani", "Dorado"],
+    note: "高台にいる相手を下ろす、孤立した後衛へ触るマップで強い。",
+  },
+  "wrecking-ball": {
+    allies: [
+      ["sombra", "ハックした相手にボールが触ると、逃げスキルを使わせず倒しやすい。"],
+      ["tracer", "ボールが荒らした相手を追い切りやすい。"],
+      ["zenyatta", "不和でボールの短い接触をキル圧に変えやすい。"],
+    ],
+    styles: ["広い移動", "高台"],
+    maps: ["New Junk City", "Suravasa", "Watchpoint: Gibraltar"],
+    note: "広く回れるルート、ヘルスパック、裏取り導線が多いマップで動きやすい。",
+  },
+  zarya: {
+    allies: [
+      ["reaper", "バリアを付けて近距離で強引に前へ出しやすい。"],
+      ["genji", "ブレードや深い仕掛けにバリアを合わせると事故を減らせる。"],
+      ["baptiste", "正面の撃ち合いを支え、ザリアが高エネルギーを維持しやすい。"],
+    ],
+    styles: ["狭所乱戦"],
+    maps: ["King's Row", "Lijiang Tower", "Nepal"],
+    note: "味方にバリアを合わせやすく、短い距離で高エネルギーを活かせる場所向き。",
+  },
+};
 const COMP_METADATA = {
   迷ったらこれ: {
     category: "style",
@@ -1689,6 +1821,7 @@ function renderHeroDetail() {
 
       <section>
         ${renderCounterPanel(hero)}
+        ${renderTankGuidePanel(hero)}
         <div class="panel-title">
           <h3>Abilities</h3>
           <span class="chip">${abilities.length}</span>
@@ -1890,6 +2023,47 @@ function renderCounterPanel(hero) {
         ${counters.map(renderCounterCard).join("")}
       </div>
     </div>
+  `;
+}
+
+function renderTankGuidePanel(hero) {
+  const guide = TANK_GUIDES[hero.key];
+  if (hero.role !== "tank" || !guide) {
+    return "";
+  }
+
+  return `
+    <div class="tank-guide-panel">
+      <div class="panel-title">
+        <h3>相性がいい味方</h3>
+        <span class="chip">Tank pair</span>
+      </div>
+      <div class="counter-grid">
+        ${guide.allies.map(([key, reason]) => renderCounterCard({ key, reason })).join("")}
+      </div>
+
+      <div class="tank-map-panel">
+        <div class="panel-title">
+          <h3>向いているマップ</h3>
+          <span class="chip">${escapeHtml(guide.styles.join(" / "))}</span>
+        </div>
+        <p>${escapeHtml(guide.note)}</p>
+        <div class="tank-map-list">
+          ${guide.maps.map(renderTankMapChip).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function renderTankMapChip(mapName) {
+  const stage = state.maps.find((item) => item.name === mapName) || FALLBACK_STAGES.find((item) => item.name === mapName);
+  const meta = stage ? `${stage.rule} · ${stage.style}` : "Map";
+  return `
+    <span class="tank-map-chip">
+      <strong>${escapeHtml(mapName)}</strong>
+      <small>${escapeHtml(meta)}</small>
+    </span>
   `;
 }
 
