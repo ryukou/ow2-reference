@@ -723,6 +723,7 @@ const state = {
   favoriteOnly: false,
   favoriteHeroKeys: new Set(),
   compFilters: {
+    stageInitial: "all",
     stage: "all",
   },
   sensitivity: {
@@ -764,6 +765,7 @@ function cacheElements() {
   els.metaStats = document.querySelector("#metaStats");
   els.updateGrid = document.querySelector("#updateGrid");
   els.compGrid = document.querySelector("#compGrid");
+  els.compInitialFilter = document.querySelector("#compInitialFilter");
   els.compStageFilter = document.querySelector("#compStageFilter");
   els.diagTank = document.querySelector("#diagTank");
   els.diagDamage1 = document.querySelector("#diagDamage1");
@@ -797,6 +799,15 @@ function bindEvents() {
     state.favoriteOnly = !state.favoriteOnly;
     els.favoriteFilterButton.classList.toggle("is-active", state.favoriteOnly);
     renderHeroList();
+  });
+
+  els.compInitialFilter.addEventListener("change", () => {
+    state.compFilters.stageInitial = els.compInitialFilter.value;
+    const selectedStage = getSelectedStage();
+    if (selectedStage && !stageMatchesInitial(selectedStage, state.compFilters.stageInitial)) {
+      state.compFilters.stage = "all";
+    }
+    renderComps();
   });
 
   els.compStageFilter.addEventListener("change", () => {
@@ -1410,17 +1421,45 @@ function buildAllComps() {
 
 function renderCompFilterOptions() {
   const selected = { ...state.compFilters };
+  const visibleStages = getVisibleCompStages();
+  setSelectOptions(
+    els.compInitialFilter,
+    [
+      { value: "all", label: "すべて" },
+      ...getStageInitialOptions().map((initial) => ({
+        value: initial,
+        label: initial,
+      })),
+    ],
+    selected.stageInitial,
+  );
   setSelectOptions(
     els.compStageFilter,
     [
       { value: "all", label: "ステージを選択" },
-      ...state.maps.map((stage) => ({
+      ...visibleStages.map((stage) => ({
         value: stage.key,
         label: stage.name,
       })),
     ],
     selected.stage,
   );
+}
+
+function getVisibleCompStages() {
+  return state.maps.filter((stage) => stageMatchesInitial(stage, state.compFilters.stageInitial));
+}
+
+function getStageInitialOptions() {
+  return [...new Set(state.maps.map(stageInitial).filter(Boolean))].sort((a, b) => a.localeCompare(b, "en"));
+}
+
+function stageMatchesInitial(stage, initial) {
+  return !initial || initial === "all" || stageInitial(stage) === initial;
+}
+
+function stageInitial(stage) {
+  return stringValue(stage.name).trim().charAt(0).toUpperCase();
 }
 
 function renderCompDiagnosisControls() {
@@ -2319,7 +2358,9 @@ function setSelectOptions(select, options, selectedValue) {
   const values = new Set(options.map((option) => option.value));
   const nextValue = values.has(selectedValue) ? selectedValue : "all";
   if (nextValue !== selectedValue) {
-    if (select === els.compStageFilter) {
+    if (select === els.compInitialFilter) {
+      state.compFilters.stageInitial = nextValue;
+    } else if (select === els.compStageFilter) {
       state.compFilters.stage = nextValue;
     }
   }
