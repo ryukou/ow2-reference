@@ -786,7 +786,7 @@ a {
 
 .comp-filters {
   display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
+  grid-template-columns: minmax(260px, 520px);
   gap: 8px;
   margin-bottom: 10px;
 }

@@ -723,11 +723,7 @@ const state = {
   favoriteOnly: false,
   favoriteHeroKeys: new Set(),
   compFilters: {
-    category: "all",
-    rule: "all",
-    map: "all",
     stage: "all",
-    hero: "all",
   },
   sensitivity: {
     hero: "all",
@@ -768,11 +764,7 @@ function cacheElements() {
   els.metaStats = document.querySelector("#metaStats");
   els.updateGrid = document.querySelector("#updateGrid");
   els.compGrid = document.querySelector("#compGrid");
-  els.compCategoryFilter = document.querySelector("#compCategoryFilter");
-  els.compRuleFilter = document.querySelector("#compRuleFilter");
-  els.compMapFilter = document.querySelector("#compMapFilter");
   els.compStageFilter = document.querySelector("#compStageFilter");
-  els.compHeroFilter = document.querySelector("#compHeroFilter");
   els.diagTank = document.querySelector("#diagTank");
   els.diagDamage1 = document.querySelector("#diagDamage1");
   els.diagDamage2 = document.querySelector("#diagDamage2");
@@ -807,17 +799,9 @@ function bindEvents() {
     renderHeroList();
   });
 
-  [
-    [els.compCategoryFilter, "category"],
-    [els.compRuleFilter, "rule"],
-    [els.compMapFilter, "map"],
-    [els.compStageFilter, "stage"],
-    [els.compHeroFilter, "hero"],
-  ].forEach(([select, key]) => {
-    select.addEventListener("change", () => {
-      state.compFilters[key] = select.value;
-      renderComps();
-    });
+  els.compStageFilter.addEventListener("change", () => {
+    state.compFilters.stage = els.compStageFilter.value;
+    renderComps();
   });
 
   [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
@@ -1274,35 +1258,145 @@ function renderUpdateCard(update) {
 }
 
 function renderComps() {
-  const comps = buildAllComps();
-  renderCompFilterOptions(comps);
-
-  const filtered = comps.filter((comp) => {
-    const filters = state.compFilters;
-    const stage = getSelectedStage();
-    const categoryMatches = filters.category === "all" || comp.category === filters.category;
-    const ruleMatches = filters.rule === "all" || comp.rules.includes(filters.rule);
-    const mapMatches = filters.map === "all" || comp.maps.includes(filters.map);
-    const stageMatches =
-      !stage ||
-      comp.rules.includes(stage.rule) ||
-      comp.maps.includes(stage.style) ||
-      comp.stageNames.includes(stage.name);
-    const heroMatches =
-      filters.hero === "all" ||
-      comp.members.some((member) => (member.hero?.key || member.key) === filters.hero);
-    return categoryMatches && ruleMatches && mapMatches && stageMatches && heroMatches;
-  });
-
-  if (!filtered.length) {
-    els.compGrid.innerHTML = renderEmpty("条件に合う構成例がありません。フィルタをゆるめてください。");
+  renderCompFilterOptions();
+  const stage = getSelectedStage();
+  if (!stage) {
+    els.compGrid.innerHTML = renderEmpty("ステージ名を選ぶと、そのマップ向けの構成例を表示します。");
     return;
   }
 
-  els.compGrid.innerHTML = filtered.map(renderCompCard).join("");
+  const comps = buildStageComps(stage);
+  els.compGrid.innerHTML = comps.map(renderCompCard).join("");
   els.compGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
+}
+
+function buildStageComps(stage) {
+  const sides = stageHasAttackDefense(stage) ? ["attack", "defense"] : ["common"];
+  return sides.map((side) => buildStageComp(stage, side));
+}
+
+function stageHasAttackDefense(stage) {
+  return ["Escort", "Hybrid"].includes(stage.rule);
+}
+
+function buildStageComp(stage, side) {
+  const sideLabel = labelStageSide(side);
+  const members = pickStageMembers(stage, side);
+  return {
+    title: `${stage.name} ${sideLabel}`,
+    note: buildStageCompNote(stage, side),
+    tag: side === "attack" ? "Attack" : side === "defense" ? "Defense" : "Map",
+    category: "map",
+    categoryLabel: "ステージ別",
+    rules: [stage.rule],
+    maps: [stage.style],
+    stageNames: [stage.name],
+    reasons: buildStageReasons(stage, side),
+    members: members.map((member) => ({
+      ...member,
+      hero: findHeroByKey(member.key),
+      fallback: heroName(member.key),
+      source: "stage",
+    })),
+  };
+}
+
+function pickStageMembers(stage, side) {
+  if (side === "common") {
+    if (stage.rule === "Control") {
+      return stage.style === "狭所乱戦"
+        ? buildStageMemberSet(["ramattra", "mei", "sojourn", "lucio", "kiriko"])
+        : buildStageMemberSet(["dva", "tracer", "sojourn", "lucio", "kiriko"]);
+    }
+    if (stage.rule === "Push") {
+      return buildStageMemberSet(["junker-queen", "tracer", "sojourn", "lucio", "juno"]);
+    }
+    if (stage.rule === "Flashpoint") {
+      return buildStageMemberSet(["dva", "tracer", "venture", "lucio", "kiriko"]);
+    }
+    if (stage.rule === "Clash") {
+      return buildStageMemberSet(["orisa", "mei", "cassidy", "baptiste", "kiriko"]);
+    }
+  }
+
+  if (stage.style === "長射線") {
+    return side === "defense"
+      ? buildStageMemberSet(["sigma", "widowmaker", "ashe", "baptiste", "zenyatta"])
+      : buildStageMemberSet(["sigma", "ashe", "sojourn", "baptiste", "kiriko"]);
+  }
+  if (stage.style === "高台") {
+    return side === "defense"
+      ? buildStageMemberSet(["dva", "ashe", "sojourn", "baptiste", "kiriko"])
+      : buildStageMemberSet(["winston", "tracer", "genji", "ana", "juno"]);
+  }
+  if (stage.style === "広い移動") {
+    return buildStageMemberSet(["dva", "tracer", "sombra", "lucio", "kiriko"]);
+  }
+  return side === "defense"
+    ? buildStageMemberSet(["orisa", "mei", "cassidy", "baptiste", "kiriko"])
+    : buildStageMemberSet(["reinhardt", "mei", "reaper", "lucio", "baptiste"]);
+}
+
+function buildStageMemberSet(keys) {
+  return keys.map((key) => ({
+    key,
+    role: stageMemberRole(key),
+  }));
+}
+
+function stageMemberRole(key) {
+  const hero = findHeroByKey(key);
+  if (hero?.role) {
+    return hero.role;
+  }
+  if (["ana", "baptiste", "juno", "kiriko", "lucio", "zenyatta"].includes(key)) {
+    return "support";
+  }
+  if (["dva", "junker-queen", "orisa", "ramattra", "reinhardt", "sigma", "winston"].includes(key)) {
+    return "tank";
+  }
+  return "damage";
+}
+
+function buildStageCompNote(stage, side) {
+  if (side === "attack") {
+    return `${stage.rule}の攻撃側。${stage.style}で最初に有利位置を取りに行く構成。`;
+  }
+  if (side === "defense") {
+    return `${stage.rule}の防衛側。先に持てる強い位置を守り、相手の入りを止める構成。`;
+  }
+  return `${stage.rule}は攻撃/防衛が固定されないため、${stage.style}に合わせた共通構成。`;
+}
+
+function buildStageReasons(stage, side) {
+  if (side === "attack") {
+    return [
+      "攻撃側は最初にエリアを取り返す必要があるため、タンクが入口を作り、DPSが高台や角を動かす形にしています。",
+      `${stage.style}の強みを相手に使わせ続けないよう、サポートは前線維持と離脱のしやすさを優先しています。`,
+    ];
+  }
+  if (side === "defense") {
+    return [
+      "防衛側は先に強い射線や高台を持てるため、相手の進入ルートを絞って人数差を作る狙いです。",
+      "押し切られそうな時も一度引いて立て直せるよう、耐久と自衛のあるサポートを合わせています。",
+    ];
+  }
+  return [
+    "このルールは攻防が固定されないため、初動、再集合、次の当たり合いへの移動を重視しています。",
+    `${stage.style}に合わせて、迷った時でも役割が分かりやすいタンク、DPS、サポートの形にしています。`,
+  ];
+}
+
+function labelStageSide(side) {
+  if (side === "attack") return "攻撃";
+  if (side === "defense") return "防衛";
+  return "共通";
+}
+
+function findHeroByKey(key) {
+  return state.heroes.find((hero) => hero.key === key || hero.name === key) || null;
 }
 
 function buildAllComps() {
@@ -1314,49 +1408,18 @@ function buildAllComps() {
   ];
 }
 
-function renderCompFilterOptions(comps) {
+function renderCompFilterOptions() {
   const selected = { ...state.compFilters };
-  setSelectOptions(
-    els.compRuleFilter,
-    [{ value: "all", label: "すべて" }, ...COMP_RULE_OPTIONS.map((rule) => ({ value: rule, label: rule }))],
-    selected.rule,
-  );
-  setSelectOptions(
-    els.compMapFilter,
-    [{ value: "all", label: "すべて" }, ...COMP_MAP_OPTIONS.map((map) => ({ value: map, label: map }))],
-    selected.map,
-  );
   setSelectOptions(
     els.compStageFilter,
     [
-      { value: "all", label: "すべて" },
+      { value: "all", label: "ステージを選択" },
       ...state.maps.map((stage) => ({
         value: stage.key,
-        label: `${stage.name} / ${stage.rule}`,
+        label: stage.name,
       })),
     ],
     selected.stage,
-  );
-
-  const heroOptions = new Map();
-  comps.forEach((comp) => {
-    comp.members.forEach((member) => {
-      const key = member.hero?.key || member.key;
-      const name = member.hero?.name || member.fallback || member.key;
-      if (key && name) {
-        heroOptions.set(key, name);
-      }
-    });
-  });
-  setSelectOptions(
-    els.compHeroFilter,
-    [
-      { value: "all", label: "すべて" },
-      ...[...heroOptions.entries()]
-        .sort((a, b) => a[1].localeCompare(b[1], "ja"))
-        .map(([value, label]) => ({ value, label })),
-    ],
-    selected.hero,
   );
 }
 
@@ -2250,17 +2313,14 @@ function updateTopbarVisibility() {
 }
 
 function setSelectOptions(select, options, selectedValue) {
+  if (!select) {
+    return;
+  }
   const values = new Set(options.map((option) => option.value));
   const nextValue = values.has(selectedValue) ? selectedValue : "all";
   if (nextValue !== selectedValue) {
-    if (select === els.compRuleFilter) {
-      state.compFilters.rule = nextValue;
-    } else if (select === els.compMapFilter) {
-      state.compFilters.map = nextValue;
-    } else if (select === els.compStageFilter) {
+    if (select === els.compStageFilter) {
       state.compFilters.stage = nextValue;
-    } else if (select === els.compHeroFilter) {
-      state.compFilters.hero = nextValue;
     }
   }
 
