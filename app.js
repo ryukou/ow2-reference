@@ -91,15 +91,70 @@ const EXTRA_HERO_DETAILS = {
     ],
     perks: {
       minor: [
-        { name: "Refuel", description: "機動力を維持しやすく、離脱や再エンゲージを助ける。" },
-        { name: "X Machina", description: "Executionの火力や扱いやすさを伸ばす攻撃寄り候補。" },
+        { name: "ラピッド・リロード", description: "Evade後の弾切れを減らし、近距離で撃ち続けやすくする。" },
+        { name: "X・マキーナ", description: "Executionで体力が減った敵を倒し切りやすくする火力寄り候補。" },
       ],
       major: [
-        { name: "Faces of Death", description: "キル圧を高める強力な攻撃寄り候補。" },
-        { name: "Road Rash", description: "Joyride周りの圧力を伸ばし、奇襲性能を高める。" },
+        { name: "リフュエル", description: "Joyride中の回復で、仕掛けた後の生存と離脱を安定させる。" },
+        { name: "フェイシズ・オブ・デス", description: "ダメージ系サブロールの強みをまとめて得る、汎用火力寄り候補。" },
       ],
     },
   },
+};
+const OWPERKS_SOURCE_URL = "https://owperks.com/ja";
+const OWPERKS_USAGE = {
+  "ana": { minor: [18, 82], major: [31, 69] },
+  "anran": { minor: [72, 28], major: [28, 72] },
+  "ashe": { minor: [87, 13], major: [79, 21] },
+  "baptiste": { minor: [48, 52], major: [76, 24] },
+  "bastion": { minor: [34, 66], major: [27, 73] },
+  "brigitte": { minor: [19, 81], major: [86, 14] },
+  "cassidy": { minor: [94, 6], major: [7, 93] },
+  "domina": { minor: [35, 65], major: [27, 73] },
+  "doomfist": { minor: [38, 62], major: [8, 92] },
+  "dva": { minor: [17, 83], major: [74, 26] },
+  "echo": { minor: [23, 77], major: [95, 5] },
+  "emre": { minor: [24, 76], major: [76, 24] },
+  "freja": { minor: [57, 43], major: [70, 30] },
+  "genji": { minor: [28, 72], major: [59, 41] },
+  "hanzo": { minor: [65, 35], major: [67, 33] },
+  "hazard": { minor: [13, 87], major: [83, 17] },
+  "illari": { minor: [30, 70], major: [12, 88] },
+  "jetpack_cat": { minor: [93, 7], major: [5, 95] },
+  "junker-queen": { minor: [79, 21], major: [27, 73] },
+  "junkrat": { minor: [65, 35], major: [14, 86] },
+  "juno": { minor: [23, 77], major: [61, 39] },
+  "kiriko": { minor: [26, 74], major: [13, 87] },
+  "lifeweaver": { minor: [22, 78], major: [23, 77] },
+  "lucio": { minor: [54, 46], major: [79, 21] },
+  "mauga": { minor: [19, 81], major: [72, 28] },
+  "mei": { minor: [27, 73], major: [72, 28] },
+  "mercy": { minor: [46, 54], major: [60, 40] },
+  "mizuki": { minor: [38, 62], major: [77, 23] },
+  "moira": { minor: [18, 82], major: [24, 76] },
+  "orisa": { minor: [17, 83], major: [63, 37] },
+  "pharah": { minor: [75, 25], major: [14, 86] },
+  "ramattra": { minor: [19, 81], major: [73, 27] },
+  "reaper": { minor: [22, 78], major: [36, 64] },
+  "reinhardt": { minor: [24, 76], major: [45, 55] },
+  "roadhog": { minor: [73, 27], major: [73, 27] },
+  "shion": { minor: [12, 88], major: [39, 61] },
+  "sierra": { minor: [21, 79], major: [9, 91] },
+  "sigma": { minor: [23, 77], major: [57, 43] },
+  "sojourn": { minor: [51, 49], major: [23, 77] },
+  "soldier-76": { minor: [76, 24], major: [21, 79] },
+  "sombra": { minor: [24, 76], major: [23, 77] },
+  "symmetra": { minor: [20, 80], major: [21, 79] },
+  "torbjorn": { minor: [36, 64], major: [82, 18] },
+  "tracer": { minor: [8, 92], major: [44, 56] },
+  "vendetta": { minor: [31, 69], major: [86, 14] },
+  "venture": { minor: [26, 74], major: [82, 18] },
+  "widowmaker": { minor: [78, 22], major: [9, 91] },
+  "winston": { minor: [83, 17], major: [24, 76] },
+  "wrecking-ball": { minor: [33, 67], major: [26, 74] },
+  "wuyang": { minor: [22, 78], major: [28, 72] },
+  "zarya": { minor: [18, 82], major: [82, 18] },
+  "zenyatta": { minor: [62, 38], major: [36, 64] },
 };
 const COMPOSITION_EXAMPLES = [
   {
@@ -1915,7 +1970,7 @@ function renderHeroDetail() {
       <section>
         <div class="panel-title">
           <h3>Perks</h3>
-          <span class="chip">実測使用率は公開データなし</span>
+          <a class="chip" href="${safeUrl(OWPERKS_SOURCE_URL)}" target="_blank" rel="noreferrer">owperks使用率参考</a>
         </div>
         ${renderPerkGroup("Minor Perk", perks.minor, "minor", hero, stat)}
         ${renderPerkGroup("Major Perk", perks.major, "major", hero, stat)}
@@ -1990,21 +2045,25 @@ function renderMetric(label, value) {
 
 function renderPerkGroup(label, perks, type, hero, stat) {
   const entries = perks
-    .map((perk, index) => ({ perk, index, analysis: analyzePerk(perk, index, type, hero, stat) }))
+    .map((perk, index) => {
+      const usage = getOwPerksUsage(hero, type, index);
+      return { perk, index, usage, analysis: analyzePerk(perk, index, type, hero, stat, usage) };
+    })
     .sort((a, b) => b.analysis.score - a.analysis.score || a.index - b.index);
   const recommendedOriginalIndex = entries[0]?.index ?? -1;
   return `
     <div class="perk-group">
       <span class="perk-type">${escapeHtml(label)}</span>
       <div class="perk-grid">
-        ${entries.length ? entries.map((entry) => renderPerkCard(entry.perk, entry.analysis, entry.index === recommendedOriginalIndex)).join("") : renderEmpty("パークを取得できませんでした。")}
+        ${entries.length ? entries.map((entry) => renderPerkCard(entry.perk, entry.analysis, entry.index === recommendedOriginalIndex, entry.usage)).join("") : renderEmpty("パークを取得できませんでした。")}
       </div>
     </div>
   `;
 }
 
-function renderPerkCard(perk, analysis, recommended) {
+function renderPerkCard(perk, analysis, recommended, usage) {
   const icon = perk.icon ? `<img src="${safeUrl(perk.icon)}" alt="">` : '<span></span>';
+  const usageBadge = Number.isFinite(usage) ? `<span class="popular-perk">${escapeHtml(formatOwPerksUsage(usage))}</span>` : "";
   const recommendedBadge = recommended ? '<span class="popular-perk">★ よく使う候補</span>' : "";
   return `
     <article class="perk-card${recommended ? " is-recommended" : ""}">
@@ -2012,6 +2071,7 @@ function renderPerkCard(perk, analysis, recommended) {
       <div>
         <div class="perk-card-head">
           <h4>${escapeHtml(perk.name || "Unknown")}</h4>
+          ${usageBadge}
           ${recommendedBadge}
         </div>
         <p>${escapeHtml(perk.description || "")}</p>
@@ -2025,13 +2085,66 @@ function renderPerkCard(perk, analysis, recommended) {
   `;
 }
 
-function analyzePerk(perk, index, type, hero, stat) {
+function getOwPerksUsage(hero, type, index) {
+  const usage = OWPERKS_USAGE[owperksHeroKey(hero)];
+  const values = usage?.[type];
+  if (!Array.isArray(values)) {
+    return NaN;
+  }
+  return Number(values[index]);
+}
+
+function owperksHeroKey(hero) {
+  const key = hero?.key || "";
+  const aliases = {
+    "d-va": "dva",
+    "junkerqueen": "junker-queen",
+    "soldier76": "soldier-76",
+    "wreckingball": "wrecking-ball",
+    "wrecking_ball": "wrecking-ball",
+    "torbjorn": "torbjorn",
+    "tobjorn": "torbjorn",
+  };
+  const normalized = key.toLowerCase().replace(/[^a-z0-9-]/g, "");
+  return aliases[normalized] || normalized;
+}
+
+function formatOwPerksUsage(value) {
+  if (value >= 70) {
+    return `使用率 高 ${value}%`;
+  }
+  if (value >= 55) {
+    return `使用率 中 ${value}%`;
+  }
+  return `使用率 ${value}%`;
+}
+
+function analyzePerk(perk, index, type, hero, stat, usage) {
   const text = `${perk.name || ""} ${perk.description || ""}`.toLowerCase();
   const pick = numberFromStat(stat, ["pickrate", "pick_rate"]);
   const win = numberFromStat(stat, ["winrate", "win_rate"]);
   const isPopularHero = Number.isFinite(pick) && pick >= 10;
   const isWinningHero = Number.isFinite(win) && win >= 50;
   const isMajor = type === "major";
+
+  if (Number.isFinite(usage) && usage >= 70) {
+    return {
+      levelKey: "high",
+      level: "採用目安 高",
+      score: 5 + usage / 100,
+      situation: "迷った時・まず試す候補",
+      reason: `owperksのコミュニティ投票で${usage}%と高め。まずこのパークから試して、相手構成で変える。`,
+    };
+  }
+  if (Number.isFinite(usage) && usage >= 55) {
+    return {
+      levelKey: "medium",
+      level: "採用目安 中",
+      score: 4 + usage / 100,
+      situation: "標準候補・構成に合わせる",
+      reason: `owperksのコミュニティ投票で${usage}%。標準寄りだが、マップや相手で入れ替える余地がある。`,
+    };
+  }
 
   const rules = [
     {
