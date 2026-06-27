@@ -241,6 +241,7 @@ a {
 }
 
 .workspace,
+.mindset-section,
 .comps-section,
 .sensitivity-section,
 .updates-section {
@@ -282,6 +283,73 @@ a {
 .search-field input {
   width: 100%;
   padding: 0 14px;
+}
+
+.mindset-layout {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.mindset-card,
+.mindset-checklist > div {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.mindset-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  min-height: 170px;
+  padding: 13px;
+}
+
+.mindset-card.is-primary {
+  border-color: rgba(243, 161, 58, 0.44);
+  background: linear-gradient(180deg, rgba(243, 161, 58, 0.14), var(--panel));
+}
+
+.mindset-index {
+  color: var(--orange);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.mindset-card h3,
+.mindset-checklist h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.mindset-card p,
+.mindset-checklist li {
+  color: var(--muted);
+  line-height: 1.52;
+}
+
+.mindset-card p {
+  margin: 0;
+  font-size: 0.92rem;
+}
+
+.mindset-checklist {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.mindset-checklist > div {
+  padding: 13px;
+}
+
+.mindset-checklist ul {
+  display: grid;
+  gap: 7px;
+  margin: 10px 0 0;
+  padding-left: 18px;
 }
 
 .search-field input:focus {
@@ -1277,10 +1345,12 @@ a {
 
 @media (max-width: 1100px) {
   .quick-board,
+  .mindset-layout,
   .hero-layout,
   .content-grid,
   .update-grid,
   .comp-grid,
+  .mindset-checklist,
   .diagnosis-grid,
   .sensitivity-tool,
   .sens-advice {
