@@ -162,6 +162,12 @@ a {
   border-color: rgba(56, 201, 222, 0.7);
 }
 
+.top-actions a.is-active {
+  border-color: rgba(88, 215, 232, 0.46);
+  background: rgba(88, 215, 232, 0.12);
+  color: var(--cyan);
+}
+
 .top-actions button {
   color: #111319;
   border-color: rgba(88, 215, 232, 0.8);
@@ -246,6 +252,41 @@ a {
 .sensitivity-section,
 .updates-section {
   padding: 10px 0 26px;
+}
+
+.view-switcher {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin: 0 0 14px;
+}
+
+.view-switcher button {
+  display: grid;
+  gap: 5px;
+  min-height: 72px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--text);
+  padding: 12px;
+  text-align: left;
+}
+
+.view-switcher button.is-active {
+  border-color: rgba(88, 215, 232, 0.5);
+  background: linear-gradient(180deg, rgba(88, 215, 232, 0.16), var(--panel));
+  box-shadow: inset 0 0 0 1px rgba(88, 215, 232, 0.1);
+}
+
+.view-switcher span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+
+.view-switcher strong {
+  font-size: 0.98rem;
+  line-height: 1.2;
 }
 
 .hero-controls,
@@ -1375,6 +1416,7 @@ a {
 
 @media (max-width: 1100px) {
   .quick-board,
+  .view-switcher,
   .mindset-layout,
   .role-mindset-grid,
   .hero-layout,
@@ -1467,6 +1509,21 @@ a {
 
   .top-actions::-webkit-scrollbar {
     display: none;
+  }
+
+  .view-switcher {
+    display: flex;
+    overflow-x: auto;
+    overscroll-behavior-inline: contain;
+    scrollbar-width: none;
+  }
+
+  .view-switcher::-webkit-scrollbar {
+    display: none;
+  }
+
+  .view-switcher button {
+    flex: 0 0 156px;
   }
 
   .top-actions a,

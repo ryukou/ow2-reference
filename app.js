@@ -765,9 +765,11 @@ const COMP_METADATA = {
 const CACHE_KEY = "ow2-reference-cache-v1";
 const FAVORITE_KEY = "ow2-reference-favorites-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
+const VIEW_IDS = ["mindset", "heroes", "comps", "sensitivity", "updates"];
 
 const state = {
   bootstrapped: false,
+  activeView: "mindset",
   heroes: [],
   heroDetails: new Map(),
   heroStats: new Map(),
@@ -803,6 +805,7 @@ document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   readFavorites();
   bindEvents();
+  syncViewFromLocation();
   bootstrap();
 });
 
@@ -810,6 +813,8 @@ function cacheElements() {
   els.syncStatus = document.querySelector("#syncStatus");
   els.refreshButton = document.querySelector("#refreshButton");
   els.topbar = document.querySelector(".topbar");
+  els.viewButtons = document.querySelectorAll("[data-view-target]");
+  els.viewPanels = document.querySelectorAll("[data-view-panel]");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
@@ -837,6 +842,17 @@ function cacheElements() {
 
 function bindEvents() {
   els.refreshButton.addEventListener("click", () => loadRemoteData({ force: true }));
+  els.viewButtons.forEach((button) => {
+    button.addEventListener("click", (event) => {
+      const view = button.dataset.viewTarget;
+      if (!VIEW_IDS.includes(view)) {
+        return;
+      }
+      event.preventDefault();
+      setActiveView(view, { updateHash: true, scroll: true });
+    });
+  });
+
   els.heroSearch.addEventListener("input", (event) => {
     state.query = event.target.value.trim().toLowerCase();
     renderHeroList();
@@ -884,6 +900,44 @@ function bindEvents() {
   });
 
   window.addEventListener("scroll", updateTopbarVisibility, { passive: true });
+  window.addEventListener("hashchange", () => {
+    syncViewFromLocation({ scroll: false });
+  });
+}
+
+function syncViewFromLocation(options = {}) {
+  const view = viewFromHash(window.location.hash) || state.activeView;
+  setActiveView(view, { updateHash: false, scroll: options.scroll || false });
+}
+
+function viewFromHash(hash) {
+  const view = String(hash || "").replace(/^#/, "");
+  return VIEW_IDS.includes(view) ? view : "";
+}
+
+function setActiveView(view, options = {}) {
+  if (!VIEW_IDS.includes(view)) {
+    return;
+  }
+  state.activeView = view;
+  els.viewPanels.forEach((panel) => {
+    const active = panel.dataset.viewPanel === view;
+    panel.hidden = !active;
+    panel.classList.toggle("is-active", active);
+  });
+  els.viewButtons.forEach((button) => {
+    const active = button.dataset.viewTarget === view;
+    button.classList.toggle("is-active", active);
+    if (button.tagName === "BUTTON") {
+      button.setAttribute("aria-pressed", active ? "true" : "false");
+    }
+  });
+  if (options.updateHash && window.location.hash !== `#${view}`) {
+    window.history.pushState(null, "", `#${view}`);
+  }
+  if (options.scroll) {
+    document.querySelector(".view-switcher")?.scrollIntoView({ block: "start" });
+  }
 }
 
 async function bootstrap() {

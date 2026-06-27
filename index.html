@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=role-solo-mindset">
-    <script src="./app.js?v=role-solo-mindset" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=view-groups">
+    <script src="./app.js?v=view-groups" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -26,11 +26,11 @@
           </span>
         </a>
         <nav class="top-actions" aria-label="Main">
-          <a href="#mindset">Mindset</a>
-          <a href="#heroes">Heroes</a>
-          <a href="#comps">Comps</a>
-          <a href="#sensitivity">Sens</a>
-          <a href="#updates">Updates</a>
+          <a href="#mindset" data-view-target="mindset">Mindset</a>
+          <a href="#heroes" data-view-target="heroes">Heroes</a>
+          <a href="#comps" data-view-target="comps">Comps</a>
+          <a href="#sensitivity" data-view-target="sensitivity">Sens</a>
+          <a href="#updates" data-view-target="updates">Updates</a>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -57,7 +57,30 @@
           </div>
         </section>
 
-        <section id="mindset" class="mindset-section" aria-label="Bronze and Silver improvement advice">
+        <section class="view-switcher" aria-label="Information groups">
+          <button class="is-active" type="button" data-view-target="mindset">
+            <span>試合前 / 連敗中</span>
+            <strong>心得</strong>
+          </button>
+          <button type="button" data-view-target="heroes">
+            <span>キャラ選び</span>
+            <strong>ヒーロー・パーク</strong>
+          </button>
+          <button type="button" data-view-target="comps">
+            <span>マップを見る時</span>
+            <strong>構成・相性</strong>
+          </button>
+          <button type="button" data-view-target="sensitivity">
+            <span>操作を直す時</span>
+            <strong>感度</strong>
+          </button>
+          <button type="button" data-view-target="updates">
+            <span>環境確認</span>
+            <strong>ニュース</strong>
+          </button>
+        </section>
+
+        <section id="mindset" class="mindset-section" data-view-panel="mindset" aria-label="Bronze and Silver improvement advice">
           <div class="section-head">
             <div>
               <span class="eyebrow">Bronze / Silver Reset</span>
@@ -154,7 +177,7 @@
           </div>
         </section>
 
-        <section id="heroes" class="workspace" aria-label="Heroes">
+        <section id="heroes" class="workspace" data-view-panel="heroes" aria-label="Heroes">
           <div class="hero-controls">
             <label class="search-field">
               <span>Search</span>
@@ -187,7 +210,7 @@
           </div>
         </section>
 
-        <section id="comps" class="comps-section" aria-label="Recommended compositions">
+        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Recommended compositions">
           <div class="section-head">
             <div>
               <span class="eyebrow">Recommended Comps</span>
@@ -247,7 +270,7 @@
           <div id="compGrid" class="comp-grid" aria-live="polite"></div>
         </section>
 
-        <section id="sensitivity" class="sensitivity-section" aria-label="Console sensitivity helper">
+        <section id="sensitivity" class="sensitivity-section" data-view-panel="sensitivity" aria-label="Console sensitivity helper">
           <div class="section-head">
             <div>
               <span class="eyebrow">Console Aim</span>
@@ -317,7 +340,7 @@
           </div>
         </section>
 
-        <section id="updates" class="updates-section" aria-label="Patch notes and news">
+        <section id="updates" class="updates-section" data-view-panel="updates" aria-label="Patch notes and news">
           <div class="section-head">
             <div>
               <span class="eyebrow">Patch & News</span>
