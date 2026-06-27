@@ -815,6 +815,8 @@ function cacheElements() {
   els.topbar = document.querySelector(".topbar");
   els.viewButtons = document.querySelectorAll("[data-view-target]");
   els.viewPanels = document.querySelectorAll("[data-view-panel]");
+  els.latestPatchTitle = document.querySelector("#latestPatchTitle");
+  els.latestPatchSummary = document.querySelector("#latestPatchSummary");
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
@@ -1350,6 +1352,7 @@ function renderMetaStats() {
 }
 
 function renderUpdates() {
+  renderLatestPatchSummary();
   const updates = PATCH_UPDATES.slice()
     .filter(isVisibleRecentUpdate)
     .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))
@@ -1358,6 +1361,17 @@ function renderUpdates() {
   els.updateGrid.innerHTML = updates.length
     ? updates.join("")
     : renderEmpty("直近1か月以内のイベント・ニュース・パッチ予定はありません。");
+}
+
+function renderLatestPatchSummary() {
+  const patch = PATCH_UPDATES.slice()
+    .filter((update) => update.type === "Patch")
+    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))[0];
+  if (!patch || !els.latestPatchTitle || !els.latestPatchSummary) {
+    return;
+  }
+  els.latestPatchTitle.textContent = `${patch.date} ${patch.title}`;
+  els.latestPatchSummary.textContent = patch.summary;
 }
 
 function renderUpdateCard(update) {
