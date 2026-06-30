@@ -664,6 +664,70 @@ const TANK_GUIDES = {
     note: "味方にバリアを合わせやすく、短い距離で高エネルギーを活かせる場所向き。",
   },
 };
+const ROLE_PLAYSTYLE_GUIDES = {
+  tank: {
+    title: "前線を作る",
+    tips: [
+      "味方が撃てる角や高台まで前線を上げる。",
+      "防御/移動スキルを使い切ったら、遮蔽物まで戻って回復を待つ。",
+      "相手タンクだけを殴り続けず、孤立したDPS/サポートへ圧をかける。",
+    ],
+    avoid: "1人で深く入りすぎると味方の射線と回復が切れる。",
+  },
+  damage: {
+    title: "人数差を作る",
+    tips: [
+      "撃つ前に逃げ道と回復をもらえる位置を決める。",
+      "正面で撃ち負ける時は、横から味方と同じ敵を見る。",
+      "キルできなくても、相手サポートを下がらせれば当たり合いが楽になる。",
+    ],
+    avoid: "単独の裏取りを続けるより、味方の当たり合いに合わせる。",
+  },
+  support: {
+    title: "生きて人数差を戻す",
+    tips: [
+      "回復量より先に、自分が死なない遮蔽物を取る。",
+      "味方タンクの真後ろではなく、横の角や高台から支える。",
+      "余裕がある時だけ、HPが減った敵や相手サポートを撃つ。",
+    ],
+    avoid: "味方を助けに行って自分も倒れる連鎖を避ける。",
+  },
+};
+const ARCHETYPE_PLAYSTYLE_GUIDES = {
+  brawl: {
+    label: "近距離",
+    tips: ["角を使って短い距離で戦う。", "味方と固まり、スピードや壁で一気に距離を詰める。"],
+  },
+  dive: {
+    label: "ダイブ",
+    tips: ["孤立した敵や高台の敵に短く入る。", "入る前に帰り道と味方の位置を確認する。"],
+  },
+  poke: {
+    label: "ポーク",
+    tips: ["長い射線と高台から先に削る。", "詰められたら下がれる角を残して戦う。"],
+  },
+  pick: {
+    label: "ワンピック",
+    tips: ["最初の1人を落とすために射線をずらす。", "倒し切れない時は無理に追わず、次の射線へ移る。"],
+  },
+};
+const ROLE_SYNERGY_GUIDES = {
+  tank: [
+    ["lucio", "前に出るタイミングと下がるタイミングを作りやすい。"],
+    ["baptiste", "範囲回復とイモータリティで前線維持を支えやすい。"],
+    ["kiriko", "阻害やCCを鈴で返し、深めの位置から戻しやすい。"],
+  ],
+  damage: [
+    ["winston", "高台や後衛への圧に合わせると、同じ敵を倒し切りやすい。"],
+    ["mercy", "射線を広げるDPSの火力と生存を支えやすい。"],
+    ["ana", "阻害や遠距離回復で、横展開したDPSを活かしやすい。"],
+  ],
+  support: [
+    ["dva", "高台や裏から来る相手を剥がしやすい。"],
+    ["sojourn", "回復の合間に削った敵を中距離から回収しやすい。"],
+    ["reinhardt", "味方が固まりやすく、回復と補助を合わせやすい。"],
+  ],
+};
 const COMP_METADATA = {
   迷ったらこれ: {
     category: "style",
@@ -1969,11 +2033,19 @@ function getFilteredHeroes() {
 
     const detail = state.heroDetails.get(hero.key);
     const perks = normalizePerks(detail?.perks);
+    const playstyle = buildHeroPlaystyle(hero);
+    const synergy = buildHeroSynergy(hero);
+    const counters = getHeroCounters(hero);
     const fields = [
       hero.name,
       hero.key,
       hero.role,
       detail?.description,
+      playstyle.summary,
+      playstyle.avoid,
+      ...playstyle.tips,
+      ...synergy.allies.flatMap((ally) => [heroName(ally.key), ally.reason]),
+      ...counters.flatMap((counter) => [heroName(counter.key), counter.reason]),
       ...(detail?.abilities || []).flatMap((ability) => [ability.name, ability.description]),
       ...perks.minor.flatMap((perk) => [perk.name, perk.description]),
       ...perks.major.flatMap((perk) => [perk.name, perk.description]),
@@ -2045,8 +2117,9 @@ function renderHeroDetail() {
       </section>
 
       <section>
+        ${renderPlaystylePanel(hero)}
+        ${renderSynergyPanel(hero)}
         ${renderCounterPanel(hero)}
-        ${renderTankGuidePanel(hero)}
         <div class="panel-title">
           <h3>Abilities</h3>
           <span class="chip">${abilities.length}</span>
@@ -2294,6 +2367,52 @@ function renderAbilityCard(ability) {
   `;
 }
 
+function renderPlaystylePanel(hero) {
+  const guide = buildHeroPlaystyle(hero);
+  return `
+    <div class="playstyle-panel">
+      <div class="panel-title">
+        <h3>立ち回り</h3>
+        <span class="chip">${escapeHtml(guide.badge)}</span>
+      </div>
+      <p>${escapeHtml(guide.summary)}</p>
+      <ul>
+        ${guide.tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("")}
+      </ul>
+      <div class="playstyle-avoid">
+        <strong>やりすぎ注意</strong>
+        <span>${escapeHtml(guide.avoid)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function buildHeroPlaystyle(hero) {
+  const roleGuide = ROLE_PLAYSTYLE_GUIDES[hero.role] || ROLE_PLAYSTYLE_GUIDES.damage;
+  const archetypes = getHeroArchetypes(hero.key);
+  const primaryType = archetypes[0] || roleFallbackArchetype(hero.role);
+  const archetypeGuide = ARCHETYPE_PLAYSTYLE_GUIDES[primaryType] || ARCHETYPE_PLAYSTYLE_GUIDES.poke;
+  const tips = [...archetypeGuide.tips, ...roleGuide.tips].slice(0, 5);
+  return {
+    badge: `${labelRole(hero.role)} · ${archetypeGuide.label}`,
+    summary: `${hero.name}は「${roleGuide.title}」を意識しつつ、${archetypeGuide.label}の距離で価値を出す。`,
+    tips,
+    avoid: roleGuide.avoid,
+  };
+}
+
+function getHeroArchetypes(heroKey) {
+  return Object.entries(HERO_ARCHETYPES)
+    .filter(([, keys]) => keys.includes(heroKey))
+    .map(([type]) => type);
+}
+
+function roleFallbackArchetype(role) {
+  if (role === "tank") return "brawl";
+  if (role === "support") return "poke";
+  return "poke";
+}
+
 function renderCounterPanel(hero) {
   const counters = getHeroCounters(hero);
   return `
@@ -2309,34 +2428,69 @@ function renderCounterPanel(hero) {
   `;
 }
 
-function renderTankGuidePanel(hero) {
-  const guide = TANK_GUIDES[hero.key];
-  if (hero.role !== "tank" || !guide) {
-    return "";
-  }
+function renderSynergyPanel(hero) {
+  const synergy = buildHeroSynergy(hero);
 
   return `
-    <div class="tank-guide-panel">
+    <div class="synergy-panel">
       <div class="panel-title">
         <h3>相性がいい味方</h3>
-        <span class="chip">Tank pair</span>
+        <span class="chip">${escapeHtml(synergy.label)}</span>
       </div>
       <div class="counter-grid">
-        ${guide.allies.map(([key, reason]) => renderCounterCard({ key, reason })).join("")}
+        ${synergy.allies.map((ally) => renderCounterCard(ally)).join("")}
       </div>
 
       <div class="tank-map-panel">
         <div class="panel-title">
           <h3>向いているマップ</h3>
-          <span class="chip">${escapeHtml(guide.styles.join(" / "))}</span>
+          <span class="chip">${escapeHtml(synergy.styles.join(" / "))}</span>
         </div>
-        <p>${escapeHtml(guide.note)}</p>
+        <p>${escapeHtml(synergy.note)}</p>
         <div class="tank-map-list">
-          ${guide.maps.map(renderTankMapChip).join("")}
+          ${synergy.maps.map(renderTankMapChip).join("")}
         </div>
       </div>
     </div>
   `;
+}
+
+function buildHeroSynergy(hero) {
+  const tankGuide = TANK_GUIDES[hero.key];
+  if (hero.role === "tank" && tankGuide) {
+    return {
+      label: "具体例",
+      allies: tankGuide.allies.map(([key, reason]) => ({ key, reason })),
+      styles: tankGuide.styles,
+      maps: tankGuide.maps,
+      note: tankGuide.note,
+    };
+  }
+
+  const archetypes = getHeroArchetypes(hero.key);
+  const primaryType = archetypes[0] || roleFallbackArchetype(hero.role);
+  const roleAllies = ROLE_SYNERGY_GUIDES[hero.role] || ROLE_SYNERGY_GUIDES.damage;
+  const style = ARCHETYPE_PLAYSTYLE_GUIDES[primaryType]?.label || "標準";
+  return {
+    label: `${style}相性`,
+    allies: roleAllies.map(([key, reason]) => ({ key, reason })),
+    styles: mapStylesForArchetype(primaryType),
+    maps: mapExamplesForArchetype(primaryType),
+    note: `${style}寄りの動きがしやすいマップで、味方と同じ敵を見ると価値を出しやすい。`,
+  };
+}
+
+function mapStylesForArchetype(type) {
+  if (type === "dive" || type === "pick") return ["高台", "広い移動"];
+  if (type === "brawl") return ["狭所乱戦"];
+  return ["長射線", "高台"];
+}
+
+function mapExamplesForArchetype(type) {
+  if (type === "dive") return ["Watchpoint: Gibraltar", "Numbani", "Dorado"];
+  if (type === "pick") return ["Circuit Royal", "Havana", "Junkertown"];
+  if (type === "brawl") return ["King's Row", "Lijiang Tower", "Eichenwalde"];
+  return ["Circuit Royal", "Havana", "Shambali Monastery"];
 }
 
 function renderTankMapChip(mapName) {

@@ -778,14 +778,53 @@ a {
   object-fit: contain;
 }
 
+.playstyle-panel,
 .counter-panel {
   margin-bottom: 14px;
 }
 
-.tank-guide-panel {
+.synergy-panel {
   display: grid;
   gap: 14px;
   margin-bottom: 14px;
+}
+
+.playstyle-panel {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #10161d;
+  padding: 11px;
+}
+
+.playstyle-panel p,
+.playstyle-panel li,
+.playstyle-avoid span {
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.playstyle-panel p {
+  margin: 0 0 10px;
+}
+
+.playstyle-panel ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.playstyle-avoid {
+  display: grid;
+  gap: 4px;
+  margin-top: 10px;
+  border-top: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+.playstyle-avoid strong {
+  color: var(--orange);
+  font-size: 0.82rem;
 }
 
 .tank-map-panel {
