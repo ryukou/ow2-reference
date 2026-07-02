@@ -325,8 +325,16 @@ a {
   display: flex;
   align-items: end;
   justify-content: space-between;
+  flex-wrap: wrap;
+  row-gap: 10px;
   gap: 18px;
   margin-bottom: 10px;
+}
+
+.map-field {
+  display: grid;
+  gap: 7px;
+  min-width: 200px;
 }
 
 .section-head.compact {
@@ -508,6 +516,15 @@ a {
   border-bottom: 1px solid var(--line);
 }
 
+.hero-map-note {
+  margin: 0;
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--line);
+  background: rgba(56, 201, 222, 0.08);
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
 .hero-list {
   display: grid;
   gap: 4px;
@@ -571,6 +588,11 @@ a {
 .favorite-mark {
   flex: 0 0 auto;
   color: var(--orange);
+}
+
+.map-fit-mark {
+  flex: 0 0 auto;
+  color: var(--cyan);
 }
 
 .hero-row-name {
@@ -1016,7 +1038,8 @@ a {
 }
 
 .comp-filters span,
-.diagnosis-controls span {
+.diagnosis-controls span,
+.map-field span {
   color: var(--muted);
   font-size: 0.78rem;
   font-weight: 900;
@@ -1026,7 +1049,8 @@ a {
 .comp-filters select,
 .diagnosis-controls select,
 .sens-controls select,
-.sens-controls input {
+.sens-controls input,
+.map-field select {
   width: 100%;
   min-height: 38px;
   border: 1px solid var(--line);
@@ -1038,7 +1062,8 @@ a {
 .comp-filters select:focus,
 .diagnosis-controls select:focus,
 .sens-controls select:focus,
-.sens-controls input:focus {
+.sens-controls input:focus,
+.map-field select:focus {
   border-color: var(--cyan);
   outline: none;
   box-shadow: 0 0 0 3px rgba(56, 201, 222, 0.14);

@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=hero-playstyle-matchups">
-    <script src="./app.js?v=hero-playstyle-matchups" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=map-hero-lookup">
+    <script src="./app.js?v=map-hero-lookup" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -204,6 +204,12 @@
               <button type="button" data-role="support" aria-pressed="false">Support</button>
               <button type="button" data-favorite-filter aria-pressed="false">★ Fav</button>
             </div>
+            <label class="map-field">
+              <span>マップから選ぶ</span>
+              <select id="heroMapFilter">
+                <option value="all">指定なし</option>
+              </select>
+            </label>
           </div>
 
           <div class="hero-layout">
@@ -212,6 +218,7 @@
                 <strong id="heroCount">0 Heroes</strong>
                 <span id="detailProgress">Waiting</span>
               </div>
+              <p id="heroMapNote" class="hero-map-note" hidden></p>
               <div id="heroList" class="hero-list" aria-live="polite"></div>
             </aside>
 

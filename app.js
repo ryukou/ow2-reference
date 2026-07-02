@@ -843,6 +843,7 @@ const state = {
   query: "",
   favoriteOnly: false,
   favoriteHeroKeys: new Set(),
+  mapFilter: "all",
   compFilters: {
     stageInitial: "all",
     stage: "all",
@@ -884,6 +885,8 @@ function cacheElements() {
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
+  els.heroMapFilter = document.querySelector("#heroMapFilter");
+  els.heroMapNote = document.querySelector("#heroMapNote");
   els.heroList = document.querySelector("#heroList");
   els.heroDetail = document.querySelector("#heroDetail");
   els.heroCount = document.querySelector("#heroCount");
@@ -940,6 +943,11 @@ function bindEvents() {
     state.favoriteOnly = !state.favoriteOnly;
     els.favoriteFilterButton.classList.toggle("is-active", state.favoriteOnly);
     els.favoriteFilterButton.setAttribute("aria-pressed", state.favoriteOnly ? "true" : "false");
+    renderHeroList();
+  });
+
+  els.heroMapFilter.addEventListener("change", () => {
+    state.mapFilter = els.heroMapFilter.value;
     renderHeroList();
   });
 
@@ -1195,8 +1203,25 @@ function renderAll() {
   renderComps();
   renderSensitivityControls();
   renderSensitivity();
+  renderHeroMapFilterOptions();
   renderHeroList();
   renderHeroDetail();
+}
+
+function renderHeroMapFilterOptions() {
+  if (!els.heroMapFilter) {
+    return;
+  }
+  const current = els.heroMapFilter.value || state.mapFilter;
+  const options = [
+    { value: "all", label: "指定なし" },
+    ...state.maps
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+      .map((stage) => ({ value: stage.key, label: `${stage.name}(${stage.rule})` })),
+  ];
+  setSelectOptions(els.heroMapFilter, options, current);
+  state.mapFilter = els.heroMapFilter.value;
 }
 
 function renderSensitivityControls() {
@@ -1976,6 +2001,7 @@ function selectHeroFromInline(heroKey) {
 function renderHeroList() {
   const heroes = getFilteredHeroes();
   els.heroCount.textContent = `${heroes.length} Heroes`;
+  renderHeroMapNote();
 
   if (!heroes.length) {
     els.heroList.innerHTML = `
@@ -2008,6 +2034,11 @@ function renderHeroRow(hero) {
   const active = hero.key === state.selectedHeroKey ? " is-active" : "";
   const favorite = state.favoriteHeroKeys.has(hero.key) ? " is-favorite" : "";
   const favoriteMark = state.favoriteHeroKeys.has(hero.key) ? '<span class="favorite-mark">★</span>' : "";
+  const mapStage = getSelectedMapStageFilter();
+  const mapFits = mapStage ? heroFitsStage(hero, mapStage) : false;
+  const mapFitMark = mapFits
+    ? `<span class="map-fit-mark" title="${escapeAttr(heroStageFitReason(hero, mapStage))}">◎</span>`
+    : "";
   const portrait = hero.portrait
     ? `<img src="${safeUrl(hero.portrait)}" alt="">`
     : `<span class="hero-row-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
@@ -2016,12 +2047,54 @@ function renderHeroRow(hero) {
     <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}">
       ${portrait}
       <span>
-        <strong>${favoriteMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
+        <strong>${favoriteMark}${mapFitMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
         <small>${escapeHtml(labelRole(hero.role))} · Pick ${pickRate} · Win ${winRate}</small>
       </span>
       <span class="role-badge">${escapeHtml(shortRole(hero.role))}</span>
     </button>
   `;
+}
+
+function renderHeroMapNote() {
+  if (!els.heroMapNote) {
+    return;
+  }
+  const stage = getSelectedMapStageFilter();
+  if (!stage) {
+    els.heroMapNote.hidden = true;
+    els.heroMapNote.textContent = "";
+    return;
+  }
+  els.heroMapNote.hidden = false;
+  els.heroMapNote.textContent = `${stage.name}(${stage.rule} · ${stage.style})向きのヒーローに ◎ を付けて上に表示しています。`;
+}
+
+function getSelectedMapStageFilter() {
+  if (!state.mapFilter || state.mapFilter === "all") {
+    return null;
+  }
+  return state.maps.find((stage) => stage.key === state.mapFilter) || null;
+}
+
+function heroFitsStage(hero, stage) {
+  const tankGuide = hero.role === "tank" ? TANK_GUIDES[hero.key] : null;
+  if (tankGuide) {
+    return tankGuide.styles.includes(stage.style);
+  }
+  const archetypes = getHeroArchetypes(hero.key);
+  const primaryType = archetypes[0] || roleFallbackArchetype(hero.role);
+  return mapStylesForArchetype(primaryType).includes(stage.style);
+}
+
+function heroStageFitReason(hero, stage) {
+  const tankGuide = hero.role === "tank" ? TANK_GUIDES[hero.key] : null;
+  if (tankGuide) {
+    return tankGuide.note;
+  }
+  const archetypes = getHeroArchetypes(hero.key);
+  const primaryType = archetypes[0] || roleFallbackArchetype(hero.role);
+  const guide = ARCHETYPE_PLAYSTYLE_GUIDES[primaryType];
+  return guide ? `${guide.label}寄りの動きが${stage.style}で活きやすい。` : `${stage.style}に合うヒーロー。`;
 }
 
 function getFilteredHeroes() {
@@ -2062,12 +2135,23 @@ function getFilteredHeroes() {
 }
 
 function sortHeroesForList(heroes) {
+  const stage = getSelectedMapStageFilter();
   return heroes
     .map((hero, index) => ({ hero, index }))
     .sort((a, b) => {
       const aFavorite = state.favoriteHeroKeys.has(a.hero.key) ? 1 : 0;
       const bFavorite = state.favoriteHeroKeys.has(b.hero.key) ? 1 : 0;
-      return bFavorite - aFavorite || a.index - b.index;
+      if (aFavorite !== bFavorite) {
+        return bFavorite - aFavorite;
+      }
+      if (stage) {
+        const aFit = heroFitsStage(a.hero, stage) ? 1 : 0;
+        const bFit = heroFitsStage(b.hero, stage) ? 1 : 0;
+        if (aFit !== bFit) {
+          return bFit - aFit;
+        }
+      }
+      return a.index - b.index;
     })
     .map((item) => item.hero);
 }
