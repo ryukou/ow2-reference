@@ -595,6 +595,14 @@ a {
   color: var(--cyan);
 }
 
+.map-fit-reason {
+  display: block;
+  color: var(--cyan) !important;
+  text-transform: none !important;
+  font-weight: 600 !important;
+  white-space: normal !important;
+}
+
 .hero-row-name {
   min-width: 0;
   overflow: hidden;

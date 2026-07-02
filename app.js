@@ -865,6 +865,7 @@ const state = {
 
 const els = {};
 let lastScrollY = 0;
+let pendingHeroKeyFromHash = null;
 
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
@@ -985,13 +986,36 @@ function bindEvents() {
 }
 
 function syncViewFromLocation(options = {}) {
-  const view = viewFromHash(window.location.hash) || state.activeView;
+  const parsed = parseHash(window.location.hash);
+  const view = parsed.view || state.activeView;
+  if (parsed.heroKey) {
+    if (state.heroes.some((hero) => hero.key === parsed.heroKey)) {
+      state.selectedHeroKey = parsed.heroKey;
+      renderHeroList();
+      renderHeroDetail();
+    } else {
+      pendingHeroKeyFromHash = parsed.heroKey;
+    }
+  }
   setActiveView(view, { updateHash: false, scroll: options.scroll || false });
 }
 
-function viewFromHash(hash) {
-  const view = String(hash || "").replace(/^#/, "");
-  return VIEW_IDS.includes(view) ? view : "";
+function parseHash(hash) {
+  const raw = String(hash || "").replace(/^#/, "");
+  const [view, heroKey] = raw.split("/");
+  return {
+    view: VIEW_IDS.includes(view) ? view : "",
+    heroKey: heroKey ? decodeURIComponent(heroKey) : "",
+  };
+}
+
+function applyPendingHeroSelection(heroes) {
+  if (pendingHeroKeyFromHash && heroes.some((hero) => hero.key === pendingHeroKeyFromHash)) {
+    state.selectedHeroKey = pendingHeroKeyFromHash;
+    pendingHeroKeyFromHash = null;
+    return true;
+  }
+  return false;
 }
 
 function setActiveView(view, options = {}) {
@@ -1011,11 +1035,23 @@ function setActiveView(view, options = {}) {
       button.setAttribute("aria-pressed", active ? "true" : "false");
     }
   });
-  if (options.updateHash && window.location.hash !== `#${view}`) {
-    window.history.pushState(null, "", `#${view}`);
+  const targetHash =
+    view === "heroes" && state.selectedHeroKey ? `#heroes/${encodeURIComponent(state.selectedHeroKey)}` : `#${view}`;
+  if (options.updateHash && window.location.hash !== targetHash) {
+    window.history.pushState(null, "", targetHash);
   }
   if (options.scroll) {
     document.querySelector(".view-switcher")?.scrollIntoView({ block: "start" });
+  }
+}
+
+function updateHeroHash(heroKey) {
+  if (state.activeView !== "heroes") {
+    return;
+  }
+  const nextHash = `#heroes/${encodeURIComponent(heroKey)}`;
+  if (window.location.hash !== nextHash) {
+    window.history.replaceState(null, "", nextHash);
   }
 }
 
@@ -1066,7 +1102,7 @@ async function loadRemoteData({ force }) {
     state.heroes = heroes;
     state.heroStats = new Map(heroStats.map((item) => [item.hero, item]));
     state.maps = normalizeStages(maps);
-    if (!state.selectedHeroKey && heroes[0]) {
+    if (!applyPendingHeroSelection(heroes) && !state.selectedHeroKey && heroes[0]) {
       state.selectedHeroKey = heroes[0].key;
     }
 
@@ -1682,12 +1718,19 @@ function stageInitial(stage) {
 }
 
 function renderCompDiagnosisControls() {
-  setHeroSelectOptions(els.diagTank, "tank", "orisa");
-  setHeroSelectOptions(els.diagDamage1, "damage", "soldier-76");
-  setHeroSelectOptions(els.diagDamage2, "damage", "sojourn");
-  setHeroSelectOptions(els.diagSupport1, "support", "baptiste");
-  setHeroSelectOptions(els.diagSupport2, "support", "kiriko");
+  const favTanks = getFavoriteHeroKeysByRole("tank");
+  const favDamage = getFavoriteHeroKeysByRole("damage");
+  const favSupport = getFavoriteHeroKeysByRole("support");
+  setHeroSelectOptions(els.diagTank, "tank", favTanks[0] || "orisa");
+  setHeroSelectOptions(els.diagDamage1, "damage", favDamage[0] || "soldier-76");
+  setHeroSelectOptions(els.diagDamage2, "damage", favDamage[1] || "sojourn");
+  setHeroSelectOptions(els.diagSupport1, "support", favSupport[0] || "baptiste");
+  setHeroSelectOptions(els.diagSupport2, "support", favSupport[1] || "kiriko");
   renderCompDiagnosis();
+}
+
+function getFavoriteHeroKeysByRole(role) {
+  return state.heroes.filter((hero) => hero.role === role && state.favoriteHeroKeys.has(hero.key)).map((hero) => hero.key);
 }
 
 function setHeroSelectOptions(select, role, preferredKey) {
@@ -1988,14 +2031,33 @@ function renderCompMember(member) {
 }
 
 function selectHeroFromInline(heroKey) {
+  selectHero(heroKey, { resetFilters: true, switchView: true, scrollIntoView: true });
+}
+
+function selectHero(heroKey, options = {}) {
+  if (!heroKey) {
+    return;
+  }
   state.selectedHeroKey = heroKey;
-  state.role = "all";
-  state.query = "";
-  els.heroSearch.value = "";
-  els.roleButtons.forEach((item) => item.classList.toggle("is-active", item.dataset.role === "all"));
+  if (options.resetFilters) {
+    state.role = "all";
+    state.query = "";
+    els.heroSearch.value = "";
+    els.roleButtons.forEach((item) => {
+      const active = item.dataset.role === "all";
+      item.classList.toggle("is-active", active);
+      item.setAttribute("aria-pressed", active ? "true" : "false");
+    });
+  }
+  if (options.switchView) {
+    setActiveView("heroes", { updateHash: false, scroll: false });
+  }
   renderHeroList();
   renderHeroDetail();
-  document.querySelector("#heroes").scrollIntoView({ behavior: "smooth", block: "start" });
+  updateHeroHash(heroKey);
+  if (options.scrollIntoView) {
+    document.querySelector("#heroes")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function renderHeroList() {
@@ -2015,14 +2077,13 @@ function renderHeroList() {
   if (!heroes.some((hero) => hero.key === state.selectedHeroKey)) {
     state.selectedHeroKey = heroes[0].key;
     renderHeroDetail();
+    updateHeroHash(state.selectedHeroKey);
   }
 
   els.heroList.innerHTML = heroes.map((hero) => renderHeroRow(hero)).join("");
   els.heroList.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => {
-      state.selectedHeroKey = button.dataset.heroKey;
-      renderHeroList();
-      renderHeroDetail();
+      selectHero(button.dataset.heroKey);
     });
   });
 }
@@ -2036,9 +2097,9 @@ function renderHeroRow(hero) {
   const favoriteMark = state.favoriteHeroKeys.has(hero.key) ? '<span class="favorite-mark">★</span>' : "";
   const mapStage = getSelectedMapStageFilter();
   const mapFits = mapStage ? heroFitsStage(hero, mapStage) : false;
-  const mapFitMark = mapFits
-    ? `<span class="map-fit-mark" title="${escapeAttr(heroStageFitReason(hero, mapStage))}">◎</span>`
-    : "";
+  const mapFitReason = mapFits ? heroStageFitReason(hero, mapStage) : "";
+  const mapFitMark = mapFits ? `<span class="map-fit-mark" title="${escapeAttr(mapFitReason)}">◎</span>` : "";
+  const mapFitLine = mapFits ? `<small class="map-fit-reason">${escapeHtml(mapFitReason)}</small>` : "";
   const portrait = hero.portrait
     ? `<img src="${safeUrl(hero.portrait)}" alt="">`
     : `<span class="hero-row-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
@@ -2049,6 +2110,7 @@ function renderHeroRow(hero) {
       <span>
         <strong>${favoriteMark}${mapFitMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
         <small>${escapeHtml(labelRole(hero.role))} · Pick ${pickRate} · Win ${winRate}</small>
+        ${mapFitLine}
       </span>
       <span class="role-badge">${escapeHtml(shortRole(hero.role))}</span>
     </button>
@@ -2698,7 +2760,9 @@ function hydrateFromCache(cached) {
   });
   state.heroStats = new Map(cached.heroStats || []);
   state.maps = normalizeStages(cached.maps || FALLBACK_STAGES);
-  state.selectedHeroKey = state.heroes[0]?.key || null;
+  if (!applyPendingHeroSelection(state.heroes)) {
+    state.selectedHeroKey = state.heroes[0]?.key || null;
+  }
 }
 
 function writeCache() {
