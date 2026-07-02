@@ -927,7 +927,11 @@ function bindEvents() {
   els.roleButtons.forEach((button) => {
     button.addEventListener("click", () => {
       state.role = button.dataset.role;
-      els.roleButtons.forEach((item) => item.classList.toggle("is-active", item === button));
+      els.roleButtons.forEach((item) => {
+        const active = item === button;
+        item.classList.toggle("is-active", active);
+        item.setAttribute("aria-pressed", active ? "true" : "false");
+      });
       renderHeroList();
     });
   });
@@ -935,6 +939,7 @@ function bindEvents() {
   els.favoriteFilterButton.addEventListener("click", () => {
     state.favoriteOnly = !state.favoriteOnly;
     els.favoriteFilterButton.classList.toggle("is-active", state.favoriteOnly);
+    els.favoriteFilterButton.setAttribute("aria-pressed", state.favoriteOnly ? "true" : "false");
     renderHeroList();
   });
 
@@ -1058,7 +1063,7 @@ async function loadRemoteData({ force }) {
     }
 
     renderAll();
-    await loadHeroDetails(heroes);
+    await loadHeroDetails(heroes, { force });
     writeCache();
     setStatus(`更新 ${formatClock(new Date())}`);
   } catch (error) {
@@ -1113,13 +1118,13 @@ function fetchMaps() {
   return fetchJson("/maps");
 }
 
-async function loadHeroDetails(heroes) {
+async function loadHeroDetails(heroes, { force = false } = {}) {
   state.loadingDetails = true;
   let completed = 0;
   setProgress(`Perks ${completed}/${heroes.length}`);
 
   await mapLimit(heroes, 4, async (hero) => {
-    if (state.heroDetails.has(hero.key)) {
+    if (!force && state.heroDetails.has(hero.key)) {
       completed += 1;
       setProgress(`Perks ${completed}/${heroes.length}`);
       return;
@@ -1138,7 +1143,9 @@ async function loadHeroDetails(heroes) {
       if (hero.key === state.selectedHeroKey) {
         renderHeroDetail();
       }
-      renderHeroList();
+      if (state.query) {
+        renderHeroList();
+      }
     }
   });
 
@@ -2163,7 +2170,7 @@ function renderHeroVisual(hero, detail) {
           <h2>${escapeHtml(hero.name)}</h2>
           <button class="favorite-button${favorite ? " is-on" : ""}" type="button" data-favorite-toggle aria-pressed="${favorite ? "true" : "false"}">
             <span>${favorite ? "★" : "☆"}</span>
-            ${favorite ? "お気に入り" : "お気に入り"}
+            ${favorite ? "お気に入り解除" : "お気に入り"}
           </button>
         </div>
         <p>${escapeHtml(detail?.description || "データ取得中")}</p>
@@ -2242,8 +2249,6 @@ function owperksHeroKey(hero) {
     "junkerqueen": "junker-queen",
     "soldier76": "soldier-76",
     "wreckingball": "wrecking-ball",
-    "wrecking_ball": "wrecking-ball",
-    "torbjorn": "torbjorn",
     "tobjorn": "torbjorn",
   };
   const normalized = key.toLowerCase().replace(/[^a-z0-9-]/g, "");
@@ -2620,7 +2625,11 @@ function writeCache() {
     heroStats: [...state.heroStats.entries()],
     maps: state.maps,
   };
-  localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify(payload));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function readFavorites() {
@@ -2633,7 +2642,11 @@ function readFavorites() {
 }
 
 function writeFavorites() {
-  localStorage.setItem(FAVORITE_KEY, JSON.stringify([...state.favoriteHeroKeys]));
+  try {
+    localStorage.setItem(FAVORITE_KEY, JSON.stringify([...state.favoriteHeroKeys]));
+  } catch (error) {
+    console.error(error);
+  }
 }
 
 function toggleFavorite(heroKey) {

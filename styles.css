@@ -147,8 +147,7 @@ a {
 
 .top-actions a,
 .top-actions button,
-.segmented button,
-.ghost-button {
+.segmented button {
   border: 1px solid var(--line);
   background: #121820;
   color: var(--text);
@@ -157,8 +156,7 @@ a {
 
 .top-actions a:hover,
 .top-actions button:hover,
-.segmented button:hover,
-.ghost-button:hover {
+.segmented button:hover {
   border-color: rgba(56, 201, 222, 0.7);
 }
 
@@ -584,7 +582,6 @@ a {
 
 .hero-row small,
 .chip,
-.rank-chip,
 .perk-type {
   color: var(--muted);
   font-size: 0.75rem;
@@ -701,8 +698,7 @@ a {
   gap: 8px;
 }
 
-.chip,
-.rank-chip {
+.chip {
   border: 1px solid var(--line);
   background: rgba(14, 16, 20, 0.64);
   color: var(--text);
