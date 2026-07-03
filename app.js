@@ -991,11 +991,14 @@ function syncViewFromLocation(options = {}) {
   if (parsed.heroKey) {
     if (state.heroes.some((hero) => hero.key === parsed.heroKey)) {
       state.selectedHeroKey = parsed.heroKey;
+      pendingHeroKeyFromHash = null;
       renderHeroList();
       renderHeroDetail();
     } else {
       pendingHeroKeyFromHash = parsed.heroKey;
     }
+  } else {
+    pendingHeroKeyFromHash = null;
   }
   setActiveView(view, { updateHash: false, scroll: options.scroll || false });
 }
@@ -1005,8 +1008,16 @@ function parseHash(hash) {
   const [view, heroKey] = raw.split("/");
   return {
     view: VIEW_IDS.includes(view) ? view : "",
-    heroKey: heroKey ? decodeURIComponent(heroKey) : "",
+    heroKey: heroKey ? safeDecodeHashSegment(heroKey) : "",
   };
+}
+
+function safeDecodeHashSegment(value) {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return "";
+  }
 }
 
 function applyPendingHeroSelection(heroes) {
