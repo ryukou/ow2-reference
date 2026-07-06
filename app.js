@@ -853,6 +853,7 @@ const state = {
     stageInitial: "all",
     stage: "all",
   },
+  synergyHeroKey: null,
   sensitivity: {
     hero: "all",
     style: "balanced",
@@ -903,6 +904,8 @@ function cacheElements() {
   els.compGrid = document.querySelector("#compGrid");
   els.compInitialFilter = document.querySelector("#compInitialFilter");
   els.compStageFilter = document.querySelector("#compStageFilter");
+  els.synergyHero = document.querySelector("#synergyHero");
+  els.synergyMap = document.querySelector("#synergyMap");
   els.diagTank = document.querySelector("#diagTank");
   els.diagDamage1 = document.querySelector("#diagDamage1");
   els.diagDamage2 = document.querySelector("#diagDamage2");
@@ -970,6 +973,11 @@ function bindEvents() {
   els.compStageFilter.addEventListener("change", () => {
     state.compFilters.stage = els.compStageFilter.value;
     renderComps();
+  });
+
+  els.synergyHero.addEventListener("change", () => {
+    state.synergyHeroKey = els.synergyHero.value;
+    renderSynergyMap();
   });
 
   [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
@@ -1254,6 +1262,7 @@ function renderAll() {
   renderMetaStats();
   renderUpdates();
   renderCompDiagnosisControls();
+  renderSynergyMapControls();
   renderComps();
   renderSensitivityControls();
   renderSensitivity();
@@ -1765,6 +1774,128 @@ function setHeroSelectOptions(select, role, preferredKey) {
       return `<option value="${escapeAttr(hero.key)}"${isSelected}>${escapeHtml(hero.name)}</option>`;
     })
     .join("");
+}
+
+function renderSynergyMapControls() {
+  if (!els.synergyHero || !els.synergyMap) {
+    return;
+  }
+  const heroes = sortHeroesForQuickPerks(state.heroes);
+  const preferred = state.synergyHeroKey || state.selectedHeroKey || heroes[0]?.key || "";
+  const selected = heroes.some((hero) => hero.key === preferred) ? preferred : heroes[0]?.key || "";
+  state.synergyHeroKey = selected;
+  els.synergyHero.innerHTML = heroes
+    .map((hero) => {
+      const isSelected = hero.key === selected ? " selected" : "";
+      const fav = state.favoriteHeroKeys.has(hero.key) ? "★ " : "";
+      return `<option value="${escapeAttr(hero.key)}"${isSelected}>${fav}${escapeHtml(hero.name)} / ${escapeHtml(roleLabel(hero.role))}</option>`;
+    })
+    .join("");
+  renderSynergyMap();
+}
+
+function renderSynergyMap() {
+  if (!els.synergyMap) {
+    return;
+  }
+  const hero = findHeroByKey(state.synergyHeroKey) || state.heroes[0];
+  if (!hero) {
+    els.synergyMap.innerHTML = renderEmpty("ヒーロー取得中");
+    return;
+  }
+  const synergy = buildHeroSynergy(hero);
+  const counters = getHeroCounters(hero);
+  els.synergyMap.innerHTML = `
+    <div class="relation-diagram">
+      <section class="relation-column is-good">
+        <h4>相性がいい味方</h4>
+        <div class="relation-node-list">
+          ${synergy.allies.map((ally) => renderRelationNode(ally, "good")).join("")}
+        </div>
+      </section>
+      <div class="relation-center">
+        ${renderRelationHero(hero)}
+        <div class="relation-arrows" aria-hidden="true">
+          <span>味方</span>
+          <strong>相性</strong>
+          <span>苦手</span>
+        </div>
+      </div>
+      <section class="relation-column is-bad">
+        <h4>苦手な相手</h4>
+        <div class="relation-node-list">
+          ${counters.map((counter) => renderRelationNode(counter, "bad")).join("")}
+        </div>
+      </section>
+    </div>
+    <div class="relation-overview">
+      <div class="panel-title">
+        <h3>相性一覧</h3>
+        <span class="chip">全ロール</span>
+      </div>
+      <div class="relation-table">
+        ${sortHeroesForQuickPerks(state.heroes).map(renderRelationTableRow).join("")}
+      </div>
+    </div>
+  `;
+  els.synergyMap.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
+}
+
+function renderRelationHero(hero) {
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
+  return `
+    <button class="relation-hero" type="button" data-hero-key="${escapeAttr(hero.key)}">
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(hero.name)}</strong>
+        <small>${escapeHtml(roleLabel(hero.role))}</small>
+      </span>
+    </button>
+  `;
+}
+
+function renderRelationNode(relation, tone) {
+  const hero = findHeroByKey(relation.key);
+  const name = hero?.name || heroName(relation.key);
+  const portrait = hero?.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(name.slice(0, 2))}</span>`;
+  const keyAttr = hero ? ` data-hero-key="${escapeAttr(hero.key)}"` : "";
+  const disabled = hero ? "" : " disabled";
+  return `
+    <button class="relation-node is-${escapeAttr(tone)}" type="button"${keyAttr}${disabled}>
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(name)}</strong>
+        <small>${escapeHtml(relation.reason)}</small>
+      </span>
+    </button>
+  `;
+}
+
+function renderRelationTableRow(hero) {
+  const synergy = buildHeroSynergy(hero).allies.slice(0, 3).map((ally) => heroName(ally.key)).join(" / ");
+  const counters = getHeroCounters(hero).slice(0, 3).map((counter) => heroName(counter.key)).join(" / ");
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
+  return `
+    <button class="relation-row" type="button" data-hero-key="${escapeAttr(hero.key)}">
+      <span class="relation-row-hero">
+        ${portrait}
+        <span>
+          <strong>${escapeHtml(hero.name)}</strong>
+          <small>${escapeHtml(roleLabel(hero.role))}</small>
+        </span>
+      </span>
+      <span><small>相性良い</small>${escapeHtml(synergy)}</span>
+      <span><small>苦手</small>${escapeHtml(counters)}</span>
+    </button>
+  `;
 }
 
 function renderCompDiagnosis() {

@@ -217,6 +217,7 @@ a {
 .perk-card,
 .ability-card,
 .comp-helper,
+.synergy-map-section,
 .diagnosis-summary,
 .empty-state,
 .error-state {
@@ -1209,6 +1210,209 @@ a {
   padding: 12px;
 }
 
+.synergy-map-section {
+  margin-bottom: 12px;
+  padding: 12px;
+}
+
+.synergy-select {
+  display: grid;
+  gap: 7px;
+  min-width: min(320px, 100%);
+}
+
+.synergy-select span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.synergy-select select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+}
+
+.synergy-select select:focus {
+  border-color: var(--cyan);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 201, 222, 0.14);
+}
+
+.relation-diagram {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(170px, 0.72fr) minmax(0, 1fr);
+  gap: 10px;
+  align-items: stretch;
+}
+
+.relation-column {
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: rgba(14, 16, 20, 0.48);
+  padding: 10px;
+}
+
+.relation-column h4 {
+  margin: 0 0 8px;
+  font-size: 0.92rem;
+}
+
+.relation-column.is-good h4 {
+  color: var(--green);
+}
+
+.relation-column.is-bad h4 {
+  color: var(--orange);
+}
+
+.relation-node-list,
+.relation-table {
+  display: grid;
+  gap: 7px;
+}
+
+.relation-center {
+  display: grid;
+  align-content: center;
+  gap: 8px;
+}
+
+.relation-hero,
+.relation-node,
+.relation-row {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--text);
+  text-align: left;
+}
+
+.relation-hero,
+.relation-node {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.relation-hero {
+  border-color: rgba(56, 201, 222, 0.46);
+  background: rgba(56, 201, 222, 0.1);
+}
+
+.relation-node:hover,
+.relation-node:focus-visible,
+.relation-row:hover,
+.relation-row:focus-visible,
+.relation-hero:hover,
+.relation-hero:focus-visible {
+  border-color: rgba(243, 161, 58, 0.52);
+  background: rgba(243, 161, 58, 0.1);
+}
+
+.relation-node.is-good {
+  border-color: rgba(114, 209, 125, 0.35);
+}
+
+.relation-node.is-bad {
+  border-color: rgba(243, 161, 58, 0.35);
+}
+
+.relation-hero img,
+.relation-node img,
+.relation-row img,
+.relation-placeholder {
+  width: 44px;
+  height: 44px;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.relation-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.relation-hero span,
+.relation-node span,
+.relation-row span {
+  min-width: 0;
+}
+
+.relation-hero strong,
+.relation-node strong,
+.relation-row strong {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.relation-hero small,
+.relation-node small,
+.relation-row small {
+  display: block;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.relation-node small {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.relation-arrows {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 6px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 900;
+  text-align: center;
+}
+
+.relation-arrows strong {
+  color: var(--cyan);
+}
+
+.relation-overview {
+  margin-top: 12px;
+}
+
+.relation-row {
+  display: grid;
+  grid-template-columns: minmax(150px, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+}
+
+.relation-row-hero {
+  display: grid;
+  grid-template-columns: 36px minmax(0, 1fr);
+  align-items: center;
+  gap: 8px;
+}
+
+.relation-row img,
+.relation-row .relation-placeholder {
+  width: 36px;
+  height: 36px;
+}
+
 .diagnosis-controls {
   display: grid;
   grid-template-columns: repeat(5, minmax(150px, 1fr));
@@ -1703,6 +1907,8 @@ a {
   .mindset-checklist,
   .diagnosis-grid,
   .quick-perk-board,
+  .relation-diagram,
+  .relation-row,
   .sensitivity-tool,
   .sens-advice {
     grid-template-columns: 1fr;
@@ -1773,6 +1979,7 @@ a {
 
   .comp-filters,
   .diagnosis-controls,
+  .relation-row,
   .sens-controls,
   .sens-metrics {
     grid-template-columns: 1fr;
