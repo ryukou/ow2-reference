@@ -901,10 +901,7 @@ function cacheElements() {
   els.detailProgress = document.querySelector("#detailProgress");
   els.metaStats = document.querySelector("#metaStats");
   els.updateGrid = document.querySelector("#updateGrid");
-  els.compGrid = document.querySelector("#compGrid");
-  els.compInitialFilter = document.querySelector("#compInitialFilter");
-  els.compStageFilter = document.querySelector("#compStageFilter");
-  els.synergyHero = document.querySelector("#synergyHero");
+  els.centerHeroGrid = document.querySelector("#centerHeroGrid");
   els.synergyMap = document.querySelector("#synergyMap");
   els.diagTank = document.querySelector("#diagTank");
   els.diagDamage1 = document.querySelector("#diagDamage1");
@@ -959,25 +956,6 @@ function bindEvents() {
   els.heroMapFilter.addEventListener("change", () => {
     state.mapFilter = els.heroMapFilter.value;
     renderHeroList();
-  });
-
-  els.compInitialFilter.addEventListener("change", () => {
-    state.compFilters.stageInitial = els.compInitialFilter.value;
-    const selectedStage = getSelectedStage();
-    if (selectedStage && !stageMatchesInitial(selectedStage, state.compFilters.stageInitial)) {
-      state.compFilters.stage = "all";
-    }
-    renderComps();
-  });
-
-  els.compStageFilter.addEventListener("change", () => {
-    state.compFilters.stage = els.compStageFilter.value;
-    renderComps();
-  });
-
-  els.synergyHero.addEventListener("change", () => {
-    state.synergyHeroKey = els.synergyHero.value;
-    renderSynergyMap();
   });
 
   [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
@@ -1104,7 +1082,6 @@ async function bootstrap() {
 function renderInitialLoading() {
   els.heroList.innerHTML = Array.from({ length: 7 }, () => '<div class="hero-row skeleton"></div>').join("");
   els.heroDetail.innerHTML = '<div class="empty-state skeleton"></div>';
-  renderComps();
   renderSensitivity();
 }
 
@@ -1263,7 +1240,6 @@ function renderAll() {
   renderUpdates();
   renderCompDiagnosisControls();
   renderSynergyMapControls();
-  renderComps();
   renderSensitivityControls();
   renderSensitivity();
   renderHeroMapFilterOptions();
@@ -1552,6 +1528,9 @@ function renderUpdateCard(update) {
 }
 
 function renderComps() {
+  if (!els.compGrid) {
+    return;
+  }
   renderCompFilterOptions();
   const stage = getSelectedStage();
   if (!stage) {
@@ -1703,6 +1682,9 @@ function buildAllComps() {
 }
 
 function renderCompFilterOptions() {
+  if (!els.compInitialFilter || !els.compStageFilter) {
+    return;
+  }
   const selected = { ...state.compFilters };
   const visibleStages = getVisibleCompStages();
   setSelectOptions(
@@ -1777,21 +1759,35 @@ function setHeroSelectOptions(select, role, preferredKey) {
 }
 
 function renderSynergyMapControls() {
-  if (!els.synergyHero || !els.synergyMap) {
+  if (!els.centerHeroGrid || !els.synergyMap) {
     return;
   }
   const heroes = sortHeroesForQuickPerks(state.heroes);
   const preferred = state.synergyHeroKey || state.selectedHeroKey || heroes[0]?.key || "";
   const selected = heroes.some((hero) => hero.key === preferred) ? preferred : heroes[0]?.key || "";
   state.synergyHeroKey = selected;
-  els.synergyHero.innerHTML = heroes
-    .map((hero) => {
-      const isSelected = hero.key === selected ? " selected" : "";
-      const fav = state.favoriteHeroKeys.has(hero.key) ? "★ " : "";
-      return `<option value="${escapeAttr(hero.key)}"${isSelected}>${fav}${escapeHtml(hero.name)} / ${escapeHtml(roleLabel(hero.role))}</option>`;
-    })
-    .join("");
+  els.centerHeroGrid.innerHTML = heroes.map((hero) => renderCenterHeroButton(hero, selected)).join("");
+  els.centerHeroGrid.querySelectorAll("[data-synergy-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.synergyHeroKey = button.dataset.synergyHeroKey;
+      renderSynergyMapControls();
+    });
+  });
   renderSynergyMap();
+}
+
+function renderCenterHeroButton(hero, selected) {
+  const active = hero.key === selected ? " is-active" : "";
+  const favorite = state.favoriteHeroKeys.has(hero.key) ? " is-favorite" : "";
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="center-hero-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
+  return `
+    <button class="center-hero-button${active}${favorite}" type="button" data-synergy-hero-key="${escapeAttr(hero.key)}" aria-pressed="${active ? "true" : "false"}" title="${escapeAttr(hero.name)}">
+      ${portrait}
+      <span>${state.favoriteHeroKeys.has(hero.key) ? "★ " : ""}${escapeHtml(hero.name)}</span>
+    </button>
+  `;
 }
 
 function renderSynergyMap() {

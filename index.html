@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=synergy-map">
-    <script src="./app.js?v=synergy-map" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=synergy-icon-picker">
+    <script src="./app.js?v=synergy-icon-picker" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -67,8 +67,8 @@
             <strong>ヒーロー・パーク</strong>
           </button>
           <button type="button" data-view-target="comps">
-            <span>マップを見る時</span>
-            <strong>構成・相性</strong>
+            <span>相性を見る時</span>
+            <strong>相性・診断</strong>
           </button>
           <button type="button" data-view-target="sensitivity">
             <span>操作を直す時</span>
@@ -237,28 +237,13 @@
           </div>
         </section>
 
-        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Recommended compositions">
+        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and diagnosis">
           <div class="section-head">
             <div>
-              <span class="eyebrow">Recommended Comps</span>
-              <h2>キャラ組み合わせ例</h2>
+              <span class="eyebrow">Matchup Guide</span>
+              <h2>相性・アンチ相関図</h2>
             </div>
-            <span class="section-note">ステージ名から攻撃/防衛を表示</span>
-          </div>
-
-          <div class="comp-filters" aria-label="Composition filters">
-            <label>
-              <span>頭文字</span>
-              <select id="compInitialFilter">
-                <option value="all">すべて</option>
-              </select>
-            </label>
-            <label>
-              <span>ステージ名</span>
-              <select id="compStageFilter">
-                <option value="all">ステージを選択</option>
-              </select>
-            </label>
+            <span class="section-note">中心キャラをアイコンから選択</span>
           </div>
 
           <div class="comp-helper" aria-label="Composition diagnosis">
@@ -300,15 +285,11 @@
                 <span class="eyebrow">Synergy Map</span>
                 <h3>相性相関図</h3>
               </div>
-              <label class="synergy-select">
-                <span>中心キャラ</span>
-                <select id="synergyHero"></select>
-              </label>
+              <span class="section-note">クリックで中心を変更</span>
             </div>
+            <div id="centerHeroGrid" class="center-hero-grid" aria-label="Center hero picker"></div>
             <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
           </div>
-
-          <div id="compGrid" class="comp-grid" aria-live="polite"></div>
         </section>
 
         <section id="sensitivity" class="sensitivity-section" data-view-panel="sensitivity" aria-label="Console sensitivity helper">
