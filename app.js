@@ -2,6 +2,11 @@ const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const RECENT_UPDATE_DAYS = 31;
+const QUICK_PERK_ROLES = [
+  { role: "tank", label: "Tank", ja: "タンク" },
+  { role: "damage", label: "Damage", ja: "ダメージ" },
+  { role: "support", label: "Support", ja: "サポート" },
+];
 const PATCH_UPDATES = [
   {
     type: "Hero",
@@ -888,6 +893,7 @@ function cacheElements() {
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
   els.heroMapFilter = document.querySelector("#heroMapFilter");
   els.heroMapNote = document.querySelector("#heroMapNote");
+  els.quickPerkBoard = document.querySelector("#quickPerkBoard");
   els.heroList = document.querySelector("#heroList");
   els.heroDetail = document.querySelector("#heroDetail");
   els.heroCount = document.querySelector("#heroCount");
@@ -1195,6 +1201,7 @@ async function loadHeroDetails(heroes, { force = false } = {}) {
     } finally {
       completed += 1;
       setProgress(`Perks ${completed}/${heroes.length}`);
+      renderQuickPerkBoard();
       if (hero.key === state.selectedHeroKey) {
         renderHeroDetail();
       }
@@ -1251,6 +1258,7 @@ function renderAll() {
   renderSensitivityControls();
   renderSensitivity();
   renderHeroMapFilterOptions();
+  renderQuickPerkBoard();
   renderHeroList();
   renderHeroDetail();
 }
@@ -2227,6 +2235,104 @@ function sortHeroesForList(heroes) {
       return a.index - b.index;
     })
     .map((item) => item.hero);
+}
+
+function sortHeroesForQuickPerks(heroes) {
+  return [...heroes].sort((a, b) => {
+    const aFavorite = state.favoriteHeroKeys.has(a.key) ? 1 : 0;
+    const bFavorite = state.favoriteHeroKeys.has(b.key) ? 1 : 0;
+    if (aFavorite !== bFavorite) {
+      return bFavorite - aFavorite;
+    }
+    return a.name.localeCompare(b.name, "ja");
+  });
+}
+
+function renderQuickPerkBoard() {
+  if (!els.quickPerkBoard) {
+    return;
+  }
+  els.quickPerkBoard.innerHTML = QUICK_PERK_ROLES.map((role) => renderQuickPerkRole(role)).join("");
+  els.quickPerkBoard.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHero(button.dataset.heroKey, {
+      resetFilters: true,
+      switchView: true,
+      scrollIntoView: true,
+    }));
+  });
+}
+
+function renderQuickPerkRole(role) {
+  const heroes = sortHeroesForQuickPerks(state.heroes.filter((hero) => hero.role === role.role));
+  return `
+    <section class="quick-perk-role">
+      <div class="quick-perk-role-head">
+        <span>
+          <strong>${escapeHtml(role.ja)}</strong>
+          <small>${escapeHtml(role.label)}</small>
+        </span>
+        <em>${heroes.length}</em>
+      </div>
+      <div class="quick-perk-list">
+        ${heroes.length ? heroes.map((hero) => renderQuickPerkRow(hero)).join("") : renderEmpty("ヒーロー取得中")}
+      </div>
+    </section>
+  `;
+}
+
+function renderQuickPerkRow(hero) {
+  const minor = getRecommendedPerk(hero, "minor");
+  const major = getRecommendedPerk(hero, "major");
+  const favorite = state.favoriteHeroKeys.has(hero.key);
+  return `
+    <button class="quick-perk-row${favorite ? " is-favorite" : ""}" type="button" data-hero-key="${escapeAttr(hero.key)}">
+      <span class="quick-perk-hero">
+        <strong>${favorite ? "★ " : ""}${escapeHtml(hero.name)}</strong>
+        <small>${escapeHtml(roleLabel(hero.role))}</small>
+      </span>
+      ${renderQuickPerkCell("Minor", minor)}
+      ${renderQuickPerkCell("Major", major)}
+    </button>
+  `;
+}
+
+function roleLabel(role) {
+  return QUICK_PERK_ROLES.find((item) => item.role === role)?.ja || role || "";
+}
+
+function renderQuickPerkCell(label, entry) {
+  if (!entry) {
+    return `
+      <span class="quick-perk-cell is-loading">
+        <small>${escapeHtml(label)}</small>
+        <span>取得中</span>
+      </span>
+    `;
+  }
+  const usageLabel = Number.isFinite(entry.usage)
+    ? `${entry.usage}%`
+    : entry.analysis.level.replace("採用目安 ", "");
+  return `
+    <span class="quick-perk-cell is-${escapeAttr(entry.analysis.levelKey)}">
+      <small>${escapeHtml(label)} · ${escapeHtml(usageLabel)}</small>
+      <span>${escapeHtml(entry.perk.name || "Unknown")}</span>
+    </span>
+  `;
+}
+
+function getRecommendedPerk(hero, type) {
+  const detail = state.heroDetails.get(hero.key);
+  if (!detail || detail.error) {
+    return null;
+  }
+  const stat = state.heroStats.get(hero.key);
+  const perks = normalizePerks(detail.perks)[type] || [];
+  return perks
+    .map((perk, index) => {
+      const usage = getOwPerksUsage(hero, type, index);
+      return { perk, index, usage, analysis: analyzePerk(perk, index, type, hero, stat, usage) };
+    })
+    .sort((a, b) => b.analysis.score - a.analysis.score || a.index - b.index)[0] || null;
 }
 
 function renderHeroDetail() {

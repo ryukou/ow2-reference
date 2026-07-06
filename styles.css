@@ -365,6 +365,137 @@ a {
   padding: 0 14px;
 }
 
+.quick-perk-section {
+  margin-bottom: 14px;
+}
+
+.quick-perk-board {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.quick-perk-role {
+  border: 1px solid var(--line);
+  background: rgba(23, 27, 35, 0.82);
+  padding: 12px;
+}
+
+.quick-perk-role-head {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.quick-perk-role-head span {
+  display: grid;
+  gap: 2px;
+}
+
+.quick-perk-role-head strong {
+  font-size: 0.98rem;
+}
+
+.quick-perk-role-head small,
+.quick-perk-role-head em {
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.quick-perk-list {
+  display: grid;
+  gap: 6px;
+}
+
+.quick-perk-row {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: minmax(86px, 0.75fr) minmax(0, 1fr) minmax(0, 1fr);
+  align-items: stretch;
+  gap: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(14, 16, 20, 0.5);
+  color: var(--text);
+  padding: 6px;
+  text-align: left;
+}
+
+.quick-perk-row:hover,
+.quick-perk-row:focus-visible {
+  border-color: rgba(243, 161, 58, 0.52);
+  background: rgba(243, 161, 58, 0.1);
+}
+
+.quick-perk-row.is-favorite {
+  border-color: rgba(243, 161, 58, 0.42);
+  background: rgba(243, 161, 58, 0.08);
+}
+
+.quick-perk-hero,
+.quick-perk-cell {
+  min-width: 0;
+  display: grid;
+  align-content: center;
+  gap: 3px;
+}
+
+.quick-perk-hero {
+  padding: 4px 5px;
+}
+
+.quick-perk-hero strong,
+.quick-perk-cell span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.quick-perk-hero strong {
+  font-size: 0.82rem;
+}
+
+.quick-perk-hero small,
+.quick-perk-cell small {
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+}
+
+.quick-perk-cell {
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.035);
+  padding: 5px 6px;
+}
+
+.quick-perk-cell span {
+  font-size: 0.78rem;
+  font-weight: 900;
+}
+
+.quick-perk-cell.is-high {
+  border-color: rgba(114, 209, 125, 0.45);
+  background: rgba(114, 209, 125, 0.08);
+}
+
+.quick-perk-cell.is-medium {
+  border-color: rgba(56, 201, 222, 0.42);
+  background: rgba(56, 201, 222, 0.08);
+}
+
+.quick-perk-cell.is-situational {
+  border-color: rgba(243, 161, 58, 0.4);
+  background: rgba(243, 161, 58, 0.08);
+}
+
+.quick-perk-cell.is-loading span {
+  color: var(--muted);
+}
+
 .mindset-layout {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1526,6 +1657,7 @@ a {
   .comp-grid,
   .mindset-checklist,
   .diagnosis-grid,
+  .quick-perk-board,
   .sensitivity-tool,
   .sens-advice {
     grid-template-columns: 1fr;
@@ -1641,6 +1773,26 @@ a {
     min-height: 220px;
     align-items: end;
     padding: 18px;
+  }
+
+  .quick-perk-row {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-perk-hero,
+  .quick-perk-cell {
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: center;
+  }
+
+  .quick-perk-hero small,
+  .quick-perk-cell small {
+    min-width: 52px;
+  }
+
+  .quick-perk-hero strong,
+  .quick-perk-cell span {
+    white-space: normal;
   }
 
   .meta-stats {
