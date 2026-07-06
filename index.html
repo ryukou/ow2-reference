@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=synergy-icon-picker">
-    <script src="./app.js?v=synergy-icon-picker" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=deprioritize-tools">
+    <script src="./app.js?v=deprioritize-tools" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -29,8 +29,8 @@
           <a href="#mindset" data-view-target="mindset">Mindset</a>
           <a href="#heroes" data-view-target="heroes">Heroes</a>
           <a href="#comps" data-view-target="comps">Comps</a>
-          <a href="#sensitivity" data-view-target="sensitivity">Sens</a>
           <a href="#updates" data-view-target="updates">Updates</a>
+          <a href="#sensitivity" data-view-target="sensitivity">Sens</a>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -70,13 +70,13 @@
             <span>相性を見る時</span>
             <strong>相性・診断</strong>
           </button>
-          <button type="button" data-view-target="sensitivity">
-            <span>操作を直す時</span>
-            <strong>感度</strong>
-          </button>
           <button type="button" data-view-target="updates">
             <span>環境確認</span>
             <strong>ニュース</strong>
+          </button>
+          <button type="button" data-view-target="sensitivity">
+            <span>たまに使う</span>
+            <strong>感度</strong>
           </button>
         </section>
 
@@ -246,13 +246,25 @@
             <span class="section-note">中心キャラをアイコンから選択</span>
           </div>
 
+          <div class="synergy-map-section" aria-label="Hero synergy map">
+            <div class="section-head compact">
+              <div>
+                <span class="eyebrow">Synergy Map</span>
+                <h3>相性相関図</h3>
+              </div>
+              <span class="section-note">クリックで中心を変更</span>
+            </div>
+            <div id="centerHeroGrid" class="center-hero-grid" aria-label="Center hero picker"></div>
+            <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
+          </div>
+
           <div class="comp-helper" aria-label="Composition diagnosis">
             <div class="section-head compact">
               <div>
                 <span class="eyebrow">Comp Check</span>
                 <h3>組み合わせ診断</h3>
               </div>
-              <span class="section-note">アンチパターンを確認</span>
+              <span class="section-note">たまに見る用</span>
             </div>
             <div class="diagnosis-controls">
               <label>
@@ -278,18 +290,18 @@
             </div>
             <div id="compDiagnosis" class="diagnosis-result" aria-live="polite"></div>
           </div>
+        </section>
 
-          <div class="synergy-map-section" aria-label="Hero synergy map">
-            <div class="section-head compact">
-              <div>
-                <span class="eyebrow">Synergy Map</span>
-                <h3>相性相関図</h3>
-              </div>
-              <span class="section-note">クリックで中心を変更</span>
+        <section id="updates" class="updates-section" data-view-panel="updates" aria-label="Patch notes and news">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Patch & News</span>
+              <h2>パッチ・イベント・ニュース</h2>
             </div>
-            <div id="centerHeroGrid" class="center-hero-grid" aria-label="Center hero picker"></div>
-            <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
+            <span class="section-note">直近1か月 + 今後の予定</span>
           </div>
+
+          <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
 
         <section id="sensitivity" class="sensitivity-section" data-view-panel="sensitivity" aria-label="Console sensitivity helper">
@@ -360,18 +372,6 @@
 
             <div id="sensitivityResult" class="sensitivity-result" aria-live="polite"></div>
           </div>
-        </section>
-
-        <section id="updates" class="updates-section" data-view-panel="updates" aria-label="Patch notes and news">
-          <div class="section-head">
-            <div>
-              <span class="eyebrow">Patch & News</span>
-              <h2>パッチ・イベント・ニュース</h2>
-            </div>
-            <span class="section-note">直近1か月 + 今後の予定</span>
-          </div>
-
-          <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
       </main>
     </div>
