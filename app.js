@@ -2284,11 +2284,17 @@ function renderQuickPerkRow(hero) {
   const minor = getRecommendedPerk(hero, "minor");
   const major = getRecommendedPerk(hero, "major");
   const favorite = state.favoriteHeroKeys.has(hero.key);
+  const portrait = hero.portrait
+    ? `<img class="quick-perk-avatar" src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="quick-perk-avatar is-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
   return `
     <button class="quick-perk-row${favorite ? " is-favorite" : ""}" type="button" data-hero-key="${escapeAttr(hero.key)}">
       <span class="quick-perk-hero">
-        <strong>${favorite ? "★ " : ""}${escapeHtml(hero.name)}</strong>
-        <small>${escapeHtml(roleLabel(hero.role))}</small>
+        ${portrait}
+        <span class="quick-perk-hero-text">
+          <strong>${favorite ? "★ " : ""}${escapeHtml(hero.name)}</strong>
+          <small>${escapeHtml(roleLabel(hero.role))}</small>
+        </span>
       </span>
       ${renderQuickPerkCell("Minor", minor)}
       ${renderQuickPerkCell("Major", major)}
@@ -2312,10 +2318,16 @@ function renderQuickPerkCell(label, entry) {
   const usageLabel = Number.isFinite(entry.usage)
     ? `${entry.usage}%`
     : entry.analysis.level.replace("採用目安 ", "");
+  const icon = entry.perk.icon
+    ? `<img class="quick-perk-icon" src="${safeUrl(entry.perk.icon)}" alt="">`
+    : '<span class="quick-perk-icon is-placeholder"></span>';
   return `
     <span class="quick-perk-cell is-${escapeAttr(entry.analysis.levelKey)}">
       <small>${escapeHtml(label)} · ${escapeHtml(usageLabel)}</small>
-      <span>${escapeHtml(entry.perk.name || "Unknown")}</span>
+      <span class="quick-perk-main">
+        ${icon}
+        <span>${escapeHtml(entry.perk.name || "Unknown")}</span>
+      </span>
     </span>
   `;
 }

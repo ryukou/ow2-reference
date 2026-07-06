@@ -413,9 +413,9 @@ a {
 
 .quick-perk-row {
   width: 100%;
-  min-height: 58px;
+  min-height: 62px;
   display: grid;
-  grid-template-columns: minmax(86px, 0.75fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: minmax(106px, 0.8fr) minmax(0, 1fr) minmax(0, 1fr);
   align-items: stretch;
   gap: 6px;
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -445,11 +445,39 @@ a {
 }
 
 .quick-perk-hero {
+  grid-template-columns: 30px minmax(0, 1fr);
+  align-items: center;
   padding: 4px 5px;
 }
 
+.quick-perk-avatar,
+.quick-perk-icon {
+  display: block;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.quick-perk-avatar {
+  width: 30px;
+  height: 30px;
+}
+
+.quick-perk-avatar.is-placeholder {
+  display: grid;
+  place-items: center;
+  color: var(--muted);
+  font-size: 0.68rem;
+  font-weight: 900;
+}
+
+.quick-perk-hero-text {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
 .quick-perk-hero strong,
-.quick-perk-cell span {
+.quick-perk-main span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -475,6 +503,23 @@ a {
 .quick-perk-cell span {
   font-size: 0.78rem;
   font-weight: 900;
+}
+
+.quick-perk-main {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr);
+  align-items: center;
+  gap: 5px;
+}
+
+.quick-perk-icon {
+  width: 22px;
+  height: 22px;
+}
+
+.quick-perk-icon.is-placeholder {
+  border: 1px solid var(--line);
 }
 
 .quick-perk-cell.is-high {
