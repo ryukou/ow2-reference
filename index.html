@@ -12,7 +12,7 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=hero-specific-counterplay">
+    <link rel="stylesheet" href="./styles.css?v=readability-pass">
     <script src="./app.js?v=hero-specific-counterplay" defer></script>
   </head>
   <body>
@@ -26,12 +26,12 @@
           </span>
         </a>
         <nav class="top-actions" aria-label="Main">
-          <a href="#mindset" data-view-target="mindset">Mindset</a>
-          <a href="#heroes" data-view-target="heroes">Heroes</a>
-          <a href="#guides" data-view-target="guides">Guides</a>
-          <a href="#comps" data-view-target="comps">Comps</a>
-          <a href="#updates" data-view-target="updates">Updates</a>
-          <a href="#sensitivity" data-view-target="sensitivity">Sens</a>
+          <a href="#mindset" data-view-target="mindset">心得</a>
+          <a href="#heroes" data-view-target="heroes">ヒーロー</a>
+          <a href="#guides" data-view-target="guides">攻略</a>
+          <a href="#comps" data-view-target="comps">相性</a>
+          <a href="#updates" data-view-target="updates">更新</a>
+          <a href="#sensitivity" data-view-target="sensitivity">感度</a>
           <button id="refreshButton" type="button">更新</button>
         </nav>
       </header>
@@ -40,7 +40,7 @@
         <section class="quick-board" aria-label="Hero meta stats">
           <div>
             <span class="eyebrow">Competitive Console Asia</span>
-            <h1>ヒーロー性能、パーク、構成例</h1>
+            <h1>OW2 試合中に見る早見表</h1>
           </div>
           <div id="metaStats" class="meta-stats" aria-live="polite">
             <div class="mini-stat">
@@ -83,15 +83,6 @@
             <span>たまに使う</span>
             <strong>感度</strong>
           </button>
-        </section>
-
-        <section class="patch-summary" aria-label="Latest patch summary">
-          <div>
-            <span class="eyebrow">Latest Patch</span>
-            <h2 id="latestPatchTitle">パッチ情報を確認中</h2>
-            <p id="latestPatchSummary">環境確認にパッチ・イベント・ニュースをまとめています。</p>
-          </div>
-          <button type="button" data-view-target="updates">パッチを見る</button>
         </section>
 
         <section id="mindset" class="mindset-section" data-view-panel="mindset" aria-label="Bronze and Silver improvement advice">
@@ -405,6 +396,15 @@
 
             <div id="sensitivityResult" class="sensitivity-result" aria-live="polite"></div>
           </div>
+        </section>
+
+        <section class="patch-summary" aria-label="Latest patch summary">
+          <div>
+            <span class="eyebrow">Latest Patch</span>
+            <h2 id="latestPatchTitle">パッチ情報を確認中</h2>
+            <p id="latestPatchSummary">環境確認にパッチ・イベント・ニュースをまとめています。</p>
+          </div>
+          <button type="button" data-view-target="updates">パッチを見る</button>
         </section>
       </main>
     </div>

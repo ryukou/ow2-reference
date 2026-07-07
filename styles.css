@@ -4,6 +4,7 @@
   --surface: #11161d;
   --panel: #151b23;
   --panel-2: #1d2530;
+  --panel-soft: rgba(19, 24, 31, 0.76);
   --line: #2a3442;
   --line-strong: #3d4b5d;
   --text: #f5f7fb;
@@ -15,6 +16,7 @@
   --red: #f07670;
   --violet: #b49aff;
   --shadow: 0 16px 42px rgba(0, 0, 0, 0.28);
+  --shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.18);
 }
 
 * {
@@ -28,7 +30,9 @@ html {
 body {
   min-width: 320px;
   margin: 0;
-  background: var(--bg);
+  background:
+    linear-gradient(180deg, rgba(21, 27, 35, 0.62), rgba(11, 13, 17, 0) 420px),
+    var(--bg);
   color: var(--text);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
@@ -58,13 +62,18 @@ button:disabled {
   opacity: 0.68;
 }
 
+:focus-visible {
+  outline: 3px solid rgba(88, 215, 232, 0.38);
+  outline-offset: 2px;
+}
+
 a {
   color: inherit;
   text-decoration: none;
 }
 
 .app-shell {
-  width: min(1560px, 100%);
+  width: min(1480px, 100%);
   margin: 0 auto;
   padding: 14px;
 }
@@ -82,10 +91,10 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: -14px -14px 12px;
+  margin: -14px -14px 14px;
   padding: 10px 14px;
   border-bottom: 1px solid rgba(255, 255, 255, 0.07);
-  background: rgba(11, 13, 17, 0.94);
+  background: rgba(11, 13, 17, 0.96);
   backdrop-filter: blur(14px);
   transition:
     transform 180ms ease,
@@ -143,6 +152,7 @@ a {
   display: flex;
   align-items: center;
   gap: 8px;
+  min-width: 0;
 }
 
 .top-actions a,
@@ -151,7 +161,7 @@ a {
   border: 1px solid var(--line);
   background: #121820;
   color: var(--text);
-  padding: 9px 12px;
+  padding: 9px 13px;
 }
 
 .top-actions a:hover,
@@ -162,7 +172,7 @@ a {
 
 .top-actions a.is-active {
   border-color: rgba(88, 215, 232, 0.46);
-  background: rgba(88, 215, 232, 0.12);
+  background: rgba(88, 215, 232, 0.16);
   color: var(--cyan);
 }
 
@@ -178,9 +188,9 @@ a {
   grid-template-columns: minmax(0, 1fr) auto;
   gap: 18px;
   align-items: end;
-  min-height: 132px;
-  margin: 0 0 14px;
-  padding: 22px;
+  min-height: 118px;
+  margin: 0 0 12px;
+  padding: 20px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -189,14 +199,14 @@ a {
     url("https://images.blz-contentstack.com/v3/assets/blt2477dcaf4ebd440c/bltc0169f6eaa5d495c/633755ecddbec210e88589e7/OVERWATCH2_HEROES_4K.jpg");
   background-position: center 36%;
   background-size: cover;
-  box-shadow: var(--shadow);
+  box-shadow: var(--shadow-soft);
 }
 
 .quick-board h1 {
   max-width: 780px;
   margin: 6px 0 0;
-  font-size: clamp(1.7rem, 3vw, 3.1rem);
-  line-height: 1;
+  font-size: clamp(1.55rem, 2.6vw, 2.65rem);
+  line-height: 1.04;
 }
 
 .eyebrow {
@@ -229,6 +239,8 @@ a {
 .mini-stat {
   min-height: 68px;
   padding: 11px;
+  background: rgba(17, 22, 29, 0.86);
+  backdrop-filter: blur(8px);
 }
 
 .mini-stat span {
@@ -256,26 +268,38 @@ a {
 
 .view-switcher {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  margin: 0 0 14px;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 16px;
 }
 
 .view-switcher button {
+  position: relative;
   display: grid;
   gap: 5px;
-  min-height: 72px;
+  min-height: 66px;
+  min-width: 0;
   border: 1px solid var(--line);
-  background: var(--panel);
+  background: var(--panel-soft);
   color: var(--text);
   padding: 12px;
   text-align: left;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 .view-switcher button.is-active {
   border-color: rgba(88, 215, 232, 0.5);
   background: linear-gradient(180deg, rgba(88, 215, 232, 0.16), var(--panel));
   box-shadow: inset 0 0 0 1px rgba(88, 215, 232, 0.1);
+}
+
+.view-switcher button.is-active::before {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  border-radius: 8px 0 0 8px;
+  background: var(--cyan);
+  content: "";
 }
 
 .view-switcher span {
@@ -287,6 +311,7 @@ a {
 .view-switcher strong {
   font-size: 0.98rem;
   line-height: 1.2;
+  overflow-wrap: anywhere;
 }
 
 .patch-summary {
@@ -294,10 +319,10 @@ a {
   align-items: center;
   justify-content: space-between;
   gap: 14px;
-  margin: 0 0 14px;
+  margin: 12px 0 0;
   border: 1px solid rgba(243, 161, 58, 0.42);
   border-radius: 8px;
-  background: linear-gradient(90deg, rgba(243, 161, 58, 0.12), var(--panel));
+  background: linear-gradient(90deg, rgba(243, 161, 58, 0.1), rgba(21, 27, 35, 0.82));
   padding: 13px;
 }
 
@@ -331,6 +356,23 @@ a {
   row-gap: 10px;
   gap: 18px;
   margin-bottom: 10px;
+}
+
+.hero-controls {
+  position: sticky;
+  top: 64px;
+  z-index: 12;
+  align-items: center;
+  border: 1px solid rgba(42, 52, 66, 0.88);
+  border-radius: 8px;
+  background: rgba(11, 13, 17, 0.92);
+  padding: 10px;
+  backdrop-filter: blur(14px);
+}
+
+.section-head {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+  padding-bottom: 10px;
 }
 
 .map-field {
@@ -380,8 +422,12 @@ a {
 .guide-controls {
   display: grid;
   grid-template-columns: repeat(3, minmax(180px, 1fr));
-  gap: 8px;
-  margin-bottom: 12px;
+  gap: 10px;
+  margin-bottom: 14px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(17, 22, 29, 0.74);
+  padding: 10px;
 }
 
 .guide-controls label {
@@ -416,7 +462,7 @@ a {
 .guide-side-grid,
 .guide-check-grid {
   display: grid;
-  gap: 10px;
+  gap: 12px;
 }
 
 .guide-quick-grid {
@@ -444,7 +490,7 @@ a {
 
 .guide-quick-card,
 .guide-card {
-  padding: 12px;
+  padding: 14px;
 }
 
 .guide-side-grid section,
@@ -476,7 +522,7 @@ a {
 .guide-quick-card li,
 .guide-list-block li {
   color: var(--muted);
-  line-height: 1.5;
+  line-height: 1.62;
 }
 
 .guide-warning {
@@ -486,11 +532,16 @@ a {
 .quick-perk-board {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .quick-perk-role {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  max-height: clamp(380px, calc(100vh - 300px), 560px);
+  overflow: hidden;
   border: 1px solid var(--line);
+  border-radius: 8px;
   background: rgba(23, 27, 35, 0.82);
   padding: 12px;
 }
@@ -523,6 +574,8 @@ a {
 .quick-perk-list {
   display: grid;
   gap: 6px;
+  overflow: auto;
+  padding-right: 2px;
 }
 
 .quick-perk-row {
@@ -658,7 +711,7 @@ a {
 .mindset-layout {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
+  gap: 12px;
 }
 
 .mindset-card,
@@ -673,8 +726,8 @@ a {
   display: grid;
   align-content: start;
   gap: 8px;
-  min-height: 170px;
-  padding: 13px;
+  min-height: 158px;
+  padding: 14px;
 }
 
 .mindset-card.is-primary {
@@ -699,7 +752,7 @@ a {
 .role-mindset-card li,
 .mindset-checklist li {
   color: var(--muted);
-  line-height: 1.52;
+  line-height: 1.62;
 }
 
 .mindset-card p {
@@ -710,19 +763,19 @@ a {
 .mindset-checklist {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .role-mindset-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 10px;
-  margin-top: 10px;
+  gap: 12px;
+  margin-top: 12px;
 }
 
 .role-mindset-card {
-  padding: 13px;
+  padding: 14px;
 }
 
 .role-mindset-card.is-solo {
@@ -782,7 +835,7 @@ a {
 
 .hero-layout {
   display: grid;
-  grid-template-columns: minmax(300px, 380px) minmax(0, 1fr);
+  grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
   gap: 14px;
   align-items: start;
 }
@@ -795,6 +848,7 @@ a {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
+  box-shadow: var(--shadow-soft);
 }
 
 .rail-head {
@@ -817,13 +871,14 @@ a {
 
 .hero-list {
   display: grid;
-  gap: 4px;
+  gap: 5px;
   max-height: calc(100vh - 142px);
   overflow: auto;
   padding: 6px;
 }
 
 .hero-row {
+  position: relative;
   display: grid;
   grid-template-columns: 44px minmax(0, 1fr) auto;
   gap: 9px;
@@ -831,7 +886,7 @@ a {
   width: 100%;
   min-height: 56px;
   border: 1px solid transparent;
-  background: transparent;
+  background: rgba(255, 255, 255, 0.018);
   color: var(--text);
   padding: 6px;
   text-align: left;
@@ -841,6 +896,15 @@ a {
 .hero-row.is-active {
   border-color: rgba(56, 201, 222, 0.46);
   background: rgba(56, 201, 222, 0.08);
+}
+
+.hero-row.is-active::before {
+  position: absolute;
+  inset: 6px auto 6px 0;
+  width: 3px;
+  border-radius: 0 4px 4px 0;
+  background: var(--cyan);
+  content: "";
 }
 
 .hero-row.is-favorite {
@@ -924,7 +988,7 @@ a {
   position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(150px, 220px);
-  min-height: 220px;
+  min-height: 208px;
   overflow: hidden;
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -940,13 +1004,13 @@ a {
   flex-direction: column;
   justify-content: end;
   min-width: 0;
-  padding: 22px;
+  padding: 20px;
 }
 
 .hero-copy h2 {
   margin: 6px 0;
-  font-size: clamp(2rem, 5vw, 4.3rem);
-  line-height: 0.96;
+  font-size: clamp(1.95rem, 4.2vw, 3.7rem);
+  line-height: 1;
 }
 
 .hero-title-row {
@@ -1028,13 +1092,13 @@ a {
 .detail-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 8px;
-  margin: 10px 0 14px;
+  gap: 10px;
+  margin: 12px 0 14px;
 }
 
 .metric {
-  min-height: 72px;
-  padding: 11px;
+  min-height: 68px;
+  padding: 12px;
 }
 
 .metric strong {
@@ -1045,7 +1109,7 @@ a {
 
 .content-grid {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(330px, 0.82fr);
+  grid-template-columns: minmax(0, 1fr) minmax(350px, 0.9fr);
   gap: 14px;
 }
 
@@ -1067,7 +1131,7 @@ a {
 .ability-grid,
 .counter-grid {
   display: grid;
-  gap: 8px;
+  gap: 10px;
 }
 
 .perk-card,
@@ -1075,8 +1139,9 @@ a {
   display: grid;
   grid-template-columns: 42px minmax(0, 1fr);
   gap: 10px;
-  min-height: 86px;
-  padding: 11px;
+  min-height: 88px;
+  background: rgba(21, 27, 35, 0.9);
+  padding: 12px;
 }
 
 .perk-card.is-recommended {
@@ -1109,28 +1174,28 @@ a {
 .playstyle-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #10161d;
-  padding: 11px;
+  background: rgba(16, 22, 29, 0.96);
+  padding: 13px;
 }
 
 .counterplay-panel {
   border: 1px solid rgba(243, 161, 58, 0.28);
   border-radius: 8px;
   background: rgba(16, 22, 29, 0.92);
-  padding: 11px;
+  padding: 13px;
 }
 
 .counterplay-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 8px;
+  gap: 10px;
 }
 
 .counterplay-grid section {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: rgba(14, 16, 20, 0.42);
-  padding: 9px;
+  background: rgba(14, 16, 20, 0.55);
+  padding: 11px;
 }
 
 .counterplay-grid h4,
@@ -1142,7 +1207,7 @@ a {
 .counterplay-grid p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.62;
 }
 
 .counterplay-counters {
@@ -1155,7 +1220,7 @@ a {
 .playstyle-panel li,
 .playstyle-avoid span {
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.58;
 }
 
 .playstyle-panel p {
@@ -1185,14 +1250,14 @@ a {
 .tank-map-panel {
   border: 1px solid var(--line);
   border-radius: 8px;
-  background: #10161d;
-  padding: 11px;
+  background: rgba(16, 22, 29, 0.96);
+  padding: 13px;
 }
 
 .tank-map-panel p {
   margin: 0 0 10px;
   color: var(--muted);
-  line-height: 1.45;
+  line-height: 1.58;
 }
 
 .tank-map-list {
@@ -1232,7 +1297,7 @@ a {
   width: 100%;
   min-height: 62px;
   border: 1px solid var(--line);
-  background: #10161d;
+  background: rgba(16, 22, 29, 0.96);
   color: var(--text);
   padding: 8px;
   text-align: left;
@@ -1240,6 +1305,7 @@ a {
 
 .counter-card:hover {
   border-color: rgba(238, 112, 108, 0.62);
+  background: rgba(238, 112, 108, 0.08);
 }
 
 .counter-card img,
@@ -1259,7 +1325,7 @@ a {
 .counter-card small {
   margin-top: 3px;
   color: var(--muted);
-  line-height: 1.35;
+  line-height: 1.48;
 }
 
 .perk-card h4,
@@ -1284,6 +1350,7 @@ a {
   padding: 4px 6px;
   font-size: 0.7rem;
   font-weight: 900;
+  white-space: nowrap;
 }
 
 .perk-card p,
@@ -1292,7 +1359,7 @@ a {
 .error-state p {
   margin: 0;
   color: var(--muted);
-  line-height: 1.48;
+  line-height: 1.58;
 }
 
 .perk-group + .perk-group {
@@ -2116,7 +2183,6 @@ a {
 
 @media (max-width: 1100px) {
   .quick-board,
-  .view-switcher,
   .mindset-layout,
   .role-mindset-grid,
   .guide-controls,
@@ -2136,6 +2202,10 @@ a {
   .sensitivity-tool,
   .sens-advice {
     grid-template-columns: 1fr;
+  }
+
+  .view-switcher {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .comp-filters,
@@ -2181,6 +2251,10 @@ a {
     padding: 8px 10px;
   }
 
+  .hero-controls {
+    position: static;
+  }
+
   .topbar.is-hidden {
     opacity: 0;
     pointer-events: none;
@@ -2188,17 +2262,22 @@ a {
   }
 
   .brand-mark {
-    width: 40px;
-    height: 40px;
+    width: 36px;
+    height: 36px;
     font-size: 0.84rem;
   }
 
+  .brand {
+    flex: 0 0 126px;
+    gap: 10px;
+  }
+
   .brand strong {
-    font-size: 0.94rem;
+    font-size: 0.88rem;
   }
 
   .brand small {
-    font-size: 0.7rem;
+    display: none;
   }
 
   .comp-filters,
