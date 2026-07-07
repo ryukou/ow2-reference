@@ -1095,7 +1095,8 @@ a {
 }
 
 .playstyle-panel,
-.counter-panel {
+.counter-panel,
+.counterplay-panel {
   margin-bottom: 14px;
 }
 
@@ -1110,6 +1111,44 @@ a {
   border-radius: 8px;
   background: #10161d;
   padding: 11px;
+}
+
+.counterplay-panel {
+  border: 1px solid rgba(243, 161, 58, 0.28);
+  border-radius: 8px;
+  background: rgba(16, 22, 29, 0.92);
+  padding: 11px;
+}
+
+.counterplay-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.counterplay-grid section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(14, 16, 20, 0.42);
+  padding: 9px;
+}
+
+.counterplay-grid h4,
+.counterplay-counters h4 {
+  margin: 0 0 6px;
+  font-size: 0.9rem;
+}
+
+.counterplay-grid p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.counterplay-counters {
+  display: grid;
+  gap: 8px;
+  margin-top: 10px;
 }
 
 .playstyle-panel p,
@@ -2084,6 +2123,7 @@ a {
   .guide-quick-grid,
   .guide-side-grid,
   .guide-check-grid,
+  .counterplay-grid,
   .hero-layout,
   .content-grid,
   .update-grid,

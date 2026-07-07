@@ -2849,6 +2849,7 @@ function renderHeroDetail() {
         ${renderPlaystylePanel(hero)}
         ${renderSynergyPanel(hero)}
         ${renderCounterPanel(hero)}
+        ${renderCounterplayPanel(hero)}
         <div class="panel-title">
           <h3>Abilities</h3>
           <span class="chip">${abilities.length}</span>
@@ -3161,6 +3162,70 @@ function renderCounterPanel(hero) {
       </div>
     </div>
   `;
+}
+
+function renderCounterplayPanel(hero) {
+  const counterplay = buildHeroCounterplay(hero);
+  return `
+    <div class="counterplay-panel">
+      <div class="panel-title">
+        <h3>このキャラへの対策</h3>
+        <span class="chip">${escapeHtml(counterplay.badge)}</span>
+      </div>
+      <div class="counterplay-grid">
+        ${renderGuidePoint("狙い方", counterplay.focus)}
+        ${renderGuidePoint("立ち位置", counterplay.position)}
+        ${renderGuidePoint("スキル管理", counterplay.cooldown)}
+        ${renderGuidePoint("注意点", counterplay.warning)}
+      </div>
+      <div class="counterplay-counters">
+        <h4>有効な対策キャラ</h4>
+        <div class="counter-grid">
+          ${counterplay.counters.map(renderCounterCard).join("")}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function buildHeroCounterplay(hero) {
+  const archetypes = getHeroArchetypes(hero.key);
+  const primaryType = archetypes[0] || roleFallbackArchetype(hero.role);
+  const rolePlan = {
+    tank: {
+      focus: "正面で硬さに付き合い続けず、阻害、不和、孤立、移動スキル後を味方全員で狙う。",
+      position: "タンクの得意距離に入り続けない。角を使って射線を切り、横からサポートやDPSに圧をかける。",
+      cooldown: "防御、移動、自己回復を使った直後が攻め時。先にスキルを吐かせてから詰める。",
+      warning: "タンクだけ撃ってキルできない時は、後ろのサポートを下げさせる動きに切り替える。",
+    },
+    damage: {
+      focus: "単独行動や撃った後の帰り道を狙う。逃げスキルを使わせてから、味方と同じタイミングで詰める。",
+      position: "射線に出っぱなしにせず、横や高台から撃たれたら一度角に戻る。",
+      cooldown: "機動力、自衛、バースト火力のスキルを見てから勝負する。先に無理に追わない。",
+      warning: "1対1にこだわりすぎず、味方と同じ敵を見るだけで倒しやすくなる。",
+    },
+    support: {
+      focus: "自衛スキルや逃げスキルを先に使わせてから倒す。回復役を下げさせるだけでも前線が楽になる。",
+      position: "サポートの射線を切り、回復が届かない角や高台へ相手を動かす。",
+      cooldown: "鈴、阻害、無敵、移動などの重要スキルを使った直後に攻める。",
+      warning: "深追いして自分が倒れると逆効果。帰り道を残して圧をかける。",
+    },
+  }[hero.role] || {};
+  const archetypePlan = {
+    brawl: "近距離の殴り合いが得意なので、短い通路で受けず、引きながら削る。",
+    dive: "一気に入ってくるため、孤立しないで合流し、着地後や帰り際を狙う。",
+    poke: "長い射線が得意なので、正面で撃ち合わず遮蔽物をつなぐ。",
+    pick: "ワンピック狙いが強いので、単独行動を避け、見られている射線を切る。",
+  }[primaryType] || "相手の得意距離を避け、味方と同じタイミングで狙う。";
+  const counters = getHeroCounters(hero);
+  return {
+    badge: `${labelRole(hero.role)}対策`,
+    focus: rolePlan.focus,
+    position: `${rolePlan.position} ${archetypePlan}`,
+    cooldown: rolePlan.cooldown,
+    warning: rolePlan.warning,
+    counters,
+  };
 }
 
 function renderSynergyPanel(hero) {
