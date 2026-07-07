@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=readability-pass">
-    <script src="./app.js?v=hero-specific-counterplay" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=learning-hub">
+    <script src="./app.js?v=learning-hub" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -261,13 +261,13 @@
           <div id="guideDetails" class="guide-detail-grid" aria-live="polite"></div>
         </section>
 
-        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and diagnosis">
+        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and composition theory">
           <div class="section-head">
             <div>
               <span class="eyebrow">Matchup Guide</span>
-              <h2>相性・アンチ相関図</h2>
+              <h2>相性・構成セオリー</h2>
             </div>
-            <span class="section-note">中心キャラをアイコンから選択</span>
+            <span class="section-note">相性表 + 構成例の理由</span>
           </div>
 
           <div class="synergy-map-section" aria-label="Hero synergy map">
@@ -282,37 +282,15 @@
             <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
           </div>
 
-          <div class="comp-helper" aria-label="Composition diagnosis">
+          <div class="comp-helper" aria-label="Theory composition examples">
             <div class="section-head compact">
               <div>
-                <span class="eyebrow">Comp Check</span>
-                <h3>組み合わせ診断</h3>
+                <span class="eyebrow">Theory Comps</span>
+                <h3>セオリーの組み合わせ例</h3>
               </div>
-              <span class="section-note">たまに見る用</span>
+              <span class="section-note">構成の狙いと理由を学ぶ</span>
             </div>
-            <div class="diagnosis-controls">
-              <label>
-                <span>Tank</span>
-                <select id="diagTank"></select>
-              </label>
-              <label>
-                <span>Damage 1</span>
-                <select id="diagDamage1"></select>
-              </label>
-              <label>
-                <span>Damage 2</span>
-                <select id="diagDamage2"></select>
-              </label>
-              <label>
-                <span>Support 1</span>
-                <select id="diagSupport1"></select>
-              </label>
-              <label>
-                <span>Support 2</span>
-                <select id="diagSupport2"></select>
-              </label>
-            </div>
-            <div id="compDiagnosis" class="diagnosis-result" aria-live="polite"></div>
+            <div id="theoryCompGrid" class="theory-comp-grid" aria-live="polite"></div>
           </div>
         </section>
 
@@ -322,7 +300,7 @@
               <span class="eyebrow">Patch & News</span>
               <h2>パッチ・イベント・ニュース</h2>
             </div>
-            <span class="section-note">直近1か月 + 今後の予定</span>
+            <span class="section-note">公式パッチ + 公式ニュース + 話題記事</span>
           </div>
 
           <div id="updateGrid" class="update-grid" aria-live="polite"></div>

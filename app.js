@@ -1,77 +1,99 @@
 const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
-const RECENT_UPDATE_DAYS = 31;
+const RECENT_UPDATE_DAYS = 180;
 const QUICK_PERK_ROLES = [
   { role: "tank", label: "Tank", ja: "タンク" },
   { role: "damage", label: "Damage", ja: "ダメージ" },
   { role: "support", label: "Support", ja: "サポート" },
 ];
-const PATCH_UPDATES = [
+const OFFICIAL_PATCH_UPDATES = [
   {
-    type: "Hero",
-    title: "シオン追加",
-    date: "2026-06-16",
+    type: "公式パッチ",
+    title: "2026年2月25日 不具合修正",
+    date: "2026-02-25",
     tone: "info",
-    summary: "Season 3: Into the Tiger's Denで追加されたダメージヒーロー。高機動のフランカー寄り。",
-    details: ["二丁拳銃とバイクを使うダメージヒーロー", "EvadeとJoyrideで素早く接近/離脱", "準備できている相手やCCに弱い"],
-    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-shion-release-date/",
+    category: "patch",
+    summary: "公式パッチノート上の最新更新。バランス変更なしの不具合修正パッチ。",
+    details: ["Dominaのアーマーに対するビームダメージ計算を修正", "PharahのPerk Rocket Salvoが想定以上に発射できる不具合を修正", "6v6 Open Queueのタンク系パッシブ不具合を修正"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/patch-notes/",
   },
   {
-    type: "Patch",
-    title: "Season 3 バランス調整",
-    date: "2026-06-16",
-    tone: "nerf",
-    summary: "Season 3開始時のパッチ。高機動メタを抑えつつ、新環境向けの調整が入った。",
-    details: ["Jetpack Cat: 搬送中の燃料回復ペナルティが重くなり、Transport Shielding系も弱体化", "Jetpack Cat: Biotic PawjectilesやHeadbutt系は補填強化", "シオン追加に合わせてフランカー対策とCCの価値が上がりやすい"],
-    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-kicks-off-with-the-gift-of-jetpack-cat-nerfs-after-the-apache-helicopter-meta-dominated-the-world-cup/",
-  },
-  {
-    type: "Season",
-    title: "Season 3: Into the Tiger's Den",
-    date: "2026-06-16",
+    type: "公式パッチ",
+    title: "2026年2月25日配信パッチ 不具合修正",
+    date: "2026-02-24",
     tone: "info",
-    summary: "シオン実装、新バトルパス、ストア更新、ミシックスキン予定を含む新シーズン。",
-    details: ["開催期間は6月16日から8月中旬見込み", "PC/コンソール/Switch 2で展開", "シオンはヒットスキャン寄りの高機動DPS"],
-    href: "https://www.pcgamer.com/games/fps/overwatch-season-3-shion-release-date/",
+    category: "patch",
+    summary: "日本語公式告知の不具合修正。ヒーロー、スタジアム、UI周辺の修正が中心。",
+    details: ["ソルジャー76スキン、アナ、ジェットパック・キャット、マーシーなどの不具合を修正", "スタジアムUI消失やヴェンデッタのULT関連不具合を修正", "ミズキがスタン中に形代を発動できる不具合を修正"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/patch-notes/",
   },
   {
-    type: "News",
-    title: "シオン開発情報",
-    date: "2026-06-15",
+    type: "公式パッチ",
+    title: "2026年2月19日配信パッチ 不具合修正",
+    date: "2026-02-18",
     tone: "info",
-    summary: "開発初期にはコンボ評価メーターも検討されたが、実戦負荷を考えて見送られた。",
-    details: ["二丁拳銃、X字ボレー、ダッシュ、バイクを連携して戦う設計", "高いスキル上限のフランカー寄り", "準備された相手や妨害には弱い"],
-    href: "https://www.pcgamer.com/games/fps/blizzard-almost-put-devil-mays-style-rank-into-overwatch-for-its-newest-combo-heavy-hero-shion/",
+    category: "patch",
+    summary: "トールビョーン、ジャンカー・クイーン、アッシュ、ミズキ、アンランなどの不具合修正。",
+    details: ["トールビョーンのメイン攻撃とタレットの発射レート不具合を修正", "アッシュのダブルバレル関連不具合を修正", "レッキング・ボールのマルチ・ボール地雷数不具合を修正"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/patch-notes/",
   },
   {
-    type: "Preview",
-    title: "シオンのバイク能力公開",
-    date: "2026-06-12",
-    tone: "video",
-    summary: "Overwatch初の本格的な乗り物系アビリティとして、バイク移動と投げつけ攻撃が紹介された。",
-    details: ["Joyrideで素早く移動し、バイクを攻撃にも使う", "Evadeでオーバーシールド付きの離脱/接近", "近距離奇襲と逃げ道管理が重要"],
-    href: "https://www.gamesradar.com/games/fps/overwatch-gives-new-hero-shion-a-motorcycle-which-you-can-throw-at-people-when-youre-not-akira-sliding-all-over-the-place/",
-  },
-  {
-    type: "Esports",
-    title: "OWCS Champions Clash",
-    date: "2026-05-25",
-    tone: "esports",
-    summary: "5月23日から25日に開催された直近1か月内のOWCS主要大会。",
-    details: ["直近1か月の過去予定として表示", "次の大型大会はMidseason Championshipが7月30日から8月3日予定", "観戦メタの変化は構成例の見直し材料"],
-    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
-  },
-  {
-    type: "Upcoming",
-    title: "OWCS Midseason Championship",
-    date: "2026-07-30",
-    tone: "esports",
-    summary: "次の国際大会予定。7月30日から8月3日開催予定。",
-    details: ["今後の予定として表示", "Season 3環境での構成傾向を確認しやすい大会", "タンク相性やフランカー対策の参考にする"],
-    href: "https://overwatch.blizzard.com/en-us/news/24246297/owcs-2026-%25E9%2596%258B%25E5%25B9%2595%25E5%2589%258D%25E3%2582%25AC%25E3%2582%25A4%25E3%2583%2589/",
+    type: "公式パッチ",
+    title: "2026年2月14日配信パッチ ヒーロー調整",
+    date: "2026-02-13",
+    tone: "buff",
+    category: "patch",
+    summary: "新ヒーロー6人を対象とした小規模なバランス調整と不具合修正。",
+    details: ["ドミナのバリア耐久を低下", "アンラン、エムレ、ミズキに使いやすさや射程面の強化", "ジェットパック・キャットとヴェンデッタには一部弱体化"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/patch-notes/",
   },
 ];
+const OFFICIAL_NEWS_ITEMS = [
+  {
+    type: "公式ニュース",
+    title: "新要素「サブ・ロール」の紹介",
+    date: "2026-02-26",
+    tone: "info",
+    category: "official-news",
+    summary: "ヒーロー選択と役割理解に関わる新要素。初心者は自分の役割把握に使いやすい。",
+    details: ["タンク/DPS/サポート内の役割をより細かく理解できる", "構成の意図を読みやすくなる", "このサイトのセオリー構成例とも合わせて見る"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/",
+  },
+  {
+    type: "公式ニュース",
+    title: "ハローキティ・アンド・フレンズ コラボ",
+    date: "2026-02-12",
+    tone: "video",
+    category: "official-news",
+    summary: "期間限定コラボ。イベントやスキン確認用の公式ニュース。",
+    details: ["期間限定イベントやストア更新の確認に使う", "ゲーム内チャレンジがある場合は先に報酬条件を見る", "環境変化ではなくイベント情報として扱う"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/",
+  },
+  {
+    type: "公式ニュース",
+    title: "OWCS 2026 開幕前ガイド",
+    date: "2026-01-29",
+    tone: "esports",
+    category: "official-news",
+    summary: "競技シーンを見る時の入り口。構成やULT合わせを学ぶ材料にしやすい。",
+    details: ["プロの構成はそのまま真似ず、役割と当たり合いの作り方を見る", "観戦時は最初の高台取り、ULT順、リグループに注目", "初心者は構成名より動きの理由を優先して学ぶ"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/",
+  },
+];
+const TOPICAL_ARTICLE_ITEMS = [
+  {
+    type: "話題・参考",
+    title: "Overwatch 2のリブランドと2026年方針",
+    date: "2026-02-04",
+    tone: "info",
+    category: "topic",
+    summary: "外部メディアのまとめ。ゲーム全体の方向性を把握する読み物。",
+    details: ["公式情報の補助として読む", "バランス判断の根拠にはせず、今後の流れを知る用途", "大型変更時は公式パッチノートで必ず確認"],
+    href: "https://www.polygon.com/gaming/518016/overwatch-2-renamed-overwatch-new-heroes",
+  },
+];
+const PATCH_UPDATES = [...OFFICIAL_PATCH_UPDATES, ...OFFICIAL_NEWS_ITEMS, ...TOPICAL_ARTICLE_ITEMS];
 const EXTRA_HEROES = [
   {
     key: "shion",
@@ -107,6 +129,11 @@ const EXTRA_HERO_DETAILS = {
   },
 };
 const OWPERKS_SOURCE_URL = "https://owperks.com/ja";
+const HERO_LEARNING_LINKS = {
+  defaultOfficial: "https://www.youtube.com/@PlayOverwatch/videos",
+  defaultSearchBase: "https://www.youtube.com/results?search_query=",
+  officialNews: "https://overwatch.blizzard.com/ja-jp/news/",
+};
 const OWPERKS_USAGE = {
   "ana": { minor: [18, 82], major: [31, 69] },
   "anran": { minor: [72, 28], major: [28, 72] },
@@ -356,6 +383,98 @@ const MAP_STYLE_COMPOSITION_EXAMPLES = [
       { role: "damage", key: "tracer", fallback: "トレーサー" },
       { role: "support", key: "lucio", fallback: "ルシオ" },
       { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+];
+const THEORY_COMPOSITION_EXAMPLES = [
+  {
+    title: "初心者向け安定構成",
+    archetype: "Default",
+    goal: "前線、火力、回復の役割が分かりやすく、野良でも合わせやすい。",
+    strong: "Control / Hybrid / 迷った時",
+    weakness: "高台を放置すると押し込まれる。DPSのどちらかは横を取る。",
+    swaps: "相手が空ならSoldier、近距離がきついならMei、回復が足りないならBaptiste。",
+    members: [
+      { role: "tank", key: "orisa", fallback: "オリーサ" },
+      { role: "damage", key: "soldier-76", fallback: "ソルジャー76" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "ポーク",
+    archetype: "Poke",
+    goal: "長い射線と高台で先に削り、相手がスキルを使ってから詰める。",
+    strong: "Escort / 長射線 / 防衛",
+    weakness: "一気に詰められると崩れやすい。角を捨てる判断が必要。",
+    swaps: "相手がダイブならBrigitteやD.Va、射線勝ちしたいならWidowmaker。",
+    members: [
+      { role: "tank", key: "sigma", fallback: "シグマ" },
+      { role: "damage", key: "ashe", fallback: "アッシュ" },
+      { role: "damage", key: "sojourn", fallback: "ソジョーン" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+      { role: "support", key: "zenyatta", fallback: "ゼニヤッタ" },
+    ],
+  },
+  {
+    title: "ダイブ",
+    archetype: "Dive",
+    goal: "高台や孤立したサポートへ同時に入り、短時間で人数差を作る。",
+    strong: "高台マップ / 広い移動 / 後衛が孤立する相手",
+    weakness: "1人ずつ入ると返される。入る前に狙う敵を決める。",
+    swaps: "難しければGenjiをSoldier、AnaをKirikoにして安定寄りにする。",
+    members: [
+      { role: "tank", key: "winston", fallback: "ウィンストン" },
+      { role: "damage", key: "tracer", fallback: "トレーサー" },
+      { role: "damage", key: "genji", fallback: "ゲンジ" },
+      { role: "support", key: "ana", fallback: "アナ" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "ラッシュ",
+    archetype: "Rush",
+    goal: "ルシオのスピードで距離を詰め、狭い場所で一気に当たる。",
+    strong: "King's Row / Lijiang Tower / 狭所乱戦",
+    weakness: "長射線や空中相手に弱い。詰めるルートを決めないと削られる。",
+    swaps: "相手が硬いならRamattra、分断したいならMei、火力がほしいならReaper。",
+    members: [
+      { role: "tank", key: "reinhardt", fallback: "ラインハルト" },
+      { role: "damage", key: "mei", fallback: "メイ" },
+      { role: "damage", key: "reaper", fallback: "リーパー" },
+      { role: "support", key: "lucio", fallback: "ルシオ" },
+      { role: "support", key: "baptiste", fallback: "バティスト" },
+    ],
+  },
+  {
+    title: "ピック",
+    archetype: "Pick",
+    goal: "ウィドウやハンゾーで先に1人落とし、人数有利で進める。",
+    strong: "長射線 / 高台 / 防衛開始",
+    weakness: "外す時間が長いと4対5のようになる。外したら構成変更も早めに考える。",
+    swaps: "蘇生が欲しいならMercy、安定火力が欲しいならAsheやSoldier。",
+    members: [
+      { role: "tank", key: "dva", fallback: "D.Va" },
+      { role: "damage", key: "widowmaker", fallback: "ウィドウメイカー" },
+      { role: "damage", key: "hanzo", fallback: "ハンゾー" },
+      { role: "support", key: "mercy", fallback: "マーシー" },
+      { role: "support", key: "kiriko", fallback: "キリコ" },
+    ],
+  },
+  {
+    title: "対フランカー",
+    archetype: "Anti Dive",
+    goal: "トレーサー/ソンブラ/ゲンジに後衛を壊されないよう、近くで守って返す。",
+    strong: "味方サポートが狙われ続ける試合",
+    weakness: "守りすぎると前への圧が減る。返したらすぐ前へ出る。",
+    swaps: "DPSはCassidyやTorbjorn、サポートはBrigitteやMoiraが分かりやすい。",
+    members: [
+      { role: "tank", key: "dva", fallback: "D.Va" },
+      { role: "damage", key: "cassidy", fallback: "キャスディ" },
+      { role: "damage", key: "torbjorn", fallback: "トールビョーン" },
+      { role: "support", key: "brigitte", fallback: "ブリギッテ" },
+      { role: "support", key: "moira", fallback: "モイラ" },
     ],
   },
 ];
@@ -1183,6 +1302,93 @@ const GUIDE_MAP_STYLES = {
     mistake: "広いマップで1人ずつ戦い、毎回フォーカスされる。",
   },
 };
+const ULT_COMBO_GUIDES = [
+  {
+    title: "ナノ + ブレード",
+    heroes: "アナ + ゲンジ",
+    timing: "ゲンジが風斬りで入れる位置にいて、相手のスタン/無敵を1つ使わせた後。",
+    call: "アナはナノを先に言う。ゲンジはブレード後に孤立したサポートから狙う。",
+    mistake: "相手が全員そろっていて、スリープや鈴が残っているのに正面から使う。",
+  },
+  {
+    title: "狐走り + ラッシュ",
+    heroes: "キリコ + ラインハルト/ラマットラ/ルシオ",
+    timing: "角を曲がって一気に距離を詰める直前。味方が同じ方向へ進める時。",
+    call: "狐の道を正面ではなく、次の角や拠点入口へ通す。タンクは止まらず前へ出る。",
+    mistake: "味方が散っている時に使い、狐の道に誰も乗れない。",
+  },
+  {
+    title: "グラビトン + 範囲火力",
+    heroes: "ザリア + ハンゾー/ジャンクラット/ソジョーン",
+    timing: "相手の防御ULTや鈴を使わせた後。2人以上を捕まえられる角や拠点で使う。",
+    call: "ザリアが先に使う場所を言う。DPSは即合わせできる射線に移動しておく。",
+    mistake: "ザリアだけが見えている場所に撃ち、味方の火力が届かない。",
+  },
+  {
+    title: "EMP + フォーカス",
+    heroes: "ソンブラ + 全員",
+    timing: "味方が撃てる距離にいて、EMP後すぐ同じ敵を狙える時。",
+    call: "EMP前にターゲットを1人決める。使った後はサポートか逃げスキルなしの敵を全員で見る。",
+    mistake: "ソンブラが奥で1人だけ使い、味方が届かずキルにつながらない。",
+  },
+  {
+    title: "サウンドバリア/虹彩で受ける",
+    heroes: "ルシオ/ゼニヤッタ",
+    timing: "相手のブレード、グラビトン、ラッシュ、EMP後の押し込みを受ける時。",
+    call: "先に使う防御ULTを決める。2つ同時に使わず、1つ目で耐えて次の当たりに残す。",
+    mistake: "怖くて早すぎるタイミングで使い、相手の本命ULTを受けられない。",
+  },
+];
+const BEGINNER_THEORY_GUIDES = [
+  { title: "人数差", body: "1人倒したら前へ、1人倒されたら下がる。人数差を見ずに戦うとエイム以前に負けやすい。" },
+  { title: "リグループ", body: "負けた後は1人で触らず5人で集合する。最後に生き残った人ほど早く下がる。" },
+  { title: "高台", body: "高台は撃ち下ろし、逃げ道、回復線を作れる。敵の高台を放置しない。" },
+  { title: "射線", body: "正面1本だけだと止められる。DPSは横、サポートは安全な角、タンクは射線を切る場所を作る。" },
+  { title: "フォーカス", body: "味方と同じ敵を見るだけでキルが増える。低HP、孤立、スキルなしの敵を優先する。" },
+  { title: "ULT管理", body: "勝ち確の戦いでULTを足しすぎない。次の当たりで何を使うか1つだけ決める。" },
+  { title: "角待ち", body: "遮蔽物のない場所で撃ち合わない。角から短く出て、スキルを使ったら戻る。" },
+  { title: "デスを減らす", body: "勝てない時はキル数より最初のデスを見る。最初に死なないだけで勝率が上がる。" },
+];
+const SETTINGS_CHECKLIST = [
+  { title: "味方HP表示", body: "サポート以外でもON推奨。助ける相手、引くべきタイミングが見えやすい。" },
+  { title: "ピン設定", body: "敵、集合、後退、ULT状況を押しやすい場所に置く。VCなしでも合わせやすくなる。" },
+  { title: "字幕/効果音", body: "ULT音声と足音を聞き取りやすい音量にする。BGMは少し下げる。" },
+  { title: "視野角", body: "設定できる機種では広めを試す。横から来る敵や味方位置を把握しやすい。" },
+  { title: "エイムアシスト", body: "強度は高め、ウィンドウは広すぎると吸われる。違和感がある時だけ小さく調整する。" },
+  { title: "色設定", body: "敵味方の色を見分けやすくする。赤緑が見づらい場合は色覚設定を使う。" },
+  { title: "リプレイ", body: "負け試合は最初のデスだけ確認する。全部見直すより原因が見つかりやすい。" },
+  { title: "詳細情報パネル", body: "アビリティ説明をゲーム内でも確認できる。新キャラやパーク確認に使う。" },
+];
+const MAP_GUIDE_OVERRIDES = Object.fromEntries(FALLBACK_STAGES.map((stage) => {
+  const style = GUIDE_MAP_STYLES[stage.style] || GUIDE_MAP_STYLES["狭所乱戦"];
+  const compByStyle = {
+    長射線: "ポーク",
+    高台: "ダイブ/ピック",
+    狭所乱戦: "ラッシュ",
+    広い移動: "ダイブ/機動力",
+  };
+  const strongByStyle = {
+    長射線: "長い射線、角、高台。正面を歩く前に横の射線を作る。",
+    高台: "高台、上から拠点を撃てる場所、下がれる角。",
+    狭所乱戦: "曲がり角、狭い入口、拠点手前のチョーク。",
+    広い移動: "次の集合地点、回復パック周辺、横道の合流地点。",
+  };
+  const roleByStyle = {
+    長射線: ["Tank: 射線を切って味方が渡る時間を作る。", "Damage: 横か高台からサポートを下がらせる。", "Support: 長射線に立ち続けず角から支える。"],
+    高台: ["Tank: 高台を取り返すか、敵高台の射線を消す。", "Damage: 高台の敵を先に見る。", "Support: 味方全体が見える高台/角を使う。"],
+    狭所乱戦: ["Tank: 角から短く出入りしてスキルを使わせる。", "Damage: タンクが触った敵を一緒に撃つ。", "Support: 1つ後ろの角から回復と火力を出す。"],
+    広い移動: ["Tank: 味方が届く距離で前線を作る。", "Damage: 横を取っても戻り道を残す。", "Support: 移動中に孤立しない道を選ぶ。"],
+  };
+  return [stage.name, {
+    rule: stage.rule,
+    attack: stageHasAttackDefense(stage) ? `${stage.name}攻撃は、${style.attack}` : `${stage.name}は、先に次の強い場所を取り、人数がそろってから当たる。`,
+    defense: stageHasAttackDefense(stage) ? `${stage.name}防衛は、${style.defense}` : `${stage.name}は、負けたら粘りすぎず次の入口で受け直す。`,
+    strong: strongByStyle[stage.style],
+    mistake: `${stage.name}での初心者ミス: ${style.mistake}`,
+    comp: compByStyle[stage.style],
+    roles: roleByStyle[stage.style],
+  }];
+}));
 const ROLE_BEGINNER_GUIDES = {
   tank: {
     role: "味方が撃てる場所まで前線を作る。",
@@ -1281,12 +1487,7 @@ function cacheElements() {
   els.guideDetails = document.querySelector("#guideDetails");
   els.centerHeroGrid = document.querySelector("#centerHeroGrid");
   els.synergyMap = document.querySelector("#synergyMap");
-  els.diagTank = document.querySelector("#diagTank");
-  els.diagDamage1 = document.querySelector("#diagDamage1");
-  els.diagDamage2 = document.querySelector("#diagDamage2");
-  els.diagSupport1 = document.querySelector("#diagSupport1");
-  els.diagSupport2 = document.querySelector("#diagSupport2");
-  els.compDiagnosis = document.querySelector("#compDiagnosis");
+  els.theoryCompGrid = document.querySelector("#theoryCompGrid");
   els.sensitivityResult = document.querySelector("#sensitivityResult");
   els.sensHero = document.querySelector("#sensHero");
   els.sensInputs = document.querySelectorAll(
@@ -1354,10 +1555,6 @@ function bindEvents() {
   els.guideHero.addEventListener("change", () => {
     state.guideFilters.hero = els.guideHero.value;
     renderGuides();
-  });
-
-  [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
-    select.addEventListener("change", renderCompDiagnosis);
   });
 
   els.sensInputs.forEach((input) => {
@@ -1638,7 +1835,7 @@ function renderAll() {
   renderUpdates();
   renderGuideControls();
   renderGuides();
-  renderCompDiagnosisControls();
+  renderTheoryComps();
   renderSynergyMapControls();
   renderSensitivityControls();
   renderSensitivity();
@@ -1735,6 +1932,10 @@ function renderGuides() {
     renderMapGuide(stage),
     renderRuleGuide(rule),
     renderHeroBeginnerGuide(hero),
+    renderMapSpecificGuide(stage),
+    renderUltComboGuide(),
+    renderBeginnerTheoryGuide(),
+    renderSettingsChecklist(),
   ].join("");
   els.guideDetails.querySelector("[data-guide-open-hero]")?.addEventListener("click", () => selectHeroFromInline(hero.key));
 }
@@ -1799,6 +2000,48 @@ function renderMapGuide(stage) {
   `;
 }
 
+function mapSpecificGuide(stage) {
+  return MAP_GUIDE_OVERRIDES[stage?.name] || null;
+}
+
+function renderMapSpecificGuide(stage) {
+  const guide = mapSpecificGuide(stage);
+  if (!guide) {
+    return "";
+  }
+  const sideBlocks = stageHasAttackDefense(stage)
+    ? [
+        ["攻撃", guide.attack],
+        ["防衛", guide.defense],
+      ]
+    : [["共通", `${guide.attack} ${guide.defense}`]];
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>${escapeHtml(stage.name)} 個別攻略</h3>
+        <span class="chip">${escapeHtml(guide.rule)} / ${escapeHtml(guide.comp)}</span>
+      </div>
+      <div class="guide-side-grid">
+        ${sideBlocks.map(([label, text]) => `
+          <section>
+            <h4>${escapeHtml(label)}</h4>
+            <p>${escapeHtml(text)}</p>
+          </section>
+        `).join("")}
+      </div>
+      <div class="guide-check-grid">
+        ${renderGuidePoint("強い位置", guide.strong)}
+        ${renderGuidePoint("おすすめ構成タイプ", guide.comp)}
+        ${renderGuidePoint("初心者ミス", guide.mistake)}
+      </div>
+      <div class="guide-list-block">
+        <h4>ロール別に見る場所</h4>
+        <ul>${guide.roles.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+    </article>
+  `;
+}
+
 function renderRuleGuide(rule) {
   const guide = ruleGuide(rule);
   return `
@@ -1848,6 +2091,66 @@ function renderHeroBeginnerGuide(hero) {
           <h4>味方との合わせ方</h4>
           <p>${escapeHtml(synergy.allies.slice(0, 2).map((ally) => `${heroName(ally.key)}: ${ally.reason}`).join(" / "))}</p>
         </section>
+      </div>
+    </article>
+  `;
+}
+
+function renderUltComboGuide() {
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>ウルトの合わせ方</h3>
+        <span class="chip">ULT Combo</span>
+      </div>
+      <div class="learning-card-grid">
+        ${ULT_COMBO_GUIDES.map((combo) => `
+          <section class="learning-card">
+            <span>${escapeHtml(combo.heroes)}</span>
+            <h4>${escapeHtml(combo.title)}</h4>
+            <p><strong>タイミング:</strong> ${escapeHtml(combo.timing)}</p>
+            <p><strong>合わせ方:</strong> ${escapeHtml(combo.call)}</p>
+            <p><strong>失敗例:</strong> ${escapeHtml(combo.mistake)}</p>
+          </section>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderBeginnerTheoryGuide() {
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>初心者向けセオリー</h3>
+        <span class="chip">Theory</span>
+      </div>
+      <div class="learning-card-grid is-compact">
+        ${BEGINNER_THEORY_GUIDES.map((item) => `
+          <section class="learning-card">
+            <h4>${escapeHtml(item.title)}</h4>
+            <p>${escapeHtml(item.body)}</p>
+          </section>
+        `).join("")}
+      </div>
+    </article>
+  `;
+}
+
+function renderSettingsChecklist() {
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>設定でやっておくこと</h3>
+        <span class="chip">Console</span>
+      </div>
+      <div class="learning-card-grid is-compact">
+        ${SETTINGS_CHECKLIST.map((item) => `
+          <section class="learning-card">
+            <h4>${escapeHtml(item.title)}</h4>
+            <p>${escapeHtml(item.body)}</p>
+          </section>
+        `).join("")}
       </div>
     </article>
   `;
@@ -2087,19 +2390,22 @@ function renderMetaStats() {
 
 function renderUpdates() {
   renderLatestPatchSummary();
-  const updates = PATCH_UPDATES.slice()
+  const updates = PATCH_UPDATES
     .filter(isVisibleRecentUpdate)
-    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))
-    .map(renderUpdateCard);
+    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a));
 
   els.updateGrid.innerHTML = updates.length
-    ? updates.join("")
-    : renderEmpty("直近1か月以内のイベント・ニュース・パッチ予定はありません。");
+    ? [
+        renderUpdateSection("公式パッチ", "公式パッチノートを主ソースにした変更点", updates.filter((item) => item.category === "patch")),
+        renderUpdateSection("公式ニュース", "イベント、シーズン、OWCSなどの公式告知", updates.filter((item) => item.category === "official-news")),
+        renderUpdateSection("話題・参考記事", "公式情報ではない読み物。環境判断は公式パッチを優先", updates.filter((item) => item.category === "topic")),
+      ].join("")
+    : renderEmpty("表示できる公式パッチ・ニュース・参考記事はありません。");
 }
 
 function renderLatestPatchSummary() {
   const patch = PATCH_UPDATES.slice()
-    .filter((update) => update.type === "Patch")
+    .filter((update) => update.category === "patch")
     .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))[0];
   if (!patch || !els.latestPatchTitle || !els.latestPatchSummary) {
     return;
@@ -2109,6 +2415,7 @@ function renderLatestPatchSummary() {
 }
 
 function renderUpdateCard(update) {
+  const linkLabel = update.category === "topic" ? "参考記事を開く" : "公式で確認";
   return `
     <article class="update-card is-${escapeAttr(update.tone)}">
       <div class="update-head">
@@ -2120,8 +2427,25 @@ function renderUpdateCard(update) {
       <ul>
         ${update.details.map((detail) => `<li>${escapeHtml(detail)}</li>`).join("")}
       </ul>
-      <a href="${safeUrl(update.href)}" target="_blank" rel="noreferrer">公式で確認</a>
+      <a href="${safeUrl(update.href)}" target="_blank" rel="noreferrer">${escapeHtml(linkLabel)}</a>
     </article>
+  `;
+}
+
+function renderUpdateSection(title, note, items) {
+  return `
+    <section class="update-section">
+      <div class="section-head compact">
+        <div>
+          <span class="eyebrow">${escapeHtml(title)}</span>
+          <h3>${escapeHtml(note)}</h3>
+        </div>
+        <span class="section-note">${items.length}件</span>
+      </div>
+      <div class="update-card-grid">
+        ${items.length ? items.map(renderUpdateCard).join("") : renderEmpty("表示できる項目はありません。")}
+      </div>
+    </section>
   `;
 }
 
@@ -2325,35 +2649,34 @@ function stageInitial(stage) {
   return stringValue(stage.name).trim().charAt(0).toUpperCase();
 }
 
-function renderCompDiagnosisControls() {
-  const favTanks = getFavoriteHeroKeysByRole("tank");
-  const favDamage = getFavoriteHeroKeysByRole("damage");
-  const favSupport = getFavoriteHeroKeysByRole("support");
-  setHeroSelectOptions(els.diagTank, "tank", favTanks[0] || "orisa");
-  setHeroSelectOptions(els.diagDamage1, "damage", favDamage[0] || "soldier-76");
-  setHeroSelectOptions(els.diagDamage2, "damage", favDamage[1] || "sojourn");
-  setHeroSelectOptions(els.diagSupport1, "support", favSupport[0] || "baptiste");
-  setHeroSelectOptions(els.diagSupport2, "support", favSupport[1] || "kiriko");
-  renderCompDiagnosis();
+function renderTheoryComps() {
+  if (!els.theoryCompGrid) {
+    return;
+  }
+  els.theoryCompGrid.innerHTML = THEORY_COMPOSITION_EXAMPLES.map(renderTheoryCompCard).join("");
+  els.theoryCompGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
 }
 
-function getFavoriteHeroKeysByRole(role) {
-  return state.heroes.filter((hero) => hero.role === role && state.favoriteHeroKeys.has(hero.key)).map((hero) => hero.key);
-}
-
-function setHeroSelectOptions(select, role, preferredKey) {
-  const current = select.value;
-  const heroes = state.heroes
-    .filter((hero) => hero.role === role)
-    .sort((a, b) => a.name.localeCompare(b.name, "ja"));
-  const fallback = heroes.find((hero) => hero.key === preferredKey)?.key || heroes[0]?.key || "";
-  const selected = heroes.some((hero) => hero.key === current) ? current : fallback;
-  select.innerHTML = heroes
-    .map((hero) => {
-      const isSelected = hero.key === selected ? " selected" : "";
-      return `<option value="${escapeAttr(hero.key)}"${isSelected}>${escapeHtml(hero.name)}</option>`;
-    })
-    .join("");
+function renderTheoryCompCard(comp) {
+  return `
+    <article class="theory-comp-card">
+      <div class="theory-comp-head">
+        <span class="chip">${escapeHtml(comp.archetype)}</span>
+        <h4>${escapeHtml(comp.title)}</h4>
+      </div>
+      <div class="comp-members">
+        ${comp.members.map(renderCompMember).join("")}
+      </div>
+      <div class="theory-comp-points">
+        ${renderGuidePoint("狙い", comp.goal)}
+        ${renderGuidePoint("強い場面", comp.strong)}
+        ${renderGuidePoint("弱点", comp.weakness)}
+        ${renderGuidePoint("入れ替え候補", comp.swaps)}
+      </div>
+    </article>
+  `;
 }
 
 function renderSynergyMapControls() {
@@ -2490,128 +2813,6 @@ function renderRelationTableRow(hero) {
       <span><small>苦手</small>${escapeHtml(counters)}</span>
     </button>
   `;
-}
-
-function renderCompDiagnosis() {
-  const selectedKeys = [
-    els.diagTank.value,
-    els.diagDamage1.value,
-    els.diagDamage2.value,
-    els.diagSupport1.value,
-    els.diagSupport2.value,
-  ].filter(Boolean);
-
-  if (selectedKeys.length < 5) {
-    els.compDiagnosis.innerHTML = renderEmpty("ヒーローデータ取得後に診断できます。");
-    return;
-  }
-
-  const result = diagnoseComposition(selectedKeys);
-  els.compDiagnosis.innerHTML = `
-    <div class="diagnosis-summary is-${escapeAttr(result.tone)}">
-      <strong>${escapeHtml(result.title)}</strong>
-      <span>${escapeHtml(result.summary)}</span>
-    </div>
-    <div class="diagnosis-grid">
-      ${renderDiagnosisList("良い点", result.good)}
-      ${renderDiagnosisList("アンチパターン", result.bad)}
-      ${renderDiagnosisList("次に直すなら", result.next)}
-    </div>
-  `;
-}
-
-function renderDiagnosisList(title, items) {
-  return `
-    <section>
-      <h4>${escapeHtml(title)}</h4>
-      <ul>
-        ${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}
-      </ul>
-    </section>
-  `;
-}
-
-function diagnoseComposition(keys) {
-  const counts = Object.fromEntries(Object.keys(HERO_ARCHETYPES).map((type) => [type, 0]));
-  keys.forEach((key) => {
-    Object.entries(HERO_ARCHETYPES).forEach(([type, heroKeys]) => {
-      if (heroKeys.includes(key)) {
-        counts[type] += 1;
-      }
-    });
-  });
-
-  const sortedTypes = Object.entries(counts).sort((a, b) => b[1] - a[1]);
-  const mainType = sortedTypes[0][1] >= 3 ? sortedTypes[0][0] : "mixed";
-  const good = [];
-  const bad = [];
-  const next = [];
-  const has = (key) => keys.includes(key);
-  const hasAny = (...heroKeys) => heroKeys.some((key) => keys.includes(key));
-
-  if (mainType !== "mixed") {
-    good.push(`${labelArchetype(mainType)}の方向性が3人以上そろっている。`);
-  } else {
-    bad.push("構成の勝ち方が散っている。先に「固まる」「飛び込む」「射線で削る」のどれかを決める。");
-  }
-
-  if (hasAny("lucio", "juno")) {
-    good.push("移動補助があり、当たり始めと引き際を合わせやすい。");
-  } else if (mainType === "brawl" || mainType === "dive") {
-    bad.push("ラッシュ/ダイブ寄りなのに移動補助が薄い。入るタイミングがずれやすい。");
-    next.push("ルシオかジュノを入れて、全員で同じタイミングで動ける形にする。");
-  }
-
-  if (has("winston") && !hasAny("tracer", "genji", "sombra", "venture")) {
-    bad.push("ウィンストンだけが飛び込む形。後衛に触っても倒し切れない。");
-    next.push("トレーサー、ゲンジ、ソンブラ、ベンチャーのどれかを合わせる。");
-  }
-
-  if (hasAny("widowmaker", "hanzo", "ashe") && hasAny("reinhardt", "reaper", "mei")) {
-    bad.push("長射線DPSと近距離前進の要求が混ざっている。立ち位置が分かれやすい。");
-    next.push("射線で戦うならシグマ寄り、近距離で戦うならルシオ/メイ/リーパー寄りに寄せる。");
-  }
-
-  if (hasAny("baptiste", "kiriko", "ana")) {
-    good.push("事故を戻せるサポートがいて、初動のミスをカバーしやすい。");
-  }
-
-  if (has("mercy") && !hasAny("ashe", "sojourn", "soldier-76", "widowmaker", "pharah", "echo")) {
-    bad.push("マーシーのダメージブースト先が弱い。支援先が決まらない。");
-    next.push("アッシュ、ソジョーン、ソルジャー76、ファラ、エコーなど火力を伸ばせるDPSを置く。");
-  }
-
-  if (hasAny("zenyatta", "ana", "baptiste") && !hasAny("sigma", "orisa", "ramattra", "dva")) {
-    bad.push("足が遅いサポートを守る前線が薄い。ダイブに狙われやすい。");
-    next.push("シグマ、オリーサ、ラマットラ、D.Vaなどで射線や高台を守る。");
-  }
-
-  if (!bad.length) {
-    good.push("大きなアンチパターンは少ない。マップに合わせた射線と集合を意識すれば使いやすい。");
-    next.push("負けた時はヒーロー全替えより、DPSかサポートを1枠だけマップに合わせて差し替える。");
-  }
-  if (!next.length) {
-    next.push("まずタンクの動きに合わせて、DPSとサポートを同じ戦い方へ寄せる。");
-  }
-
-  return {
-    tone: bad.length >= 2 ? "warn" : "good",
-    title: bad.length >= 2 ? "要調整" : "使いやすい構成",
-    summary: mainType === "mixed" ? "勝ち方が混ざりやすい構成です。" : `${labelArchetype(mainType)}寄りの構成です。`,
-    good,
-    bad: bad.length ? bad : ["目立つアンチパターンは少ない。"],
-    next,
-  };
-}
-
-function labelArchetype(type) {
-  const labels = {
-    brawl: "ラッシュ/ブロール",
-    dive: "ダイブ",
-    poke: "ポーク",
-    pick: "ピック",
-  };
-  return labels[type] || "混合";
 }
 
 function buildStaticComps(comps) {
@@ -3134,6 +3335,7 @@ function renderHeroDetail() {
         ${renderSynergyPanel(hero)}
         ${renderCounterPanel(hero)}
         ${renderCounterplayPanel(hero)}
+        ${renderHeroLearningPanel(hero)}
         <div class="panel-title">
           <h3>Abilities</h3>
           <span class="chip">${abilities.length}</span>
@@ -3468,6 +3670,25 @@ function renderCounterplayPanel(hero) {
           ${counterplay.counters.map(renderCounterCard).join("")}
         </div>
       </div>
+    </div>
+  `;
+}
+
+function renderHeroLearningPanel(hero) {
+  const query = encodeURIComponent(`${hero.name} ${hero.key} 立ち回り OW2`);
+  const youtubeSearch = `${HERO_LEARNING_LINKS.defaultSearchBase}${query}`;
+  return `
+    <div class="learning-link-panel">
+      <div class="panel-title">
+        <h3>立ち回り動画・学習リンク</h3>
+        <span class="chip">Learning</span>
+      </div>
+      <div class="learning-links">
+        <a href="${safeUrl(youtubeSearch)}" target="_blank" rel="noreferrer">YouTubeで${escapeHtml(hero.name)}の立ち回りを探す</a>
+        <a href="${safeUrl(HERO_LEARNING_LINKS.defaultOfficial)}" target="_blank" rel="noreferrer">公式YouTubeを見る</a>
+        <a href="${safeUrl(HERO_LEARNING_LINKS.officialNews)}" target="_blank" rel="noreferrer">公式ニュースで更新を確認</a>
+      </div>
+      <p>動画を見る時は、エイムより「立ち位置」「スキルを使う前後」「ULTを合わせる相手」を見ると上達につながりやすい。</p>
     </div>
   `;
 }

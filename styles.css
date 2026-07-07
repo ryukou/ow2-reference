@@ -228,7 +228,6 @@ a {
 .ability-card,
 .comp-helper,
 .synergy-map-section,
-.diagnosis-summary,
 .empty-state,
 .error-state {
   border: 1px solid var(--line);
@@ -527,6 +526,69 @@ a {
 
 .guide-warning {
   margin: 10px 0 0;
+}
+
+.learning-card-grid,
+.theory-comp-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.learning-card-grid.is-compact {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.learning-card,
+.theory-comp-card,
+.learning-link-panel {
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(16, 22, 29, 0.96);
+  padding: 12px;
+}
+
+.learning-card span {
+  color: var(--orange);
+  font-size: 0.76rem;
+  font-weight: 900;
+}
+
+.learning-card h4,
+.theory-comp-card h4 {
+  margin: 4px 0 8px;
+}
+
+.learning-card p,
+.theory-comp-card p,
+.learning-link-panel p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.58;
+}
+
+.learning-card p + p {
+  margin-top: 7px;
+}
+
+.learning-card strong {
+  color: var(--text);
+}
+
+.learning-links {
+  display: grid;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.learning-links a {
+  border: 1px solid rgba(88, 215, 232, 0.32);
+  border-radius: 8px;
+  background: rgba(88, 215, 232, 0.08);
+  color: var(--cyan);
+  padding: 9px 10px;
+  font-weight: 900;
 }
 
 .quick-perk-board {
@@ -1699,20 +1761,12 @@ a {
   height: 36px;
 }
 
-.diagnosis-controls {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(150px, 1fr));
-  gap: 8px;
-}
-
-.comp-filters label,
-.diagnosis-controls label {
+.comp-filters label {
   display: grid;
   gap: 7px;
 }
 
 .comp-filters span,
-.diagnosis-controls span,
 .map-field span {
   color: var(--muted);
   font-size: 0.78rem;
@@ -1721,7 +1775,6 @@ a {
 }
 
 .comp-filters select,
-.diagnosis-controls select,
 .sens-controls select,
 .sens-controls input,
 .map-field select {
@@ -1734,7 +1787,6 @@ a {
 }
 
 .comp-filters select:focus,
-.diagnosis-controls select:focus,
 .sens-controls select:focus,
 .sens-controls input:focus,
 .map-field select:focus {
@@ -1743,63 +1795,18 @@ a {
   box-shadow: 0 0 0 3px rgba(56, 201, 222, 0.14);
 }
 
-.diagnosis-result {
-  margin-top: 12px;
-}
-
-.diagnosis-summary {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 11px;
-}
-
-.diagnosis-summary strong {
-  color: var(--green);
-}
-
-.diagnosis-summary.is-warn strong {
-  color: var(--orange);
-}
-
-.diagnosis-summary span {
-  color: var(--muted);
-}
-
-.diagnosis-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.diagnosis-grid section {
-  min-width: 0;
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  background: #10161d;
-  padding: 11px;
-}
-
-.diagnosis-grid h4 {
-  margin: 0 0 8px;
-  font-size: 0.9rem;
-}
-
-.diagnosis-grid ul {
-  display: grid;
-  gap: 6px;
-  margin: 0;
-  padding-left: 18px;
-}
-
-.diagnosis-grid li {
-  color: var(--muted);
-  line-height: 1.45;
-}
-
 .update-grid {
+  display: grid;
+  gap: 14px;
+}
+
+.update-section {
+  display: grid;
+  gap: 10px;
+  min-width: 0;
+}
+
+.update-card-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 12px;
@@ -1830,6 +1837,10 @@ a {
 
 .update-card.is-video {
   border-color: rgba(56, 201, 222, 0.52);
+}
+
+.update-card.is-info {
+  border-color: rgba(88, 215, 232, 0.42);
 }
 
 .update-head {
@@ -1906,6 +1917,36 @@ a {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--panel);
+}
+
+.theory-comp-card {
+  display: grid;
+  gap: 10px;
+}
+
+.theory-comp-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.theory-comp-head h4 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.theory-comp-points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.theory-comp-points section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: rgba(14, 16, 20, 0.45);
+  padding: 9px;
 }
 
 .comp-head {
@@ -2189,13 +2230,16 @@ a {
   .guide-quick-grid,
   .guide-side-grid,
   .guide-check-grid,
+  .learning-card-grid,
+  .learning-card-grid.is-compact,
+  .theory-comp-grid,
+  .theory-comp-points,
   .counterplay-grid,
   .hero-layout,
   .content-grid,
-  .update-grid,
+  .update-card-grid,
   .comp-grid,
   .mindset-checklist,
-  .diagnosis-grid,
   .quick-perk-board,
   .relation-diagram,
   .relation-row,
@@ -2209,7 +2253,6 @@ a {
   }
 
   .comp-filters,
-  .diagnosis-controls,
   .sens-metrics {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -2237,8 +2280,7 @@ a {
   .patch-summary,
   .hero-controls,
   .section-head,
-  .perk-card-head,
-  .diagnosis-summary {
+  .perk-card-head {
     align-items: stretch;
     flex-direction: column;
   }
@@ -2281,7 +2323,6 @@ a {
   }
 
   .comp-filters,
-  .diagnosis-controls,
   .guide-controls,
   .relation-row,
   .sens-controls,
