@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=hero-detail-scroll">
-    <script src="./app.js?v=hero-detail-scroll" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=beginner-guides">
+    <script src="./app.js?v=beginner-guides" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -28,6 +28,7 @@
         <nav class="top-actions" aria-label="Main">
           <a href="#mindset" data-view-target="mindset">Mindset</a>
           <a href="#heroes" data-view-target="heroes">Heroes</a>
+          <a href="#guides" data-view-target="guides">Guides</a>
           <a href="#comps" data-view-target="comps">Comps</a>
           <a href="#updates" data-view-target="updates">Updates</a>
           <a href="#sensitivity" data-view-target="sensitivity">Sens</a>
@@ -65,6 +66,10 @@
           <button type="button" data-view-target="heroes">
             <span>キャラ選び</span>
             <strong>ヒーロー・パーク</strong>
+          </button>
+          <button type="button" data-view-target="guides">
+            <span>初心者が迷った時</span>
+            <strong>攻略</strong>
           </button>
           <button type="button" data-view-target="comps">
             <span>相性を見る時</span>
@@ -235,6 +240,34 @@
 
             <article id="heroDetail" class="hero-detail" aria-live="polite"></article>
           </div>
+        </section>
+
+        <section id="guides" class="guides-section" data-view-panel="guides" aria-label="Beginner guides">
+          <div class="section-head">
+            <div>
+              <span class="eyebrow">Beginner Guides</span>
+              <h2>マップ・ルール・キャラ攻略</h2>
+            </div>
+            <span class="section-note">試合中の早見表 + 詳しい解説</span>
+          </div>
+
+          <div class="guide-controls" aria-label="Guide filters">
+            <label>
+              <span>マップ</span>
+              <select id="guideMap"></select>
+            </label>
+            <label>
+              <span>ルール</span>
+              <select id="guideRule"></select>
+            </label>
+            <label>
+              <span>キャラ</span>
+              <select id="guideHero"></select>
+            </label>
+          </div>
+
+          <div id="guideQuick" class="guide-quick-grid" aria-live="polite"></div>
+          <div id="guideDetails" class="guide-detail-grid" aria-live="polite"></div>
         </section>
 
         <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and diagnosis">

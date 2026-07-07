@@ -247,6 +247,7 @@ a {
 
 .workspace,
 .mindset-section,
+.guides-section,
 .comps-section,
 .sensitivity-section,
 .updates-section {
@@ -368,6 +369,118 @@ a {
 
 .quick-perk-section {
   margin-bottom: 14px;
+}
+
+.hero-title-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.guide-controls {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(180px, 1fr));
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.guide-controls label {
+  display: grid;
+  gap: 7px;
+}
+
+.guide-controls span {
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.guide-controls select {
+  width: 100%;
+  min-height: 38px;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  padding: 0 12px;
+}
+
+.guide-controls select:focus {
+  border-color: var(--cyan);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 201, 222, 0.14);
+}
+
+.guide-quick-grid,
+.guide-detail-grid,
+.guide-side-grid,
+.guide-check-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.guide-quick-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 12px;
+}
+
+.guide-detail-grid {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.guide-side-grid,
+.guide-check-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.guide-quick-card,
+.guide-card,
+.guide-side-grid section,
+.guide-check-grid section {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.guide-quick-card,
+.guide-card {
+  padding: 12px;
+}
+
+.guide-side-grid section,
+.guide-check-grid section {
+  background: rgba(14, 16, 20, 0.42);
+  padding: 10px;
+}
+
+.guide-quick-card span,
+.guide-warning strong {
+  color: var(--orange);
+  font-weight: 900;
+}
+
+.guide-quick-card h3,
+.guide-card h4 {
+  margin: 4px 0 8px;
+}
+
+.guide-quick-card ul,
+.guide-list-block ul {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding-left: 18px;
+}
+
+.guide-card p,
+.guide-quick-card li,
+.guide-list-block li {
+  color: var(--muted);
+  line-height: 1.5;
+}
+
+.guide-warning {
+  margin: 10px 0 0;
 }
 
 .quick-perk-board {
@@ -1967,6 +2080,10 @@ a {
   .view-switcher,
   .mindset-layout,
   .role-mindset-grid,
+  .guide-controls,
+  .guide-quick-grid,
+  .guide-side-grid,
+  .guide-check-grid,
   .hero-layout,
   .content-grid,
   .update-grid,
@@ -2046,6 +2163,7 @@ a {
 
   .comp-filters,
   .diagnosis-controls,
+  .guide-controls,
   .relation-row,
   .sens-controls,
   .sens-metrics {

@@ -834,7 +834,91 @@ const COMP_METADATA = {
 const CACHE_KEY = "ow2-reference-cache-v1";
 const FAVORITE_KEY = "ow2-reference-favorites-v1";
 const CACHE_MS = 6 * 60 * 60 * 1000;
-const VIEW_IDS = ["mindset", "heroes", "comps", "sensitivity", "updates"];
+const VIEW_IDS = ["mindset", "heroes", "guides", "comps", "sensitivity", "updates"];
+const GUIDE_RULES = {
+  Control: {
+    win: "先に強い位置を取り、拠点に入りすぎず入口を押さえる。",
+    position: "拠点内に全員で固まらず、角や高台から拠点へ撃てる位置を取る。",
+    reset: "人数不利なら拠点で粘りすぎず、次の当たり合いで5人をそろえる。",
+    mistake: "拠点を踏むことだけに集中して、周りの高台や横道を放置する。",
+  },
+  Escort: {
+    win: "ペイロードを盾にしながら、次の角や高台を先に取る。",
+    position: "攻撃は荷物より少し前、防衛は次の角と高台で待つ。",
+    reset: "攻撃は荷物を押す人を1人決め、防衛は倒されたら次の曲がり角まで下がる。",
+    mistake: "全員で荷物に乗り続けて、前の強い場所を相手に渡す。",
+  },
+  Hybrid: {
+    win: "第1は入口突破、第2以降はEscort同様に次の角を取り続ける。",
+    position: "攻撃は左右どちらから入るかを決め、防衛は最初に強い高台や角を守る。",
+    reset: "第1で崩れたら即集合。荷物移行後は無理な延長戦を減らす。",
+    mistake: "第1で同じ正面入口から入り続け、横や高台を使わない。",
+  },
+  Push: {
+    win: "ロボットより先に中央の強い場所を取り、勝った後だけ押す。",
+    position: "ロボット周辺に固まらず、次に戦う曲がり角や高台を先に見る。",
+    reset: "負けたら単独で触らず、戻りながら次の集合地点を決める。",
+    mistake: "ロボットを押すことだけを見て、次の当たり合いの位置取りが遅れる。",
+  },
+  Flashpoint: {
+    win: "次の拠点へ早く移動し、入口を先に押さえる。",
+    position: "広いので味方から離れすぎず、サポートが見える範囲で横を取る。",
+    reset: "遠い拠点で人数不利なら早めに切り、次の拠点移動に備える。",
+    mistake: "1人ずつ到着して戦い、毎回人数不利で当たる。",
+  },
+  Clash: {
+    win: "連続拠点なので、勝ったら前を取り、負けたら次の入口で止める。",
+    position: "狭い通路と角を使い、相手を一列にして撃てる場所を守る。",
+    reset: "奥へ追いすぎず、倒し切れない時は次の拠点で待つ。",
+    mistake: "勝った後に深追いしすぎて、次の拠点で人数不利になる。",
+  },
+};
+const GUIDE_MAP_STYLES = {
+  長射線: {
+    attack: "遮蔽物をつなぎ、いきなり中央を歩かず横や高台から射線を増やす。",
+    defense: "長い射線を先に置き、相手が角を曲がる前にリソースを使わせる。",
+    role: ["Tank: 盾や体で射線を切り、味方が渡る時間を作る。", "Damage: 横の射線か高台から、相手サポートを下がらせる。", "Support: 長い射線に出っぱなしにせず、角から回復と火力を出す。"],
+    mistake: "何も考えず正面の長い道を歩き、先に削られてスキルを吐く。",
+  },
+  高台: {
+    attack: "まず高台の敵をどかす。無理に拠点へ直行しない。",
+    defense: "高台を取られたら早めに下がり、取り返すタイミングを味方と合わせる。",
+    role: ["Tank: 高台に触るか、相手の高台射線を切る。", "Damage: 高台を使って正面以外から撃つ。", "Support: 高台や角から、味方全体が見える位置を取る。"],
+    mistake: "高台の敵を放置して、拠点内で上から撃たれ続ける。",
+  },
+  狭所乱戦: {
+    attack: "角を使って短い距離で当たり、1人を集中して落とす。",
+    defense: "入口や曲がり角で待ち、相手が狭い場所に入った瞬間にスキルを使う。",
+    role: ["Tank: 角から短く出入りし、スキルなしで前に残らない。", "Damage: タンクが触った敵を一緒に撃つ。", "Support: 味方のすぐ後ろではなく、1つ後ろの角を使う。"],
+    mistake: "狭い場所でバラバラに入り、回復もフォーカスも分かれる。",
+  },
+  広い移動: {
+    attack: "移動ルートを決め、遅れた味方を待ってから当たる。",
+    defense: "広がりすぎず、相手が孤立した瞬間に全員で見る。",
+    role: ["Tank: 先に入りすぎず、味方が届く距離で前線を作る。", "Damage: 横を取っても戻り道を残す。", "Support: 移動中に孤立しないよう、味方が見える道を選ぶ。"],
+    mistake: "広いマップで1人ずつ戦い、毎回フォーカスされる。",
+  },
+};
+const ROLE_BEGINNER_GUIDES = {
+  tank: {
+    role: "味方が撃てる場所まで前線を作る。",
+    position: "角、高台の入口、ペイロード前など、味方の射線が届く場所。",
+    skill: "防御/移動スキルは入る時と帰る時のどちらに使うか決めてから使う。",
+    dont: "回復が届かない場所まで1人で進む。",
+  },
+  damage: {
+    role: "味方と同じ敵を撃ち、人数差を作る。",
+    position: "正面だけでなく、戻れる横道や高台。",
+    skill: "逃げスキルを先に使い切らず、撃った後に帰る手段を残す。",
+    dont: "単独裏取りを繰り返して、味方の当たり合いに参加しない。",
+  },
+  support: {
+    role: "生き残って、味方がもう一度戦える時間を作る。",
+    position: "味方全員が少し見える角や高台。タンクの真後ろに立ち続けない。",
+    skill: "大事な回復/無敵/自衛スキルは、味方か自分が本当に落ちる時に使う。",
+    dont: "助けに行って自分も倒れる。",
+  },
+};
 
 const state = {
   bootstrapped: false,
@@ -852,6 +936,11 @@ const state = {
   compFilters: {
     stageInitial: "all",
     stage: "all",
+  },
+  guideFilters: {
+    map: "all",
+    rule: "Control",
+    hero: "",
   },
   synergyHeroKey: null,
   sensitivity: {
@@ -901,6 +990,11 @@ function cacheElements() {
   els.detailProgress = document.querySelector("#detailProgress");
   els.metaStats = document.querySelector("#metaStats");
   els.updateGrid = document.querySelector("#updateGrid");
+  els.guideMap = document.querySelector("#guideMap");
+  els.guideRule = document.querySelector("#guideRule");
+  els.guideHero = document.querySelector("#guideHero");
+  els.guideQuick = document.querySelector("#guideQuick");
+  els.guideDetails = document.querySelector("#guideDetails");
   els.centerHeroGrid = document.querySelector("#centerHeroGrid");
   els.synergyMap = document.querySelector("#synergyMap");
   els.diagTank = document.querySelector("#diagTank");
@@ -956,6 +1050,26 @@ function bindEvents() {
   els.heroMapFilter.addEventListener("change", () => {
     state.mapFilter = els.heroMapFilter.value;
     renderHeroList();
+  });
+
+  els.guideMap.addEventListener("change", () => {
+    state.guideFilters.map = els.guideMap.value;
+    const stage = getSelectedGuideStage();
+    if (stage) {
+      state.guideFilters.rule = stage.rule;
+    }
+    renderGuideControls();
+    renderGuides();
+  });
+
+  els.guideRule.addEventListener("change", () => {
+    state.guideFilters.rule = els.guideRule.value;
+    renderGuides();
+  });
+
+  els.guideHero.addEventListener("change", () => {
+    state.guideFilters.hero = els.guideHero.value;
+    renderGuides();
   });
 
   [els.diagTank, els.diagDamage1, els.diagDamage2, els.diagSupport1, els.diagSupport2].forEach((select) => {
@@ -1238,6 +1352,8 @@ async function fetchJson(path, params = {}) {
 function renderAll() {
   renderMetaStats();
   renderUpdates();
+  renderGuideControls();
+  renderGuides();
   renderCompDiagnosisControls();
   renderSynergyMapControls();
   renderSensitivityControls();
@@ -1262,6 +1378,204 @@ function renderHeroMapFilterOptions() {
   ];
   setSelectOptions(els.heroMapFilter, options, current);
   state.mapFilter = els.heroMapFilter.value;
+}
+
+function renderGuideControls() {
+  if (!els.guideMap || !els.guideRule || !els.guideHero) {
+    return;
+  }
+  const mapCurrent = els.guideMap.value || state.guideFilters.map;
+  setSelectOptions(
+    els.guideMap,
+    [
+      { value: "all", label: "指定なし" },
+      ...state.maps
+        .slice()
+        .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+        .map((stage) => ({ value: stage.key, label: `${stage.name} / ${stage.rule}` })),
+    ],
+    mapCurrent,
+  );
+  state.guideFilters.map = els.guideMap.value;
+
+  const stage = getSelectedGuideStage();
+  const ruleCurrent = stage?.rule || els.guideRule.value || state.guideFilters.rule;
+  setSelectOptions(
+    els.guideRule,
+    Object.keys(GUIDE_RULES).map((rule) => ({ value: rule, label: rule })),
+    ruleCurrent,
+  );
+  state.guideFilters.rule = els.guideRule.value;
+
+  const heroCurrent = state.guideFilters.hero || els.guideHero.value || state.selectedHeroKey || state.heroes[0]?.key || "";
+  setSelectOptions(
+    els.guideHero,
+    state.heroes
+      .slice()
+      .sort((a, b) => a.name.localeCompare(b.name, "ja"))
+      .map((hero) => ({ value: hero.key, label: `${hero.name} / ${roleLabel(hero.role)}` })),
+    heroCurrent,
+  );
+  state.guideFilters.hero = els.guideHero.value;
+}
+
+function renderGuides() {
+  if (!els.guideQuick || !els.guideDetails) {
+    return;
+  }
+  const stage = getSelectedGuideStage() || state.maps[0] || FALLBACK_STAGES[0];
+  const rule = GUIDE_RULES[state.guideFilters.rule] ? state.guideFilters.rule : stage.rule;
+  const hero = findHeroByKey(state.guideFilters.hero) || state.heroes[0];
+  if (!stage || !hero) {
+    els.guideQuick.innerHTML = renderEmpty("攻略データを準備中です。");
+    els.guideDetails.innerHTML = "";
+    return;
+  }
+
+  els.guideQuick.innerHTML = [
+    renderGuideQuickCard("今このマップ", `${stage.name} / ${stage.style}`, [
+      mapStyleGuide(stage).attack,
+      mapStyleGuide(stage).mistake,
+    ]),
+    renderGuideQuickCard("今このルール", rule, [
+      ruleGuide(rule).win,
+      ruleGuide(rule).reset,
+    ]),
+    renderGuideQuickCard("自分のロール", `${hero.name} / ${roleLabel(hero.role)}`, [
+      roleBeginnerGuide(hero).role,
+      roleBeginnerGuide(hero).dont,
+    ]),
+  ].join("");
+
+  els.guideDetails.innerHTML = [
+    renderMapGuide(stage),
+    renderRuleGuide(rule),
+    renderHeroBeginnerGuide(hero),
+  ].join("");
+  els.guideDetails.querySelector("[data-guide-open-hero]")?.addEventListener("click", () => selectHeroFromInline(hero.key));
+}
+
+function getSelectedGuideStage() {
+  if (!state.guideFilters.map || state.guideFilters.map === "all") {
+    return null;
+  }
+  return state.maps.find((stage) => stage.key === state.guideFilters.map) || null;
+}
+
+function ruleGuide(rule) {
+  return GUIDE_RULES[rule] || GUIDE_RULES.Control;
+}
+
+function mapStyleGuide(stage) {
+  return GUIDE_MAP_STYLES[stage?.style] || GUIDE_MAP_STYLES["狭所乱戦"];
+}
+
+function roleBeginnerGuide(hero) {
+  return ROLE_BEGINNER_GUIDES[hero?.role] || ROLE_BEGINNER_GUIDES.damage;
+}
+
+function renderGuideQuickCard(title, meta, items) {
+  return `
+    <article class="guide-quick-card">
+      <span>${escapeHtml(title)}</span>
+      <h3>${escapeHtml(meta)}</h3>
+      <ul>${items.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+    </article>
+  `;
+}
+
+function renderMapGuide(stage) {
+  const style = mapStyleGuide(stage);
+  const sideBlocks = stageHasAttackDefense(stage)
+    ? [
+        ["攻撃", style.attack],
+        ["防衛", style.defense],
+      ]
+    : [["共通", `${style.attack} ${style.defense}`]];
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>マップ別攻略</h3>
+        <span class="chip">${escapeHtml(stage.name)} / ${escapeHtml(stage.rule)} / ${escapeHtml(stage.style)}</span>
+      </div>
+      <div class="guide-side-grid">
+        ${sideBlocks.map(([label, text]) => `
+          <section>
+            <h4>${escapeHtml(label)}</h4>
+            <p>${escapeHtml(text)}</p>
+          </section>
+        `).join("")}
+      </div>
+      <div class="guide-list-block">
+        <h4>おすすめロール行動</h4>
+        <ul>${style.role.map((item) => `<li>${escapeHtml(item)}</li>`).join("")}</ul>
+      </div>
+      <p class="guide-warning"><strong>初心者ミス:</strong> ${escapeHtml(style.mistake)}</p>
+    </article>
+  `;
+}
+
+function renderRuleGuide(rule) {
+  const guide = ruleGuide(rule);
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>ルール別攻略</h3>
+        <span class="chip">${escapeHtml(rule)}</span>
+      </div>
+      <div class="guide-check-grid">
+        ${renderGuidePoint("勝ち筋", guide.win)}
+        ${renderGuidePoint("立ち位置", guide.position)}
+        ${renderGuidePoint("引き際", guide.reset)}
+        ${renderGuidePoint("初心者ミス", guide.mistake)}
+      </div>
+    </article>
+  `;
+}
+
+function renderHeroBeginnerGuide(hero) {
+  const role = roleBeginnerGuide(hero);
+  const playstyle = buildHeroPlaystyle(hero);
+  const synergy = buildHeroSynergy(hero);
+  const counters = getHeroCounters(hero);
+  const counterNames = counters.slice(0, 3).map((counter) => heroName(counter.key)).join(" / ");
+  return `
+    <article class="guide-card">
+      <div class="panel-title">
+        <h3>キャラ別攻略</h3>
+        <button class="chip" type="button" data-guide-open-hero="${escapeAttr(hero.key)}">${escapeHtml(hero.name)}詳細へ</button>
+      </div>
+      <div class="guide-check-grid">
+        ${renderGuidePoint("初心者向けの役割", role.role)}
+        ${renderGuidePoint("基本の立ち位置", role.position)}
+        ${renderGuidePoint("スキルの使いどころ", role.skill)}
+        ${renderGuidePoint("やってはいけない動き", role.dont)}
+      </div>
+      <div class="guide-list-block">
+        <h4>${escapeHtml(playstyle.badge)}の立ち回り</h4>
+        <ul>${playstyle.tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join("")}</ul>
+      </div>
+      <div class="guide-side-grid">
+        <section>
+          <h4>対策される相手</h4>
+          <p>${escapeHtml(counterNames)} に狙われる時は、射線を切る、味方の近くへ戻る、スキルを使い切ってから入らない。</p>
+        </section>
+        <section>
+          <h4>味方との合わせ方</h4>
+          <p>${escapeHtml(synergy.allies.slice(0, 2).map((ally) => `${heroName(ally.key)}: ${ally.reason}`).join(" / "))}</p>
+        </section>
+      </div>
+    </article>
+  `;
+}
+
+function renderGuidePoint(label, text) {
+  return `
+    <section>
+      <h4>${escapeHtml(label)}</h4>
+      <p>${escapeHtml(text)}</p>
+    </section>
+  `;
 }
 
 function renderSensitivityControls() {
@@ -2180,6 +2494,14 @@ function selectHeroFromInline(heroKey) {
   selectHero(heroKey, { resetFilters: true, switchView: true, scrollTarget: "detail" });
 }
 
+function openHeroGuide(heroKey) {
+  state.guideFilters.hero = heroKey;
+  setActiveView("guides", { updateHash: true, scroll: false });
+  renderGuideControls();
+  renderGuides();
+  document.querySelector("#guides")?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
 function selectHero(heroKey, options = {}) {
   if (!heroKey) {
     return;
@@ -2541,6 +2863,9 @@ function renderHeroDetail() {
   els.heroDetail.querySelector("[data-favorite-toggle]")?.addEventListener("click", () => {
     toggleFavorite(hero.key);
   });
+  els.heroDetail.querySelector("[data-open-hero-guide]")?.addEventListener("click", () => {
+    openHeroGuide(hero.key);
+  });
   els.heroDetail.querySelectorAll(".counter-card[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
@@ -2568,10 +2893,15 @@ function renderHeroVisual(hero, detail) {
         </div>
         <div class="hero-title-row">
           <h2>${escapeHtml(hero.name)}</h2>
-          <button class="favorite-button${favorite ? " is-on" : ""}" type="button" data-favorite-toggle aria-pressed="${favorite ? "true" : "false"}">
-            <span>${favorite ? "★" : "☆"}</span>
-            ${favorite ? "お気に入り解除" : "お気に入り"}
-          </button>
+          <div class="hero-title-actions">
+            <button class="favorite-button${favorite ? " is-on" : ""}" type="button" data-favorite-toggle aria-pressed="${favorite ? "true" : "false"}">
+              <span>${favorite ? "★" : "☆"}</span>
+              ${favorite ? "お気に入り解除" : "お気に入り"}
+            </button>
+            <button class="favorite-button" type="button" data-open-hero-guide>
+              攻略を見る
+            </button>
+          </div>
         </div>
         <p>${escapeHtml(detail?.description || "データ取得中")}</p>
       </div>
