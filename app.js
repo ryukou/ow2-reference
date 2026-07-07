@@ -1,7 +1,7 @@
 const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
-const RECENT_UPDATE_DAYS = 180;
+const RECENT_UPDATE_DAYS = 7;
 const QUICK_PERK_ROLES = [
   { role: "tank", label: "Tank", ja: "タンク" },
   { role: "damage", label: "Damage", ja: "ダメージ" },
@@ -2391,23 +2391,26 @@ function renderMetaStats() {
 function renderUpdates() {
   renderLatestPatchSummary();
   const updates = PATCH_UPDATES
+    .filter((item) => item.category === "patch")
     .filter(isVisibleRecentUpdate)
     .sort((a, b) => updateTimestamp(b) - updateTimestamp(a));
 
   els.updateGrid.innerHTML = updates.length
-    ? [
-        renderUpdateSection("公式パッチ", "公式パッチノートを主ソースにした変更点", updates.filter((item) => item.category === "patch")),
-        renderUpdateSection("公式ニュース", "イベント、シーズン、OWCSなどの公式告知", updates.filter((item) => item.category === "official-news")),
-        renderUpdateSection("話題・参考記事", "公式情報ではない読み物。環境判断は公式パッチを優先", updates.filter((item) => item.category === "topic")),
-      ].join("")
-    : renderEmpty("表示できる公式パッチ・ニュース・参考記事はありません。");
+    ? renderUpdateSection("公式パッチ", "過去1週間以内 + 未来予定のみ表示", updates)
+    : renderEmpty("過去1週間以内または未来予定の公式パッチ情報はありません。");
 }
 
 function renderLatestPatchSummary() {
   const patch = PATCH_UPDATES.slice()
     .filter((update) => update.category === "patch")
+    .filter(isVisibleRecentUpdate)
     .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))[0];
-  if (!patch || !els.latestPatchTitle || !els.latestPatchSummary) {
+  if (!els.latestPatchTitle || !els.latestPatchSummary) {
+    return;
+  }
+  if (!patch) {
+    els.latestPatchTitle.textContent = "直近1週間・未来予定のパッチなし";
+    els.latestPatchSummary.textContent = "古いパッチは非表示にしています。必要な時は公式パッチノートを確認してください。";
     return;
   }
   els.latestPatchTitle.textContent = `${patch.date} ${patch.title}`;
@@ -4290,7 +4293,7 @@ function isVisibleRecentUpdate(update) {
     return false;
   }
   const cutoff = Date.now() - RECENT_UPDATE_DAYS * 24 * 60 * 60 * 1000;
-  return timestamp >= cutoff;
+  return timestamp >= cutoff || timestamp > Date.now();
 }
 
 function toArray(value) {
