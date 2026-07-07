@@ -2177,7 +2177,7 @@ function renderCompMember(member) {
 }
 
 function selectHeroFromInline(heroKey) {
-  selectHero(heroKey, { resetFilters: true, switchView: true, scrollIntoView: true });
+  selectHero(heroKey, { resetFilters: true, switchView: true, scrollTarget: "detail" });
 }
 
 function selectHero(heroKey, options = {}) {
@@ -2201,7 +2201,9 @@ function selectHero(heroKey, options = {}) {
   renderHeroList();
   renderHeroDetail();
   updateHeroHash(heroKey);
-  if (options.scrollIntoView) {
+  if (options.scrollTarget === "detail") {
+    els.heroDetail?.scrollIntoView({ behavior: "smooth", block: "start" });
+  } else if (options.scrollTarget === "section" || options.scrollIntoView) {
     document.querySelector("#heroes")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 }
@@ -2381,11 +2383,7 @@ function renderQuickPerkBoard() {
   }
   els.quickPerkBoard.innerHTML = QUICK_PERK_ROLES.map((role) => renderQuickPerkRole(role)).join("");
   els.quickPerkBoard.querySelectorAll("[data-hero-key]").forEach((button) => {
-    button.addEventListener("click", () => selectHero(button.dataset.heroKey, {
-      resetFilters: true,
-      switchView: true,
-      scrollIntoView: true,
-    }));
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
 }
 
