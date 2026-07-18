@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=learning-hub">
-    <script src="./app.js?v=learning-hub" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=hero-combos">
+    <script src="./app.js?v=hero-combos" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -30,7 +30,7 @@
           <a href="#heroes" data-view-target="heroes">ヒーロー</a>
           <a href="#guides" data-view-target="guides">攻略</a>
           <a href="#comps" data-view-target="comps">相性</a>
-          <a href="#updates" data-view-target="updates">更新</a>
+          <a href="#updates" data-view-target="updates">ニュース</a>
           <a href="#sensitivity" data-view-target="sensitivity">感度</a>
           <button id="refreshButton" type="button">更新</button>
         </nav>
@@ -59,11 +59,11 @@
         </section>
 
         <section class="view-switcher" aria-label="Information groups">
-          <button class="is-active" type="button" data-view-target="mindset">
+          <button type="button" data-view-target="mindset">
             <span>試合前 / 連敗中</span>
             <strong>心得</strong>
           </button>
-          <button type="button" data-view-target="heroes">
+          <button class="is-active" type="button" data-view-target="heroes">
             <span>キャラ選び</span>
             <strong>ヒーロー・パーク</strong>
           </button>
@@ -73,7 +73,7 @@
           </button>
           <button type="button" data-view-target="comps">
             <span>相性を見る時</span>
-            <strong>相性・診断</strong>
+            <strong>相性</strong>
           </button>
           <button type="button" data-view-target="updates">
             <span>環境確認</span>
@@ -85,7 +85,7 @@
           </button>
         </section>
 
-        <section id="mindset" class="mindset-section" data-view-panel="mindset" aria-label="Bronze and Silver improvement advice">
+        <section id="mindset" class="mindset-section" data-view-panel="mindset" aria-label="Bronze and Silver improvement advice" hidden>
           <div class="section-head">
             <div>
               <span class="eyebrow">Bronze / Silver Reset</span>
@@ -117,69 +117,75 @@
             </article>
           </div>
 
-          <div class="role-mindset-grid" aria-label="Role specific ranked advice">
-            <article class="role-mindset-card">
-              <span class="mindset-index">Tank</span>
-              <h3>タンク</h3>
-              <ul>
-                <li>最初に入るが、最初に死なない。</li>
-                <li>味方が撃てる角や高台まで前線を上げる。</li>
-                <li>防御スキルを使い切ったら、1歩下がって回復を待つ。</li>
-                <li>相手タンクだけでなく、孤立したDPS/サポートへ圧をかける。</li>
-              </ul>
-            </article>
-            <article class="role-mindset-card">
-              <span class="mindset-index">Damage</span>
-              <h3>ダメージ</h3>
-              <ul>
-                <li>撃つ前に、逃げ道と回復をもらえる位置を決める。</li>
-                <li>正面だけで撃ち負けるなら、横から同じ敵を撃つ。</li>
-                <li>キルできなくても、サポートに下がらせれば価値がある。</li>
-                <li>デスが多い時は火力より射線を1本減らす。</li>
-              </ul>
-            </article>
-            <article class="role-mindset-card">
-              <span class="mindset-index">Support</span>
-              <h3>サポート</h3>
-              <ul>
-                <li>回復だけでなく、自分が死なない位置を最優先にする。</li>
-                <li>味方タンクの後ろではなく、遮蔽物の横から支える。</li>
-                <li>狙われたら戦うより、まず味方側へ逃げる。</li>
-                <li>余裕がある時だけ、HPが減った敵や相手サポートを撃つ。</li>
-              </ul>
-            </article>
-            <article class="role-mindset-card is-solo">
-              <span class="mindset-index">Solo</span>
-              <h3>ソロの時</h3>
-              <ul>
-                <li>味方を動かそうとせず、自分が合わせる。</li>
-                <li>VCなしでも分かる動きだけする。孤立、裏取り、深追いを減らす。</li>
-                <li>味方が強い場所を見つけたら、その人を支える。</li>
-                <li>負け試合でも、次に使える立ち位置を1つ覚える。</li>
-              </ul>
-            </article>
-          </div>
+          <details class="content-disclosure">
+            <summary>
+              <span>ロール別・連敗時の詳しい心得</span>
+              <small>Tank / Damage / Support / Solo</small>
+            </summary>
+            <div class="role-mindset-grid" aria-label="Role specific ranked advice">
+              <article class="role-mindset-card">
+                <span class="mindset-index">Tank</span>
+                <h3>タンク</h3>
+                <ul>
+                  <li>最初に入るが、最初に死なない。</li>
+                  <li>味方が撃てる角や高台まで前線を上げる。</li>
+                  <li>防御スキルを使い切ったら、1歩下がって回復を待つ。</li>
+                  <li>相手タンクだけでなく、孤立したDPS/サポートへ圧をかける。</li>
+                </ul>
+              </article>
+              <article class="role-mindset-card">
+                <span class="mindset-index">Damage</span>
+                <h3>ダメージ</h3>
+                <ul>
+                  <li>撃つ前に、逃げ道と回復をもらえる位置を決める。</li>
+                  <li>正面だけで撃ち負けるなら、横から同じ敵を撃つ。</li>
+                  <li>キルできなくても、サポートに下がらせれば価値がある。</li>
+                  <li>デスが多い時は火力より射線を1本減らす。</li>
+                </ul>
+              </article>
+              <article class="role-mindset-card">
+                <span class="mindset-index">Support</span>
+                <h3>サポート</h3>
+                <ul>
+                  <li>回復だけでなく、自分が死なない位置を最優先にする。</li>
+                  <li>味方タンクの後ろではなく、遮蔽物の横から支える。</li>
+                  <li>狙われたら戦うより、まず味方側へ逃げる。</li>
+                  <li>余裕がある時だけ、HPが減った敵や相手サポートを撃つ。</li>
+                </ul>
+              </article>
+              <article class="role-mindset-card is-solo">
+                <span class="mindset-index">Solo</span>
+                <h3>ソロの時</h3>
+                <ul>
+                  <li>味方を動かそうとせず、自分が合わせる。</li>
+                  <li>VCなしでも分かる動きだけする。孤立、裏取り、深追いを減らす。</li>
+                  <li>味方が強い場所を見つけたら、その人を支える。</li>
+                  <li>負け試合でも、次に使える立ち位置を1つ覚える。</li>
+                </ul>
+              </article>
+            </div>
 
-          <div class="mindset-checklist">
-            <div>
-              <h3>試合中の合言葉</h3>
-              <ul>
-                <li>1人で奥まで行かない。</li>
-                <li>スキルを使ったら一度下がる。</li>
-                <li>味方が見えない時は前に出ない。</li>
-                <li>負けたら構成変更より立ち位置を先に見る。</li>
-              </ul>
+            <div class="mindset-checklist">
+              <div>
+                <h3>試合中の合言葉</h3>
+                <ul>
+                  <li>1人で奥まで行かない。</li>
+                  <li>スキルを使ったら一度下がる。</li>
+                  <li>味方が見えない時は前に出ない。</li>
+                  <li>負けたら構成変更より立ち位置を先に見る。</li>
+                </ul>
+              </div>
+              <div>
+                <h3>連敗した時</h3>
+                <ul>
+                  <li>2連敗したらロールかヒーローを変える。</li>
+                  <li>3連敗したら5分休む。</li>
+                  <li>味方批判より、自分の最初のデスを確認する。</li>
+                  <li>勝てる試合を落とさないことを目標にする。</li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <h3>連敗した時</h3>
-              <ul>
-                <li>2連敗したらロールかヒーローを変える。</li>
-                <li>3連敗したら5分休む。</li>
-                <li>味方批判より、自分の最初のデスを確認する。</li>
-                <li>勝てる試合を落とさないことを目標にする。</li>
-              </ul>
-            </div>
-          </div>
+          </details>
         </section>
 
         <section id="heroes" class="workspace" data-view-panel="heroes" aria-label="Heroes">
@@ -212,6 +218,12 @@
               <button type="button" data-favorite-filter aria-pressed="false">★ Fav</button>
             </div>
             <label class="map-field">
+              <span>ルール</span>
+              <select id="heroMapRuleFilter">
+                <option value="all">すべて</option>
+              </select>
+            </label>
+            <label class="map-field">
               <span>マップから選ぶ</span>
               <select id="heroMapFilter">
                 <option value="all">指定なし</option>
@@ -233,7 +245,7 @@
           </div>
         </section>
 
-        <section id="guides" class="guides-section" data-view-panel="guides" aria-label="Beginner guides">
+        <section id="guides" class="guides-section" data-view-panel="guides" aria-label="Beginner guides" hidden>
           <div class="section-head">
             <div>
               <span class="eyebrow">Beginner Guides</span>
@@ -244,12 +256,12 @@
 
           <div class="guide-controls" aria-label="Guide filters">
             <label>
-              <span>マップ</span>
-              <select id="guideMap"></select>
-            </label>
-            <label>
               <span>ルール</span>
               <select id="guideRule"></select>
+            </label>
+            <label>
+              <span>マップ</span>
+              <select id="guideMap"></select>
             </label>
             <label>
               <span>キャラ</span>
@@ -258,10 +270,16 @@
           </div>
 
           <div id="guideQuick" class="guide-quick-grid" aria-live="polite"></div>
-          <div id="guideDetails" class="guide-detail-grid" aria-live="polite"></div>
+          <details class="content-disclosure">
+            <summary>
+              <span>詳しい攻略を開く</span>
+              <small>マップ / ルール / キャラ別</small>
+            </summary>
+            <div id="guideDetails" class="guide-detail-grid" aria-live="polite"></div>
+          </details>
         </section>
 
-        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and composition theory">
+        <section id="comps" class="comps-section" data-view-panel="comps" aria-label="Hero synergy and composition theory" hidden>
           <div class="section-head">
             <div>
               <span class="eyebrow">Matchup Guide</span>
@@ -270,43 +288,119 @@
             <span class="section-note">相性表 + 構成例の理由</span>
           </div>
 
-          <div class="synergy-map-section" aria-label="Hero synergy map">
+          <div class="enemy-counter-tool" aria-label="Enemy composition counter planner">
             <div class="section-head compact">
               <div>
-                <span class="eyebrow">Synergy Map</span>
-                <h3>相性相関図</h3>
+                <span class="eyebrow">Enemy Counter</span>
+                <h3>敵構成アンチ・対策</h3>
               </div>
-              <span class="section-note">クリックで中心を変更</span>
+              <span class="section-note">敵5人を選んで勝ち筋を確認</span>
             </div>
-            <div id="centerHeroGrid" class="center-hero-grid" aria-label="Center hero picker"></div>
-            <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
+            <div class="enemy-counter-controls">
+              <label>
+                <span>敵タンク</span>
+                <select data-enemy-counter-slot="tank" data-enemy-counter-role="tank"></select>
+              </label>
+              <label>
+                <span>敵DPS 1</span>
+                <select data-enemy-counter-slot="damage1" data-enemy-counter-role="damage"></select>
+              </label>
+              <label>
+                <span>敵DPS 2</span>
+                <select data-enemy-counter-slot="damage2" data-enemy-counter-role="damage"></select>
+              </label>
+              <label>
+                <span>敵サポート 1</span>
+                <select data-enemy-counter-slot="support1" data-enemy-counter-role="support"></select>
+              </label>
+              <label>
+                <span>敵サポート 2</span>
+                <select data-enemy-counter-slot="support2" data-enemy-counter-role="support"></select>
+              </label>
+            </div>
+            <div id="enemyCounterResult" class="enemy-counter-result" aria-live="polite"></div>
           </div>
 
-          <div class="comp-helper" aria-label="Theory composition examples">
-            <div class="section-head compact">
-              <div>
-                <span class="eyebrow">Theory Comps</span>
-                <h3>セオリーの組み合わせ例</h3>
+          <details class="content-disclosure" aria-label="Hero synergy map">
+            <summary>
+              <span>相性相関図を開く</span>
+              <small>中心キャラから相性を見る</small>
+            </summary>
+            <div class="synergy-map-section">
+              <div class="section-head compact">
+                <div>
+                  <span class="eyebrow">Synergy Map</span>
+                  <h3>相性相関図</h3>
+                </div>
+                <span class="section-note">クリックで中心を変更</span>
               </div>
-              <span class="section-note">構成の狙いと理由を学ぶ</span>
+              <div id="centerHeroGrid" class="center-hero-grid" aria-label="Center hero picker"></div>
+              <div id="synergyMap" class="synergy-map" aria-live="polite"></div>
             </div>
-            <div id="theoryCompGrid" class="theory-comp-grid" aria-live="polite"></div>
-          </div>
+          </details>
+
+          <details class="content-disclosure" aria-label="Stage composition examples">
+            <summary>
+              <span>ステージ別おすすめ構成を開く</span>
+              <small>攻撃 / 防衛 / ルール別</small>
+            </summary>
+            <div class="comp-helper">
+              <div class="section-head compact">
+                <div>
+                  <span class="eyebrow">Stage Comps</span>
+                  <h3>ステージ別おすすめ構成</h3>
+                </div>
+                <span class="section-note">ステージ選択で攻防/Stats候補を確認</span>
+              </div>
+              <div class="comp-filters" aria-label="Stage composition filters">
+                <label>
+                  <span>ルール</span>
+                  <select id="compRuleFilter">
+                    <option value="all">すべて</option>
+                  </select>
+                </label>
+                <label>
+                  <span>ステージ</span>
+                  <select id="compStageFilter">
+                    <option value="all">ステージを選択</option>
+                  </select>
+                </label>
+              </div>
+              <div id="compGrid" class="comp-grid" aria-live="polite"></div>
+            </div>
+          </details>
+
+          <details class="content-disclosure" aria-label="Theory composition examples">
+            <summary>
+              <span>セオリー構成例を開く</span>
+              <small>構成の狙いと理由</small>
+            </summary>
+            <div class="comp-helper">
+              <div class="section-head compact">
+                <div>
+                  <span class="eyebrow">Theory Comps</span>
+                  <h3>セオリーの組み合わせ例</h3>
+                </div>
+                <span class="section-note">構成の狙いと理由を学ぶ</span>
+              </div>
+              <div id="theoryCompGrid" class="theory-comp-grid" aria-live="polite"></div>
+            </div>
+          </details>
         </section>
 
-        <section id="updates" class="updates-section" data-view-panel="updates" aria-label="Patch notes and news">
+        <section id="updates" class="updates-section" data-view-panel="updates" aria-label="Patch notes and news" hidden>
           <div class="section-head">
             <div>
               <span class="eyebrow">Patch Notes</span>
               <h2>公式パッチ情報</h2>
             </div>
-            <span class="section-note">過去1週間 + 未来予定の公式パッチのみ</span>
+            <span class="section-note">過去1週間の最新公式パッチのみ</span>
           </div>
 
           <div id="updateGrid" class="update-grid" aria-live="polite"></div>
         </section>
 
-        <section id="sensitivity" class="sensitivity-section" data-view-panel="sensitivity" aria-label="Console sensitivity helper">
+        <section id="sensitivity" class="sensitivity-section" data-view-panel="sensitivity" aria-label="Console sensitivity helper" hidden>
           <div class="section-head">
             <div>
               <span class="eyebrow">Console Aim</span>

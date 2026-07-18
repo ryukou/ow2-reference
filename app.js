@@ -2,12 +2,24 @@ const API_BASE = "https://overfast-api.tekrop.fr";
 const LOCALE = "ja-jp";
 const FALLBACK_LOCALE = "en-us";
 const RECENT_UPDATE_DAYS = 7;
+const FETCH_TIMEOUT_MS = 9000;
+const FETCH_RETRY_DELAYS = [0, 650];
 const QUICK_PERK_ROLES = [
   { role: "tank", label: "Tank", ja: "タンク" },
   { role: "damage", label: "Damage", ja: "ダメージ" },
   { role: "support", label: "Support", ja: "サポート" },
 ];
 const OFFICIAL_PATCH_UPDATES = [
+  {
+    type: "公式パッチ",
+    title: "2026年7月15日配信パッチ サマー・ゲーム2026",
+    date: "2026-07-14",
+    tone: "buff",
+    category: "patch",
+    summary: "サマー・ゲーム2026、ジャンクラットのトレジャー・ハント予定、ヒーロー調整、不具合修正を含む最新パッチ。",
+    details: ["サマー・ゲーム2026を7月15日から31日まで配信", "ドゥームフィストの強化ロケット・パンチ射程/範囲ボーナスを調整", "シオン、マウガ、シエラ、スタジアム関連の不具合を修正"],
+    href: "https://overwatch.blizzard.com/ja-jp/news/patch-notes/live/2026/07/",
+  },
   {
     type: "公式パッチ",
     title: "2026年2月25日 不具合修正",
@@ -583,6 +595,319 @@ const HERO_ARCHETYPES = {
   dive: ["winston", "dva", "wrecking-ball", "doomfist", "tracer", "genji", "sombra", "venture", "shion", "lucio", "ana", "kiriko", "juno"],
   poke: ["sigma", "ashe", "widowmaker", "hanzo", "soldier-76", "sojourn", "cassidy", "baptiste", "zenyatta", "illari", "ana"],
   pick: ["dva", "widowmaker", "hanzo", "ashe", "sombra", "tracer", "shion", "mercy", "kiriko"],
+};
+const HERO_COMBO_GUIDES = {
+  ana: [
+    {
+      title: "阻害グレネード → スリープ確認 → フォーカス",
+      steps: ["味方が詰める直前に阻害グレネードを入れる。", "逃げスキルやタンクの突進にスリープを合わせ、起こす味方を決めて倒す。"],
+      note: "瓶とスリープを同時に外すと自衛がなくなるので、片方は返し用に残す判断も必要。",
+    },
+    {
+      title: "ナノブースト → 味方ULT/突入",
+      steps: ["ゲンジ、リーパー、ウィンストンなどが入る直前にナノを付ける。", "付けた後は対象を見続けず、他の味方のHPも確認する。"],
+      note: "ナノ対象が見えてからでは遅いので、入る位置と合図を先に決める。",
+    },
+  ],
+  ashe: [
+    {
+      title: "ダイナマイト → ADS追撃",
+      steps: ["盾上や角裏にダイナマイトを投げ、空中で撃って燃焼を入れる。", "燃えた敵が下がるところをADSで1発ずつ削る。"],
+      note: "コーチガンは追撃より自衛用に残すと安定する。",
+    },
+  ],
+  baptiste: [
+    {
+      title: "イモータリティ → リジェネ → 高所ジャンプ",
+      steps: ["味方が落ちそうな瞬間にイモータリティを置く。", "リジェネで戻しながら高所や角へジャンプし、射線を切って撃ち返す。"],
+      note: "ランプを先置きしすぎると割られるので、致命傷の直前を狙う。",
+    },
+  ],
+  bastion: [
+    {
+      title: "グレネード → 強襲モード集中火力",
+      steps: ["グレネードで逃げ道や角を削る。", "相手の防御スキルを見てから強襲モードで短く撃ち切る。"],
+      note: "変形中に正面へ残り続けず、終わる前に隠れる場所を決める。",
+    },
+  ],
+  brigitte: [
+    {
+      title: "ウィップ・ショット → バッシュ → メイス追撃",
+      steps: ["飛び込んでくる敵をウィップ・ショットで離す。", "近づかれたらバッシュで距離を作り、味方の射線に戻す。"],
+      note: "自分から深く追うより、サポート周りで返す時に強い。",
+    },
+  ],
+  cassidy: [
+    {
+      title: "グレネード → ロール → 近距離追撃",
+      steps: ["機動キャラや瀕死の敵にグレネードを付ける。", "ロールでリロードし、角から出すぎず胴撃ちで倒し切る。"],
+      note: "ロール後は逃げが弱いので、倒せない時は無理に追わない。",
+    },
+  ],
+  doomfist: [
+    {
+      title: "スラム → パンチ壁当て → ブロックで帰る",
+      steps: ["スラムで後衛や高台に入り、壁方向へパンチを狙う。", "倒し切れない時はブロックで火力を受け、次の移動で戻る。"],
+      note: "パンチを先に使うと帰れないので、入る前に戻り道を決める。",
+    },
+  ],
+  dva: [
+    {
+      title: "ブースター → ミサイル → 近距離射撃",
+      steps: ["孤立した高台やサポートへブースターで入る。", "マイクロミサイルと近距離射撃を同時に当て、マトリックスで返しを消す。"],
+      note: "倒せない時はメックを残すことを優先し、ブースターで戻る。",
+    },
+  ],
+  echo: [
+    {
+      title: "粘着爆弾 → メイン → フォーカス・ビーム",
+      steps: ["粘着爆弾とメイン射撃でHPを半分以下にする。", "フォーカス・ビームで短く削り切り、飛行で射線を切る。"],
+      note: "ビームだけで入り始めると火力が足りない。先にHPを減らす。",
+    },
+  ],
+  genji: [
+    {
+      title: "手裏剣 → 風斬り → 近接",
+      steps: ["手裏剣で体力を削ってから風斬りで入り、近接を重ねる。", "キルで風斬りが戻ったら、次の敵か帰り道に使う。"],
+      note: "最初から風斬りで入ると倒し切れない時に帰れない。",
+    },
+    {
+      title: "龍撃剣 → 風斬り → 斬り",
+      steps: ["味方のスピード、ナノ、鈴などの支援に合わせて抜刀する。", "風斬りで距離を詰め、斬りと風斬りリセットで次の敵へ移る。"],
+      note: "支援なしで正面から抜くより、横や高台から入る。",
+    },
+  ],
+  hanzo: [
+    {
+      title: "ソニック → ストームアロー → 角待ち",
+      steps: ["ソニックで出てくる位置を確認する。", "ストームアローを角や盾割りに使い、見えた敵を先に削る。"],
+      note: "体を出し続けるより、情報を取って一瞬だけ射線を通す。",
+    },
+  ],
+  hazard: [
+    {
+      title: "壁で分断 → 飛び込み → 近距離追撃",
+      steps: ["壁で回復線や逃げ道を切る。", "孤立した敵へ入り、倒せなければ壁の外へ戻る。"],
+      note: "味方が撃てない場所で分断すると自分も孤立する。",
+    },
+  ],
+  illari: [
+    {
+      title: "パイロン設置 → アウトバースト → チャージ射撃",
+      steps: ["壊されにくい角にパイロンを置く。", "詰められたらアウトバーストで距離を取り、チャージ射撃で返す。"],
+      note: "パイロンが壊された直後は無理に撃ち合わず、置き直す時間を作る。",
+    },
+  ],
+  "junker-queen": [
+    {
+      title: "ナイフ引き寄せ → 斧 → ショットガン",
+      steps: ["ナイフを当て、引き寄せた瞬間に距離を詰める。", "斧とショットガンで出血を重ね、シャウトで押し切る。"],
+      note: "ナイフを外した時は無理に前へ出ず、次の角でやり直す。",
+    },
+  ],
+  junkrat: [
+    {
+      title: "地雷 → グレネード → 地雷起爆",
+      steps: ["足元や逃げ道に地雷を置く。", "グレネードを当てた直後に地雷で押し込み、瀕死を回収する。"],
+      note: "地雷を移動用に使うか火力用に使うかを先に決める。",
+    },
+  ],
+  juno: [
+    {
+      title: "リング → ブースト → 魚雷追撃",
+      steps: ["味方が入る方向にハイパーリングを置く。", "ブーストで角を越え、魚雷で複数の味方回復と敵削りを同時に狙う。"],
+      note: "リングだけ置いて味方が使えない位置だと価値が落ちる。",
+    },
+  ],
+  kiriko: [
+    {
+      title: "鈴で受ける → 神出鬼没 → クナイ追撃",
+      steps: ["阻害や大ダメージに鈴を合わせる。", "神出鬼没で射線を変え、頭の高さへクナイを通す。"],
+      note: "鈴を攻めに使った後は、味方の危険スキルを受けられない点に注意。",
+    },
+  ],
+  lifeweaver: [
+    {
+      title: "ペタル → ライフグリップ → 立て直し",
+      steps: ["ペタルで高所や逃げ道を作る。", "深く入った味方をライフグリップで戻し、花で回復を重ねる。"],
+      note: "味方のULTや確定キルを引っ張らないよう、危険時だけ使う。",
+    },
+  ],
+  lucio: [
+    {
+      title: "スピード → ブープ → ウォールライド離脱",
+      steps: ["味方が詰める瞬間だけスピードに切り替える。", "相手をブープで角や落下方向へ押し、壁走りで戻る。"],
+      note: "常にスピードではなく、当たる瞬間と下がる瞬間を作る。",
+    },
+  ],
+  mauga: [
+    {
+      title: "オーバーラン → 炎上 → オーバードライブ",
+      steps: ["オーバーランで位置を取り、片方の銃で燃やす。", "味方が撃てるタイミングでオーバードライブを使い、回復しながら押す。"],
+      note: "阻害を受けると崩れやすいので、相手Anaの瓶を見てから使う。",
+    },
+  ],
+  mei: [
+    {
+      title: "壁で分断 → スプレー → つらら",
+      steps: ["前に出た敵と後ろの回復線を壁で切る。", "スプレーで足を止め、つららと味方フォーカスで倒す。"],
+      note: "味方の射線を壁で切らないよう、置く向きを確認する。",
+    },
+  ],
+  mercy: [
+    {
+      title: "ダメージブースト → ガーディアン・エンジェル → 蘇生",
+      steps: ["高火力DPSの撃つ瞬間にダメージブーストを付ける。", "倒れた味方は射線が切れた時だけ飛んで蘇生する。"],
+      note: "蘇生を急ぐより、まず自分が落ちない角を取る。",
+    },
+  ],
+  moira: [
+    {
+      title: "回復玉 → フェード温存 → コアレッセンス",
+      steps: ["当たり合い前に回復玉を壁へ流す。", "フェードを残して味方の後ろに立ち、コアレッセンスで味方回復と敵削りを重ねる。"],
+      note: "フェードを攻めに使い切ると、返しのフォーカスで落ちやすい。",
+    },
+  ],
+  orisa: [
+    {
+      title: "槍投げ → スピンで押す → フォーティファイ",
+      steps: ["壁際や逃げ道に向けて槍を当てる。", "スピンで距離を詰め、返しのCCや火力にフォーティファイを合わせる。"],
+      note: "防御スキルを全部重ねると次の当たり合いで硬さがなくなる。",
+    },
+  ],
+  pharah: [
+    {
+      title: "コンカッシブ → ロケット直撃 → 高度変更",
+      steps: ["コンカッシブで敵を壁や味方射線にずらす。", "ロケットを置き撃ちし、高度を変えて反撃の照準を外す。"],
+      note: "同じ高度に浮き続けるとヒットスキャンに落とされる。",
+    },
+  ],
+  ramattra: [
+    {
+      title: "スロー場 → ネメシス → ブロック押し",
+      steps: ["逃げ道にヴォイド・アクセラレーターのスローを置く。", "ネメシスでパンメルを通し、火力を受ける瞬間だけブロックする。"],
+      note: "ネメシスが切れた後は前に残りすぎない。",
+    },
+  ],
+  reaper: [
+    {
+      title: "シャドウステップ → 近距離2発 → レイス離脱",
+      steps: ["見られにくい角や高台へ移動する。", "近距離で撃って倒し切り、返しのCC前にレイスで戻る。"],
+      note: "テレポート音を聞かれるので、正面裏取りだけに頼らない。",
+    },
+  ],
+  reinhardt: [
+    {
+      title: "ファイア・ストライク → チャージ圧 → 近距離スイング",
+      steps: ["ファイア・ストライクで先にHPを削る。", "短いチャージや盾歩きで角を取り、ハンマー範囲で味方と殴る。"],
+      note: "長距離チャージは孤立しやすいので、短く壁へ当てる。",
+    },
+  ],
+  roadhog: [
+    {
+      title: "フック → 近距離射撃 → ピッグペン",
+      steps: ["遮蔽物の角からフックを当てる。", "引いた敵に近距離射撃とピッグペンを重ね、倒せない時は回復で下がる。"],
+      note: "フックを外したら大きな隙になるので、角に戻る。",
+    },
+  ],
+  sigma: [
+    {
+      title: "岩 → ハイパースフィア → シールド再配置",
+      steps: ["アクリーションで動きを止める。", "球を重ねて削り、相手の返し射線にシールドを置く。"],
+      note: "吸収中に撃たせてから、相手のリロードやスキル切れで押す。",
+    },
+  ],
+  shion: [
+    {
+      title: "Joyride → Execution → Evade離脱",
+      steps: ["Joyrideで横や高台から孤立した敵へ入る。", "Executionで瞬間火力を出し、倒し切れない時はEvadeで戻る。"],
+      note: "帰り道を決めずに入ると、CCやハックで止まりやすい。",
+    },
+  ],
+  sojourn: [
+    {
+      title: "ディスラプター → 通常射撃チャージ → レールガン",
+      steps: ["逃げ道や盾裏にディスラプターを置く。", "通常射撃でチャージし、HPが減った敵へレールガンを合わせる。"],
+      note: "レールガンだけ狙い続けず、先に削る場所を作る。",
+    },
+  ],
+  "soldier-76": [
+    {
+      title: "ヘリックス → 追い撃ち → バイオティック・フィールド",
+      steps: ["ヘリックスで先に大きく削る。", "通常射撃で追い、撃ち合いが長引く時はフィールドを角に置く。"],
+      note: "フィールド上で棒立ちせず、角を使って撃ち合う。",
+    },
+  ],
+  sombra: [
+    {
+      title: "ハック → ウイルス → 近距離射撃",
+      steps: ["孤立した敵をハックして逃げスキルを止める。", "ウイルスと近距離射撃で削り、倒せない時はトランスロケーターで戻る。"],
+      note: "ハック前に撃つと逃げられやすい。味方が見ている敵を選ぶ。",
+    },
+  ],
+  symmetra: [
+    {
+      title: "タレット設置 → テレポーター展開 → ビーム育成",
+      steps: ["通路や曲がり角にタレットを置く。", "テレポーターで味方と距離を詰め、盾やタンクでビームを育てる。"],
+      note: "テレポーターの出口が見られている時は、無理に全員で入らない。",
+    },
+  ],
+  torbjorn: [
+    {
+      title: "タレット射線 → オーバーロード → 近距離連射",
+      steps: ["タレットで横や裏取りを見せる。", "詰められたらオーバーロードで耐久と連射を上げて返す。"],
+      note: "タレットを正面に置くより、壊しにくい横に置く。",
+    },
+  ],
+  tracer: [
+    {
+      title: "ブリンク接近 → 1マガジン → リコール",
+      steps: ["横や後ろから入り、1マガジンだけ撃つ。", "倒し切れない時はリコールで戻り、次のブリンクで再接触する。"],
+      note: "リコールなしで深追いしない。HPと弾数を見て短く触る。",
+    },
+  ],
+  venture: [
+    {
+      title: "ドリル・ダッシュ → バロー → 近距離追撃",
+      steps: ["ドリル・ダッシュで孤立した敵に入る。", "危険になったらバローで回避し、出る位置で近距離火力を重ねる。"],
+      note: "出る場所を読まれると倒されるので、味方射線へ戻る。",
+    },
+  ],
+  widowmaker: [
+    {
+      title: "ヴェノム・マイン → グラップル射線 → チャージショット",
+      steps: ["裏取りルートにヴェノム・マインを置く。", "グラップルで一瞬だけ射線を変え、チャージショットを撃ってすぐ隠れる。"],
+      note: "同じ射線に居続けるとダイブされる。撃ったら位置を変える。",
+    },
+  ],
+  winston: [
+    {
+      title: "ジャンプ → バリア → テスラ追撃",
+      steps: ["孤立した後衛や高台へジャンプする。", "着地後にバリアで回復線を切り、テスラで複数を削ってジャンプで戻る。"],
+      note: "バリア外の味方が撃てる敵へ入ると倒しやすい。",
+    },
+  ],
+  "wrecking-ball": [
+    {
+      title: "グラップル加速 → パイルドライバー → シールド離脱",
+      steps: ["横から加速して敵集団を崩す。", "パイルドライバーで浮かせ、アダプティブ・シールドを使って戻る。"],
+      note: "着地後に止まる時間を短くし、ヘルスパック導線へ抜ける。",
+    },
+  ],
+  zarya: [
+    {
+      title: "味方バリア → 高エネルギー → 自分バリアで押す",
+      steps: ["前に出る味方へバリアを付けてエネルギーを得る。", "高エネルギーになったら自分バリアで角を取り、ビームで短く押す。"],
+      note: "バリア2枚を同時に使い切ると次の返しに弱い。",
+    },
+  ],
+  zenyatta: [
+    {
+      title: "不和 → チャージショット → 角から一瞬出る",
+      steps: ["フォーカスしたい敵に不和を付ける。", "遮蔽物裏でチャージし、角から一瞬だけ出て撃つ。"],
+      note: "逃げスキルがないので、撃つ位置は味方の近くにする。",
+    },
+  ],
 };
 const HERO_COUNTERS = {
   dva: [
@@ -1409,10 +1734,52 @@ const ROLE_BEGINNER_GUIDES = {
     dont: "助けに行って自分も倒れる。",
   },
 };
+const ENEMY_COMP_COUNTER_GUIDES = {
+  dive: {
+    label: "ダイブ寄り",
+    plan: "孤立を作らず、飛んできた敵を着地後に全員で見る。先にサポートへ寄れる位置を作る。",
+    position: "広がりすぎず、サポートが逃げ込める角や高台下で受ける。バックラインだけを置き去りにしない。",
+    cooldown: "ジャンプ、ブリンク、ハック、ブースターなどの突入スキル後が反撃タイミング。逃げスキルを使った敵を深追いしない。",
+    swap: "ブリギッテ、キャスディ、トールビョーン、D.Va、キリコのように自衛・ peel ・即時離脱がある候補が安定。",
+    candidates: ["dva", "orisa", "cassidy", "torbjorn", "brigitte", "kiriko", "moira"],
+  },
+  brawl: {
+    label: "ラッシュ/近距離寄り",
+    plan: "相手の得意な短距離で受け続けず、角を下がりながら削ってから当たる。",
+    position: "狭い入口に全員で詰まらない。横射線や高台から、相手が詰める前に体力とスキルを使わせる。",
+    cooldown: "スピード、バリア、自己回復、無敵を使わせた後に引き撃ちする。相手のラッシュULTには防御ULTを1つ残す。",
+    swap: "シグマ、メイ、アッシュ、ソジョーン、ゼニヤッタ、アナなど、距離を保って止められる候補が有効。",
+    candidates: ["sigma", "mei", "ashe", "sojourn", "ana", "zenyatta", "lucio"],
+  },
+  poke: {
+    label: "ポーク/長射線寄り",
+    plan: "正面の撃ち合いに付き合わず、遮蔽物をつないで距離を詰めるか、別射線から同時に圧をかける。",
+    position: "長い道の中央を歩かない。タンクは射線を切り、DPSは横、サポートは角から支える。",
+    cooldown: "盾、移動、阻害、退避スキルを使わせてから前へ出る。1人で射線に出て先に削られない。",
+    swap: "ウィンストン、D.Va、ソンブラ、トレーサー、ルシオ、キリコなど、射線を無視して触れる候補が刺さりやすい。",
+    candidates: ["winston", "dva", "sombra", "tracer", "lucio", "kiriko", "genji"],
+  },
+  pick: {
+    label: "ワンピック/スナイプ寄り",
+    plan: "最初の1デスを防ぐ。見られている射線を切り、相手の狙撃/奇襲キャラに先に圧をかける。",
+    position: "単独で横断しない。角、盾、高台下を使い、味方と同時にピークする。",
+    cooldown: "グラップル、ステルス、ワープ、逃げスキル後に詰める。蘇生や無敵でピックを返されないように見る。",
+    swap: "ウィンストン、D.Va、ソンブラ、トレーサー、キリコ、マーシーなど、射線管理やリカバーができる候補が有効。",
+    candidates: ["winston", "dva", "sombra", "tracer", "kiriko", "mercy", "lucio"],
+  },
+  mixed: {
+    label: "混合構成",
+    plan: "相手の一番強い勝ち筋を1つだけ止める。タンクだけ、スナイパーだけのように見方を絞る。",
+    position: "味方が見える範囲で広がり、正面と横のどちらかが孤立しない形を作る。",
+    cooldown: "相手の起点スキルを1つ決めて数える。使った直後に前へ、残っている時は無理に入らない。",
+    swap: "自分が生き残れる得意キャラを軸に、足りない役割だけアンチ候補へ寄せる。",
+    candidates: ["dva", "sigma", "cassidy", "sombra", "ana", "kiriko", "brigitte"],
+  },
+};
 
 const state = {
   bootstrapped: false,
-  activeView: "mindset",
+  activeView: "heroes",
   heroes: [],
   heroDetails: new Map(),
   heroStats: new Map(),
@@ -1422,10 +1789,18 @@ const state = {
   query: "",
   favoriteOnly: false,
   favoriteHeroKeys: new Set(),
+  mapRuleFilter: "all",
   mapFilter: "all",
   compFilters: {
-    stageInitial: "all",
+    rule: "all",
     stage: "all",
+  },
+  enemyCounter: {
+    tank: "",
+    damage1: "",
+    damage2: "",
+    support1: "",
+    support2: "",
   },
   guideFilters: {
     map: "all",
@@ -1471,6 +1846,7 @@ function cacheElements() {
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
+  els.heroMapRuleFilter = document.querySelector("#heroMapRuleFilter");
   els.heroMapFilter = document.querySelector("#heroMapFilter");
   els.heroMapNote = document.querySelector("#heroMapNote");
   els.quickPerkBoard = document.querySelector("#quickPerkBoard");
@@ -1487,7 +1863,12 @@ function cacheElements() {
   els.guideDetails = document.querySelector("#guideDetails");
   els.centerHeroGrid = document.querySelector("#centerHeroGrid");
   els.synergyMap = document.querySelector("#synergyMap");
+  els.enemyCounterInputs = document.querySelectorAll("[data-enemy-counter-slot]");
+  els.enemyCounterResult = document.querySelector("#enemyCounterResult");
   els.theoryCompGrid = document.querySelector("#theoryCompGrid");
+  els.compRuleFilter = document.querySelector("#compRuleFilter");
+  els.compStageFilter = document.querySelector("#compStageFilter");
+  els.compGrid = document.querySelector("#compGrid");
   els.sensitivityResult = document.querySelector("#sensitivityResult");
   els.sensHero = document.querySelector("#sensHero");
   els.sensInputs = document.querySelectorAll(
@@ -1532,7 +1913,14 @@ function bindEvents() {
     renderHeroList();
   });
 
-  els.heroMapFilter.addEventListener("change", () => {
+  els.heroMapRuleFilter?.addEventListener("change", () => {
+    state.mapRuleFilter = els.heroMapRuleFilter.value;
+    state.mapFilter = "all";
+    renderHeroMapFilterOptions();
+    renderHeroList();
+  });
+
+  els.heroMapFilter?.addEventListener("change", () => {
     state.mapFilter = els.heroMapFilter.value;
     renderHeroList();
   });
@@ -1549,12 +1937,35 @@ function bindEvents() {
 
   els.guideRule.addEventListener("change", () => {
     state.guideFilters.rule = els.guideRule.value;
+    state.guideFilters.map = "all";
+    renderGuideControls();
     renderGuides();
   });
 
   els.guideHero.addEventListener("change", () => {
     state.guideFilters.hero = els.guideHero.value;
     renderGuides();
+  });
+
+  els.compRuleFilter?.addEventListener("change", () => {
+    state.compFilters.rule = els.compRuleFilter.value;
+    state.compFilters.stage = "all";
+    renderComps();
+  });
+
+  els.compStageFilter?.addEventListener("change", () => {
+    state.compFilters.stage = els.compStageFilter.value;
+    renderComps();
+  });
+
+  els.enemyCounterInputs?.forEach((select) => {
+    select.addEventListener("change", () => {
+      const slot = select.dataset.enemyCounterSlot;
+      if (slot) {
+        state.enemyCounter[slot] = select.value;
+        renderEnemyCounterResult();
+      }
+    });
   });
 
   els.sensInputs.forEach((input) => {
@@ -1663,12 +2074,12 @@ async function bootstrap() {
   state.bootstrapped = true;
   renderInitialLoading();
 
-  const cached = readCache();
+  const cached = readCache({ allowStale: true });
   if (cached) {
     hydrateFromCache(cached);
     renderAll();
     setProgress("Ready");
-    setStatus("キャッシュ表示中");
+    setStatus(cached.stale ? "古いキャッシュ表示中" : "キャッシュ表示中");
   }
 
   await loadRemoteData({ force: false });
@@ -1706,12 +2117,20 @@ async function loadRemoteData({ force }) {
     renderAll();
     await loadHeroDetails(heroes, { force });
     writeCache();
-    setStatus(`更新 ${formatClock(new Date())}`);
+    setStatus(`最終更新 ${formatClock(new Date())}`);
   } catch (error) {
     console.error(error);
     setStatus("API取得エラー");
     if (!state.heroes.length) {
-      renderFatalError(error);
+      const stale = readCache({ allowStale: true });
+      if (stale) {
+        hydrateFromCache(stale);
+        renderAll();
+        setProgress("Ready");
+        setStatus("古いキャッシュ表示中");
+      } else {
+        renderFatalError(error);
+      }
     }
   } finally {
     els.refreshButton.disabled = false;
@@ -1816,7 +2235,7 @@ async function fetchJson(path, params = {}) {
     }
   });
 
-  const response = await fetch(url, { headers: { Accept: "application/json" } });
+  const response = await fetchWithRetry(url);
   if (!response.ok) {
     let message = `${response.status} ${response.statusText}`;
     try {
@@ -1830,11 +2249,40 @@ async function fetchJson(path, params = {}) {
   return response.json();
 }
 
+async function fetchWithRetry(url) {
+  let lastError;
+  for (const delay of FETCH_RETRY_DELAYS) {
+    if (delay > 0) {
+      await wait(delay);
+    }
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+    try {
+      return await fetch(url, {
+        headers: { Accept: "application/json" },
+        signal: controller.signal,
+      });
+    } catch (error) {
+      lastError = error;
+    } finally {
+      clearTimeout(timeoutId);
+    }
+  }
+  throw lastError;
+}
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function renderAll() {
   renderMetaStats();
   renderUpdates();
   renderGuideControls();
   renderGuides();
+  renderEnemyCounterControls();
+  renderComps();
   renderTheoryComps();
   renderSynergyMapControls();
   renderSensitivityControls();
@@ -1849,10 +2297,15 @@ function renderHeroMapFilterOptions() {
   if (!els.heroMapFilter) {
     return;
   }
+  if (els.heroMapRuleFilter) {
+    const ruleCurrent = els.heroMapRuleFilter.value || state.mapRuleFilter;
+    setSelectOptions(els.heroMapRuleFilter, ruleOptions(true), ruleCurrent);
+    state.mapRuleFilter = els.heroMapRuleFilter.value;
+  }
   const current = els.heroMapFilter.value || state.mapFilter;
   const options = [
     { value: "all", label: "指定なし" },
-    ...state.maps
+    ...filterStagesByRule(state.maps, state.mapRuleFilter)
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name, "ja"))
       .map((stage) => ({ value: stage.key, label: `${stage.name}(${stage.rule})` })),
@@ -1865,12 +2318,16 @@ function renderGuideControls() {
   if (!els.guideMap || !els.guideRule || !els.guideHero) {
     return;
   }
+  const ruleCurrent = els.guideRule.value || state.guideFilters.rule;
+  setSelectOptions(els.guideRule, ruleOptions(false), ruleCurrent);
+  state.guideFilters.rule = els.guideRule.value;
+
   const mapCurrent = els.guideMap.value || state.guideFilters.map;
   setSelectOptions(
     els.guideMap,
     [
       { value: "all", label: "指定なし" },
-      ...state.maps
+      ...filterStagesByRule(state.maps, state.guideFilters.rule)
         .slice()
         .sort((a, b) => a.name.localeCompare(b.name, "ja"))
         .map((stage) => ({ value: stage.key, label: `${stage.name} / ${stage.rule}` })),
@@ -1880,13 +2337,10 @@ function renderGuideControls() {
   state.guideFilters.map = els.guideMap.value;
 
   const stage = getSelectedGuideStage();
-  const ruleCurrent = stage?.rule || els.guideRule.value || state.guideFilters.rule;
-  setSelectOptions(
-    els.guideRule,
-    Object.keys(GUIDE_RULES).map((rule) => ({ value: rule, label: rule })),
-    ruleCurrent,
-  );
-  state.guideFilters.rule = els.guideRule.value;
+  if (stage && state.guideFilters.rule !== stage.rule) {
+    setSelectOptions(els.guideRule, ruleOptions(false), stage.rule);
+    state.guideFilters.rule = els.guideRule.value;
+  }
 
   const heroCurrent = state.guideFilters.hero || els.guideHero.value || state.selectedHeroKey || state.heroes[0]?.key || "";
   setSelectOptions(
@@ -2390,31 +2844,40 @@ function renderMetaStats() {
 
 function renderUpdates() {
   renderLatestPatchSummary();
-  const updates = PATCH_UPDATES
-    .filter((item) => item.category === "patch")
-    .filter(isVisibleRecentUpdate)
-    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a));
+  const updates = getPatchUpdateDisplay();
 
-  els.updateGrid.innerHTML = updates.length
-    ? renderUpdateSection("公式パッチ", "過去1週間以内 + 未来予定のみ表示", updates)
-    : renderEmpty("過去1週間以内または未来予定の公式パッチ情報はありません。");
+  els.updateGrid.innerHTML = updates.items.length
+    ? renderUpdateSection("公式パッチ", updates.note, updates.items)
+    : renderEmpty("過去1週間以内の公式パッチ情報はありません。");
 }
 
 function renderLatestPatchSummary() {
-  const patch = PATCH_UPDATES.slice()
-    .filter((update) => update.category === "patch")
-    .filter(isVisibleRecentUpdate)
-    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a))[0];
+  const display = getPatchUpdateDisplay();
+  const patch = display.items[0];
   if (!els.latestPatchTitle || !els.latestPatchSummary) {
     return;
   }
   if (!patch) {
-    els.latestPatchTitle.textContent = "直近1週間・未来予定のパッチなし";
-    els.latestPatchSummary.textContent = "古いパッチは非表示にしています。必要な時は公式パッチノートを確認してください。";
+    els.latestPatchTitle.textContent = "過去1週間のパッチなし";
+    els.latestPatchSummary.textContent = "古いパッチは表示せず、必要な時だけ公式パッチノートを確認してください。";
     return;
   }
-  els.latestPatchTitle.textContent = `${patch.date} ${patch.title}`;
-  els.latestPatchSummary.textContent = patch.summary;
+  els.latestPatchTitle.textContent = `${display.stale ? "保存済み: " : ""}${patch.date} ${patch.title}`;
+  els.latestPatchSummary.textContent = display.stale
+    ? `${patch.summary} 最新情報は公式パッチノートで確認してください。`
+    : patch.summary;
+}
+
+function getPatchUpdateDisplay() {
+  const sortedPatches = PATCH_UPDATES
+    .filter((item) => item.category === "patch")
+    .sort((a, b) => updateTimestamp(b) - updateTimestamp(a));
+  const visible = sortedPatches.filter(isVisibleRecentUpdate);
+  return {
+    items: visible.slice(0, 1),
+    note: "過去1週間以内の最新のみ表示",
+    stale: false,
+  };
 }
 
 function renderUpdateCard(update) {
@@ -2458,13 +2921,10 @@ function renderComps() {
   }
   renderCompFilterOptions();
   const stage = getSelectedStage();
-  if (!stage) {
-    els.compGrid.innerHTML = renderEmpty("ステージ名を選ぶと、そのマップ向けの構成例を表示します。");
-    return;
-  }
-
-  const comps = buildStageComps(stage);
-  els.compGrid.innerHTML = comps.map(renderCompCard).join("");
+  const comps = stage ? [...buildStageComps(stage), ...buildRecommendedComps()] : buildRecommendedComps();
+  els.compGrid.innerHTML = comps.length
+    ? comps.map(renderCompCard).join("")
+    : renderEmpty("ステージ名を選ぶと、そのマップ向けの構成例を表示します。");
   els.compGrid.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
@@ -2607,22 +3067,16 @@ function buildAllComps() {
 }
 
 function renderCompFilterOptions() {
-  if (!els.compInitialFilter || !els.compStageFilter) {
+  if (!els.compRuleFilter || !els.compStageFilter) {
     return;
   }
   const selected = { ...state.compFilters };
-  const visibleStages = getVisibleCompStages();
   setSelectOptions(
-    els.compInitialFilter,
-    [
-      { value: "all", label: "すべて" },
-      ...getStageInitialOptions().map((initial) => ({
-        value: initial,
-        label: initial,
-      })),
-    ],
-    selected.stageInitial,
+    els.compRuleFilter,
+    ruleOptions(true),
+    selected.rule,
   );
+  const visibleStages = getVisibleCompStages();
   setSelectOptions(
     els.compStageFilter,
     [
@@ -2637,19 +3091,20 @@ function renderCompFilterOptions() {
 }
 
 function getVisibleCompStages() {
-  return state.maps.filter((stage) => stageMatchesInitial(stage, state.compFilters.stageInitial));
+  return filterStagesByRule(state.maps, state.compFilters.rule);
 }
 
-function getStageInitialOptions() {
-  return [...new Set(state.maps.map(stageInitial).filter(Boolean))].sort((a, b) => a.localeCompare(b, "en"));
+function filterStagesByRule(stages, rule) {
+  return (Array.isArray(stages) ? stages : []).filter((stage) => stageMatchesRule(stage, rule));
 }
 
-function stageMatchesInitial(stage, initial) {
-  return !initial || initial === "all" || stageInitial(stage) === initial;
+function stageMatchesRule(stage, rule) {
+  return !rule || rule === "all" || stage.rule === rule;
 }
 
-function stageInitial(stage) {
-  return stringValue(stage.name).trim().charAt(0).toUpperCase();
+function ruleOptions(includeAll = true) {
+  const options = Object.keys(GUIDE_RULES).map((rule) => ({ value: rule, label: rule }));
+  return includeAll ? [{ value: "all", label: "すべて" }, ...options] : options;
 }
 
 function renderTheoryComps() {
@@ -2679,6 +3134,218 @@ function renderTheoryCompCard(comp) {
         ${renderGuidePoint("入れ替え候補", comp.swaps)}
       </div>
     </article>
+  `;
+}
+
+function renderEnemyCounterControls() {
+  if (!els.enemyCounterInputs?.length) {
+    return;
+  }
+  els.enemyCounterInputs.forEach((select) => {
+    const slot = select.dataset.enemyCounterSlot;
+    const role = select.dataset.enemyCounterRole;
+    const heroes = sortHeroesForQuickPerks(state.heroes.filter((hero) => hero.role === role));
+    const current = state.enemyCounter[slot] || "";
+    select.innerHTML = [
+      '<option value="">未選択</option>',
+      ...heroes.map((hero) => `<option value="${escapeAttr(hero.key)}">${escapeHtml(hero.name)}</option>`),
+    ].join("");
+    select.value = heroes.some((hero) => hero.key === current) ? current : "";
+    state.enemyCounter[slot] = select.value;
+  });
+  renderEnemyCounterResult();
+}
+
+function renderEnemyCounterResult() {
+  if (!els.enemyCounterResult) {
+    return;
+  }
+  const selectedHeroes = getSelectedEnemyHeroes();
+  if (!selectedHeroes.length) {
+    els.enemyCounterResult.innerHTML = renderEmpty("敵キャラを選ぶと、構成アンチと対策が表示されます");
+    return;
+  }
+
+  const plan = buildEnemyCounterPlan(selectedHeroes);
+  els.enemyCounterResult.innerHTML = `
+    <div class="enemy-counter-summary">
+      <div>
+        <span class="eyebrow">Detected Comp</span>
+        <h4>${escapeHtml(plan.guide.label)}</h4>
+      </div>
+      <div class="enemy-chip-list">
+        ${selectedHeroes.map(renderEnemyChip).join("")}
+      </div>
+    </div>
+    <div class="enemy-counter-plan">
+      ${renderGuidePoint("勝ち筋", plan.guide.plan)}
+      ${renderGuidePoint("立ち位置", plan.guide.position)}
+      ${renderGuidePoint("スキル管理", plan.guide.cooldown)}
+      ${renderGuidePoint("入れ替え方", plan.guide.swap)}
+    </div>
+    <div class="enemy-counter-roles">
+      ${QUICK_PERK_ROLES.map((role) => renderEnemyCounterRole(role, plan.recommendations[role.role] || [])).join("")}
+    </div>
+    <div class="enemy-counter-notes">
+      <strong>見る順番</strong>
+      <span>${escapeHtml(plan.priority)}</span>
+    </div>
+  `;
+  els.enemyCounterResult.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
+}
+
+function getSelectedEnemyHeroes() {
+  const keys = Object.values(state.enemyCounter).filter(Boolean);
+  const seen = new Set();
+  return keys
+    .map((key) => findHeroByKey(key))
+    .filter(Boolean)
+    .filter((hero) => {
+      if (seen.has(hero.key)) {
+        return false;
+      }
+      seen.add(hero.key);
+      return true;
+    });
+}
+
+function buildEnemyCounterPlan(enemyHeroes) {
+  const archetypeCounts = enemyHeroes.reduce((counts, hero) => {
+    const archetypes = getHeroArchetypes(hero.key);
+    const primary = archetypes[0] || roleFallbackArchetype(hero.role);
+    counts[primary] = (counts[primary] || 0) + 1;
+    return counts;
+  }, {});
+  const primaryType = Object.entries(archetypeCounts)
+    .sort((a, b) => b[1] - a[1])
+    .find(([, count]) => count >= 2)?.[0] || "mixed";
+  const guide = ENEMY_COMP_COUNTER_GUIDES[primaryType] || ENEMY_COMP_COUNTER_GUIDES.mixed;
+  return {
+    guide,
+    recommendations: buildEnemyCounterRecommendations(enemyHeroes, guide),
+    priority: buildEnemyCounterPriority(enemyHeroes, guide),
+  };
+}
+
+function buildEnemyCounterRecommendations(enemyHeroes, guide) {
+  const scored = new Map();
+  enemyHeroes.forEach((enemy) => {
+    getHeroCounters(enemy).forEach((counter) => {
+      if (!findHeroByKey(counter.key)) {
+        return;
+      }
+      const current = scored.get(counter.key) || {
+        key: counter.key,
+        score: 0,
+        reasons: new Set(),
+        targets: new Set(),
+      };
+      current.score += 2;
+      current.reasons.add(counter.reason);
+      current.targets.add(enemy.name);
+      scored.set(counter.key, current);
+    });
+  });
+  guide.candidates.forEach((key) => {
+    const hero = findHeroByKey(key);
+    if (!hero) {
+      return;
+    }
+    const current = scored.get(key) || {
+      key,
+      score: 0,
+      reasons: new Set(),
+      targets: new Set(),
+    };
+    current.score += 1;
+    current.reasons.add(`${guide.label}へのセオリー対策候補。`);
+    scored.set(key, current);
+  });
+
+  return QUICK_PERK_ROLES.reduce((grouped, role) => {
+    grouped[role.role] = [...scored.values()]
+      .map((item) => ({ ...item, hero: findHeroByKey(item.key) }))
+      .filter((item) => item.hero?.role === role.role)
+      .sort((a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name, "ja"))
+      .slice(0, 4)
+      .map((item) => ({
+        key: item.key,
+        hero: item.hero,
+        score: item.score,
+        reason: buildEnemyCounterReason(item),
+      }));
+    return grouped;
+  }, {});
+}
+
+function buildEnemyCounterReason(item) {
+  const targets = [...item.targets].slice(0, 2).join(" / ");
+  const reason = [...item.reasons][0] || "相手の勝ち筋を止めやすい。";
+  return targets ? `${targets}に有効。${reason}` : reason;
+}
+
+function buildEnemyCounterPriority(enemyHeroes, guide) {
+  const supportCount = enemyHeroes.filter((hero) => hero.role === "support").length;
+  const damageNames = enemyHeroes.filter((hero) => hero.role === "damage").map((hero) => hero.name).slice(0, 2);
+  if (guide === ENEMY_COMP_COUNTER_GUIDES.dive) {
+    return "最初に味方サポートを守る。飛んできた敵を1人決めて全員で撃つ。";
+  }
+  if (guide === ENEMY_COMP_COUNTER_GUIDES.poke) {
+    return "長射線を切ってから前へ出る。先に削られたら当たらず集合し直す。";
+  }
+  if (guide === ENEMY_COMP_COUNTER_GUIDES.brawl) {
+    return "相手が近づく前に削る。スピードやバリアを使わせたら角を下がって受ける。";
+  }
+  if (damageNames.length) {
+    return `${damageNames.join(" / ")}の射線や奇襲を最初に確認し、1デス目を防ぐ。`;
+  }
+  return supportCount ? "相手サポートの自衛スキルを使わせてから、同じ敵へフォーカスする。" : "相手の起点スキルを1つ決めて、使った直後に前へ出る。";
+}
+
+function renderEnemyChip(hero) {
+  const portrait = hero.portrait
+    ? `<img src="${safeUrl(hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
+  return `
+    <button class="enemy-chip" type="button" data-hero-key="${escapeAttr(hero.key)}" title="${escapeAttr(hero.name)}">
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(hero.name)}</strong>
+        <small>${escapeHtml(roleLabel(hero.role))}</small>
+      </span>
+    </button>
+  `;
+}
+
+function renderEnemyCounterRole(role, recommendations) {
+  return `
+    <section class="enemy-counter-role">
+      <div class="role-matchup-head">
+        <span>${escapeHtml(role.label)}</span>
+        <strong>${escapeHtml(role.ja)}の候補</strong>
+        <small>${recommendations.length ? "クリックで詳細" : "候補なし"}</small>
+      </div>
+      <div class="enemy-counter-candidates">
+        ${recommendations.length ? recommendations.map(renderEnemyCounterCandidate).join("") : renderEmpty("敵キャラを増やすと候補が出ます")}
+      </div>
+    </section>
+  `;
+}
+
+function renderEnemyCounterCandidate(item) {
+  const portrait = item.hero.portrait
+    ? `<img src="${safeUrl(item.hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(item.hero.name.slice(0, 2))}</span>`;
+  return `
+    <button class="enemy-counter-candidate" type="button" data-hero-key="${escapeAttr(item.hero.key)}" title="${escapeAttr(item.hero.name)}">
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(item.hero.name)}</strong>
+        <small>${escapeHtml(item.reason)}</small>
+      </span>
+    </button>
   `;
 }
 
@@ -2757,10 +3424,35 @@ function renderSynergyMap() {
         ${sortHeroesForQuickPerks(state.heroes).map(renderRelationTableRow).join("")}
       </div>
     </div>
+    <div class="role-matchup-overview">
+      <div class="panel-title">
+        <h3>ロール別 相性表</h3>
+        <span class="chip">Tank / Damage / Support</span>
+      </div>
+      <div class="role-matchup-grid">
+        ${QUICK_PERK_ROLES.map(renderRoleMatchupSection).join("")}
+      </div>
+    </div>
   `;
   els.synergyMap.querySelectorAll("[data-hero-key]").forEach((button) => {
     button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
   });
+}
+
+function renderRoleMatchupSection(role) {
+  const heroes = sortHeroesForQuickPerks(state.heroes.filter((hero) => hero.role === role.role));
+  return `
+    <section class="role-matchup-section">
+      <div class="role-matchup-head">
+        <span>${escapeHtml(role.label)}</span>
+        <strong>${escapeHtml(role.ja)}</strong>
+        <small>${heroes.length} Heroes</small>
+      </div>
+      <div class="relation-table">
+        ${heroes.length ? heroes.map(renderRelationTableRow).join("") : renderEmpty("ヒーロー取得中")}
+      </div>
+    </section>
+  `;
 }
 
 function renderRelationHero(hero) {
@@ -2768,7 +3460,7 @@ function renderRelationHero(hero) {
     ? `<img src="${safeUrl(hero.portrait)}" alt="">`
     : `<span class="relation-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
   return `
-    <button class="relation-hero" type="button" data-hero-key="${escapeAttr(hero.key)}">
+    <button class="relation-hero" type="button" data-hero-key="${escapeAttr(hero.key)}" title="${escapeAttr(hero.name)}">
       ${portrait}
       <span>
         <strong>${escapeHtml(hero.name)}</strong>
@@ -2787,7 +3479,7 @@ function renderRelationNode(relation, tone) {
   const keyAttr = hero ? ` data-hero-key="${escapeAttr(hero.key)}"` : "";
   const disabled = hero ? "" : " disabled";
   return `
-    <button class="relation-node is-${escapeAttr(tone)}" type="button"${keyAttr}${disabled}>
+    <button class="relation-node is-${escapeAttr(tone)}" type="button"${keyAttr}${disabled} title="${escapeAttr(name)}">
       ${portrait}
       <span>
         <strong>${escapeHtml(name)}</strong>
@@ -2804,7 +3496,7 @@ function renderRelationTableRow(hero) {
     ? `<img src="${safeUrl(hero.portrait)}" alt="">`
     : `<span class="relation-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
   return `
-    <button class="relation-row" type="button" data-hero-key="${escapeAttr(hero.key)}">
+    <button class="relation-row" type="button" data-hero-key="${escapeAttr(hero.key)}" title="${escapeAttr(hero.name)}">
       <span class="relation-row-hero">
         ${portrait}
         <span>
@@ -2968,7 +3660,7 @@ function renderCompMember(member) {
   const keyAttr = hero ? ` data-hero-key="${escapeAttr(key)}"` : "";
 
   return `
-    <button class="comp-member" type="button"${keyAttr}${disabled}>
+    <button class="comp-member" type="button"${keyAttr}${disabled} title="${escapeAttr(name)}">
       ${portrait}
       <span>
         <strong>${escapeHtml(name)}</strong>
@@ -3063,7 +3755,7 @@ function renderHeroRow(hero) {
     : `<span class="hero-row-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
 
   return `
-    <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}">
+    <button class="hero-row${active}${favorite}" type="button" data-hero-key="${escapeAttr(hero.key)}" title="${escapeAttr(hero.name)}">
       ${portrait}
       <span>
         <strong>${favoriteMark}${mapFitMark}<span class="hero-row-name">${escapeHtml(hero.name)}</span></strong>
@@ -3136,6 +3828,7 @@ function getFilteredHeroes() {
     const playstyle = buildHeroPlaystyle(hero);
     const synergy = buildHeroSynergy(hero);
     const counters = getHeroCounters(hero);
+    const combos = getHeroCombos(hero);
     const fields = [
       hero.name,
       hero.key,
@@ -3144,6 +3837,7 @@ function getFilteredHeroes() {
       playstyle.summary,
       playstyle.avoid,
       ...playstyle.tips,
+      ...combos.flatMap((combo) => [combo.title, combo.note, ...(combo.steps || [])]),
       ...synergy.allies.flatMap((ally) => [heroName(ally.key), ally.reason]),
       ...counters.flatMap((counter) => [heroName(counter.key), counter.reason]),
       ...(detail?.abilities || []).flatMap((ability) => [ability.name, ability.description]),
@@ -3223,7 +3917,7 @@ function renderQuickPerkRow(hero) {
     ? `<img class="quick-perk-avatar" src="${safeUrl(hero.portrait)}" alt="">`
     : `<span class="quick-perk-avatar is-placeholder">${escapeHtml(hero.name.slice(0, 2))}</span>`;
   return `
-    <button class="quick-perk-row${favorite ? " is-favorite" : ""}" type="button" data-hero-key="${escapeAttr(hero.key)}">
+    <button class="quick-perk-row${favorite ? " is-favorite" : ""}" type="button" data-hero-key="${escapeAttr(hero.key)}" title="${escapeAttr(hero.name)}">
       <span class="quick-perk-hero">
         ${portrait}
         <span class="quick-perk-hero-text">
@@ -3335,6 +4029,7 @@ function renderHeroDetail() {
 
       <section>
         ${renderPlaystylePanel(hero)}
+        ${renderHeroComboPanel(hero)}
         ${renderSynergyPanel(hero)}
         ${renderCounterPanel(hero)}
         ${renderCounterplayPanel(hero)}
@@ -3592,6 +4287,42 @@ function renderAbilityCard(ability) {
   `;
 }
 
+function renderHeroComboPanel(hero) {
+  const combos = getHeroCombos(hero);
+  if (!combos.length) {
+    return "";
+  }
+  return `
+    <div class="combo-panel">
+      <div class="panel-title">
+        <h3>固有コンボ</h3>
+        <span class="chip">${combos.length}</span>
+      </div>
+      <div class="combo-list">
+        ${combos.map(renderHeroComboCard).join("")}
+      </div>
+    </div>
+  `;
+}
+
+function renderHeroComboCard(combo) {
+  return `
+    <article class="combo-card">
+      <h4>${escapeHtml(combo.title)}</h4>
+      <ol>
+        ${(combo.steps || []).map((step) => `<li>${escapeHtml(step)}</li>`).join("")}
+      </ol>
+      <p>${escapeHtml(combo.note || "")}</p>
+    </article>
+  `;
+}
+
+function getHeroCombos(hero) {
+  const direct = HERO_COMBO_GUIDES[hero?.key];
+  const normalized = HERO_COMBO_GUIDES[owperksHeroKey(hero)];
+  return direct || normalized || [];
+}
+
 function renderPlaystylePanel(hero) {
   const guide = buildHeroPlaystyle(hero);
   return `
@@ -3817,7 +4548,7 @@ function renderTankMapChip(mapName) {
   const stage = state.maps.find((item) => item.name === mapName) || FALLBACK_STAGES.find((item) => item.name === mapName);
   const meta = stage ? `${stage.rule} · ${stage.style}` : "Map";
   return `
-    <span class="tank-map-chip">
+    <span class="tank-map-chip" title="${escapeAttr(mapName)}">
       <strong>${escapeHtml(mapName)}</strong>
       <small>${escapeHtml(meta)}</small>
     </span>
@@ -3907,13 +4638,17 @@ function normalizePerk(raw) {
   };
 }
 
-function readCache() {
+function readCache(options = {}) {
   try {
     const cached = JSON.parse(localStorage.getItem(CACHE_KEY));
-    if (!cached || Date.now() - cached.timestamp > CACHE_MS) {
+    if (!cached || !cached.timestamp) {
       return null;
     }
-    return cached;
+    const stale = Date.now() - cached.timestamp > CACHE_MS;
+    if (stale && !options.allowStale) {
+      return null;
+    }
+    return stale ? { ...cached, stale: true } : cached;
   } catch {
     return null;
   }
@@ -4021,10 +4756,11 @@ function setSelectOptions(select, options, selectedValue) {
     return;
   }
   const values = new Set(options.map((option) => option.value));
-  const nextValue = values.has(selectedValue) ? selectedValue : "all";
+  const fallbackValue = values.has("all") ? "all" : options[0]?.value || "";
+  const nextValue = values.has(selectedValue) ? selectedValue : fallbackValue;
   if (nextValue !== selectedValue) {
-    if (select === els.compInitialFilter) {
-      state.compFilters.stageInitial = nextValue;
+    if (select === els.compRuleFilter) {
+      state.compFilters.rule = nextValue;
     } else if (select === els.compStageFilter) {
       state.compFilters.stage = nextValue;
     }
@@ -4036,6 +4772,7 @@ function setSelectOptions(select, options, selectedValue) {
       return `<option value="${escapeAttr(option.value)}"${selected}>${escapeHtml(option.label)}</option>`;
     })
     .join("");
+  select.value = nextValue;
 }
 
 function normalizeStages(rawMaps) {
@@ -4292,8 +5029,9 @@ function isVisibleRecentUpdate(update) {
   if (!timestamp) {
     return false;
   }
-  const cutoff = Date.now() - RECENT_UPDATE_DAYS * 24 * 60 * 60 * 1000;
-  return timestamp >= cutoff || timestamp > Date.now();
+  const now = Date.now();
+  const cutoff = now - RECENT_UPDATE_DAYS * 24 * 60 * 60 * 1000;
+  return timestamp >= cutoff && timestamp <= now;
 }
 
 function toArray(value) {
