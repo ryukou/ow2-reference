@@ -1811,10 +1811,10 @@ const state = {
   },
   allyComp: {
     tank: "sigma",
-    damage1: "reaper",
-    damage2: "ashe",
-    support1: "kiriko",
-    support2: "juno",
+    damage1: "",
+    damage2: "",
+    support1: "",
+    support2: "",
   },
   guideFilters: {
     map: "all",
