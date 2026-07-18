@@ -1803,11 +1803,11 @@ const state = {
     stage: "all",
   },
   enemyCounter: {
-    tank: "",
-    damage1: "",
-    damage2: "",
-    support1: "",
-    support2: "",
+    tank: "orisa",
+    damage1: "soldier-76",
+    damage2: "mei",
+    support1: "baptiste",
+    support2: "kiriko",
   },
   allyComp: {
     tank: "sigma",
@@ -3443,6 +3443,9 @@ function renderAllyCompResult() {
     `
         : ""
     }
+    <div class="enemy-counter-roles">
+      ${QUICK_PERK_ROLES.map((role) => renderAllySynergyRole(role, plan.recommendations[role.role] || [])).join("")}
+    </div>
     ${
       plan.missingSlots.length
         ? `
@@ -3512,8 +3515,62 @@ function buildAllyCompPlan(allyHeroes) {
     caution,
     mapStyles: mapStylesForArchetype(primaryType),
     synergyPairs,
+    recommendations: buildAllySynergyRecommendations(allyHeroes),
     missingSlots,
   };
+}
+
+function buildAllySynergyRecommendations(allyHeroes) {
+  const selectedKeys = new Set(allyHeroes.map((hero) => hero.key));
+  const scored = new Map();
+  allyHeroes.forEach((hero) => {
+    buildHeroSynergy(hero).allies.forEach(({ key, reason }) => {
+      if (selectedKeys.has(key) || !findHeroByKey(key)) {
+        return;
+      }
+      const current = scored.get(key) || { key, score: 0, reasons: new Set(), sources: new Set() };
+      current.score += 1;
+      current.reasons.add(reason);
+      current.sources.add(hero.name);
+      scored.set(key, current);
+    });
+  });
+
+  return QUICK_PERK_ROLES.reduce((grouped, role) => {
+    grouped[role.role] = [...scored.values()]
+      .map((item) => ({ ...item, hero: findHeroByKey(item.key) }))
+      .filter((item) => item.hero?.role === role.role)
+      .sort((a, b) => b.score - a.score || a.hero.name.localeCompare(b.hero.name, "ja"))
+      .slice(0, 4)
+      .map((item) => ({
+        key: item.key,
+        hero: item.hero,
+        score: item.score,
+        reason: buildAllySynergyReason(item),
+      }));
+    return grouped;
+  }, {});
+}
+
+function buildAllySynergyReason(item) {
+  const sources = [...item.sources].slice(0, 2).join(" / ");
+  const reason = [...item.reasons][0] || "相性が良い組み合わせ。";
+  return sources ? `${sources}と相性良好。${reason}` : reason;
+}
+
+function renderAllySynergyRole(role, recommendations) {
+  return `
+    <section class="enemy-counter-role">
+      <div class="role-matchup-head">
+        <span>${escapeHtml(role.label)}</span>
+        <strong>${escapeHtml(role.ja)}の候補</strong>
+        <small>${recommendations.length ? "クリックで詳細" : "候補なし"}</small>
+      </div>
+      <div class="enemy-counter-candidates">
+        ${recommendations.length ? recommendations.map(renderEnemyCounterCandidate).join("") : renderEmpty("味方キャラを増やすと候補が出ます")}
+      </div>
+    </section>
+  `;
 }
 
 function renderAllySynergyPair(pair) {
