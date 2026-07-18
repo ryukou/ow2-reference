@@ -12,8 +12,8 @@
       rel="icon"
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='8' fill='%230e1014'/%3E%3Cpath d='M14 18h9l9 15 9-15h9L36 40v10h-8V40L14 18z' fill='%23f3a13a'/%3E%3C/svg%3E"
     >
-    <link rel="stylesheet" href="./styles.css?v=hero-combos">
-    <script src="./app.js?v=hero-combos" defer></script>
+    <link rel="stylesheet" href="./styles.css?v=ally-comp">
+    <script src="./app.js?v=ally-comp" defer></script>
   </head>
   <body>
     <div class="app-shell">
@@ -320,6 +320,45 @@
             </div>
             <div id="enemyCounterResult" class="enemy-counter-result" aria-live="polite"></div>
           </div>
+
+          <details class="content-disclosure" aria-label="Ally composition evaluator" open>
+            <summary>
+              <span>味方構成の評価・戦い方を開く</span>
+              <small>5人を選んで構成タイプと相性を確認</small>
+            </summary>
+            <div class="enemy-counter-tool" aria-label="Ally composition evaluator">
+              <div class="section-head compact">
+                <div>
+                  <span class="eyebrow">Ally Comp</span>
+                  <h3>味方構成の評価・戦い方</h3>
+                </div>
+                <span class="section-note">味方5人を選んで戦い方と相性を確認</span>
+              </div>
+              <div class="enemy-counter-controls">
+                <label>
+                  <span>味方タンク</span>
+                  <select data-ally-comp-slot="tank" data-ally-comp-role="tank"></select>
+                </label>
+                <label>
+                  <span>味方DPS 1</span>
+                  <select data-ally-comp-slot="damage1" data-ally-comp-role="damage"></select>
+                </label>
+                <label>
+                  <span>味方DPS 2</span>
+                  <select data-ally-comp-slot="damage2" data-ally-comp-role="damage"></select>
+                </label>
+                <label>
+                  <span>味方サポート 1</span>
+                  <select data-ally-comp-slot="support1" data-ally-comp-role="support"></select>
+                </label>
+                <label>
+                  <span>味方サポート 2</span>
+                  <select data-ally-comp-slot="support2" data-ally-comp-role="support"></select>
+                </label>
+              </div>
+              <div id="allyCompResult" class="enemy-counter-result" aria-live="polite"></div>
+            </div>
+          </details>
 
           <details class="content-disclosure" aria-label="Hero synergy map">
             <summary>

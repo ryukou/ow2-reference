@@ -1444,6 +1444,13 @@ const ARCHETYPE_PLAYSTYLE_GUIDES = {
     tips: ["最初の1人を落とすために射線をずらす。", "倒し切れない時は無理に追わず、次の射線へ移る。"],
   },
 };
+const ARCHETYPE_CAUTIONS = {
+  brawl: "長射線や範囲CCに弱い。近づく前に削られると押し込めない。",
+  dive: "孤立すると各個撃破されやすい。入るタイミングを味方と揃える。",
+  poke: "一気に詰められると崩れやすい。前に出るタイミングを合わせる。",
+  pick: "外すと4対5になりやすい。外したら早めに立ち回りを変える。",
+  mixed: "得意な場面が絞れていない。役割ごとに強みを1つ決めて動く。",
+};
 const ROLE_SYNERGY_GUIDES = {
   tank: [
     ["lucio", "前に出るタイミングと下がるタイミングを作りやすい。"],
@@ -1802,6 +1809,13 @@ const state = {
     support1: "",
     support2: "",
   },
+  allyComp: {
+    tank: "sigma",
+    damage1: "reaper",
+    damage2: "ashe",
+    support1: "kiriko",
+    support2: "juno",
+  },
   guideFilters: {
     map: "all",
     rule: "Control",
@@ -1865,6 +1879,8 @@ function cacheElements() {
   els.synergyMap = document.querySelector("#synergyMap");
   els.enemyCounterInputs = document.querySelectorAll("[data-enemy-counter-slot]");
   els.enemyCounterResult = document.querySelector("#enemyCounterResult");
+  els.allyCompInputs = document.querySelectorAll("[data-ally-comp-slot]");
+  els.allyCompResult = document.querySelector("#allyCompResult");
   els.theoryCompGrid = document.querySelector("#theoryCompGrid");
   els.compRuleFilter = document.querySelector("#compRuleFilter");
   els.compStageFilter = document.querySelector("#compStageFilter");
@@ -1964,6 +1980,16 @@ function bindEvents() {
       if (slot) {
         state.enemyCounter[slot] = select.value;
         renderEnemyCounterResult();
+      }
+    });
+  });
+
+  els.allyCompInputs?.forEach((select) => {
+    select.addEventListener("change", () => {
+      const slot = select.dataset.allyCompSlot;
+      if (slot) {
+        state.allyComp[slot] = select.value;
+        renderAllyCompResult();
       }
     });
   });
@@ -2282,6 +2308,7 @@ function renderAll() {
   renderGuideControls();
   renderGuides();
   renderEnemyCounterControls();
+  renderAllyCompControls();
   renderComps();
   renderTheoryComps();
   renderSynergyMapControls();
@@ -3211,16 +3238,20 @@ function getSelectedEnemyHeroes() {
     });
 }
 
-function buildEnemyCounterPlan(enemyHeroes) {
-  const archetypeCounts = enemyHeroes.reduce((counts, hero) => {
+function detectPrimaryArchetype(heroes) {
+  const archetypeCounts = heroes.reduce((counts, hero) => {
     const archetypes = getHeroArchetypes(hero.key);
     const primary = archetypes[0] || roleFallbackArchetype(hero.role);
     counts[primary] = (counts[primary] || 0) + 1;
     return counts;
   }, {});
-  const primaryType = Object.entries(archetypeCounts)
+  return Object.entries(archetypeCounts)
     .sort((a, b) => b[1] - a[1])
     .find(([, count]) => count >= 2)?.[0] || "mixed";
+}
+
+function buildEnemyCounterPlan(enemyHeroes) {
+  const primaryType = detectPrimaryArchetype(enemyHeroes);
   const guide = ENEMY_COMP_COUNTER_GUIDES[primaryType] || ENEMY_COMP_COUNTER_GUIDES.mixed;
   return {
     guide,
@@ -3346,6 +3377,157 @@ function renderEnemyCounterCandidate(item) {
         <small>${escapeHtml(item.reason)}</small>
       </span>
     </button>
+  `;
+}
+
+function renderAllyCompControls() {
+  if (!els.allyCompInputs?.length) {
+    return;
+  }
+  els.allyCompInputs.forEach((select) => {
+    const slot = select.dataset.allyCompSlot;
+    const role = select.dataset.allyCompRole;
+    const heroes = sortHeroesForQuickPerks(state.heroes.filter((hero) => hero.role === role));
+    const current = state.allyComp[slot] || "";
+    select.innerHTML = [
+      '<option value="">未選択</option>',
+      ...heroes.map((hero) => `<option value="${escapeAttr(hero.key)}">${escapeHtml(hero.name)}</option>`),
+    ].join("");
+    select.value = heroes.some((hero) => hero.key === current) ? current : "";
+    state.allyComp[slot] = select.value;
+  });
+  renderAllyCompResult();
+}
+
+function renderAllyCompResult() {
+  if (!els.allyCompResult) {
+    return;
+  }
+  const selectedHeroes = getSelectedAllyHeroes();
+  if (!selectedHeroes.length) {
+    els.allyCompResult.innerHTML = renderEmpty("味方キャラを選ぶと、構成の評価と戦い方が表示されます");
+    return;
+  }
+
+  const plan = buildAllyCompPlan(selectedHeroes);
+  els.allyCompResult.innerHTML = `
+    <div class="enemy-counter-summary">
+      <div>
+        <span class="eyebrow">Detected Comp</span>
+        <h4>${escapeHtml(plan.playstyle.label)}寄り</h4>
+      </div>
+      <div class="enemy-chip-list">
+        ${selectedHeroes.map(renderEnemyChip).join("")}
+      </div>
+    </div>
+    <div class="enemy-counter-plan">
+      ${plan.playstyle.tips.map((tip, index) => renderGuidePoint(index === 0 ? "戦い方" : "テンポ", tip)).join("")}
+      ${renderGuidePoint("向いている場面", plan.mapStyles.join(" / "))}
+      ${renderGuidePoint("注意点", plan.caution)}
+    </div>
+    ${
+      plan.synergyPairs.length
+        ? `
+      <div class="enemy-counter-roles">
+        <section class="enemy-counter-role">
+          <div class="role-matchup-head">
+            <span>Synergy</span>
+            <strong>相性が良い組み合わせ</strong>
+            <small>${plan.synergyPairs.length}件</small>
+          </div>
+          <div class="enemy-counter-candidates">
+            ${plan.synergyPairs.map(renderAllySynergyPair).join("")}
+          </div>
+        </section>
+      </div>
+    `
+        : ""
+    }
+    ${
+      plan.missingSlots.length
+        ? `
+      <div class="enemy-counter-notes">
+        <strong>未選択</strong>
+        <span>${escapeHtml(plan.missingSlots.join(" / "))}が未選択です。埋めるとより正確な評価になります。</span>
+      </div>
+    `
+        : ""
+    }
+  `;
+  els.allyCompResult.querySelectorAll("[data-hero-key]").forEach((button) => {
+    button.addEventListener("click", () => selectHeroFromInline(button.dataset.heroKey));
+  });
+}
+
+function getSelectedAllyHeroes() {
+  const keys = Object.values(state.allyComp).filter(Boolean);
+  const seen = new Set();
+  return keys
+    .map((key) => findHeroByKey(key))
+    .filter(Boolean)
+    .filter((hero) => {
+      if (seen.has(hero.key)) {
+        return false;
+      }
+      seen.add(hero.key);
+      return true;
+    });
+}
+
+function buildAllyCompPlan(allyHeroes) {
+  const primaryType = detectPrimaryArchetype(allyHeroes);
+  const playstyle =
+    primaryType === "mixed"
+      ? {
+          label: "混合",
+          tips: [
+            "役割ごとに得意な距離を意識して個別に立ち回る。",
+            "味方の中で一番得意な近距離/中距離の軸を1つ決めて合わせる。",
+          ],
+        }
+      : ARCHETYPE_PLAYSTYLE_GUIDES[primaryType] || ARCHETYPE_PLAYSTYLE_GUIDES.poke;
+  const caution = ARCHETYPE_CAUTIONS[primaryType] || ARCHETYPE_CAUTIONS.mixed;
+  const allyKeys = new Set(allyHeroes.map((hero) => hero.key));
+  const synergyPairs = [];
+  allyHeroes.forEach((hero) => {
+    const roleAllies = ROLE_SYNERGY_GUIDES[hero.role] || [];
+    roleAllies.forEach(([partnerKey, reason]) => {
+      if (partnerKey === hero.key || !allyKeys.has(partnerKey)) {
+        return;
+      }
+      const partner = findHeroByKey(partnerKey);
+      if (!partner) {
+        return;
+      }
+      synergyPairs.push({ hero, partner, reason });
+    });
+  });
+  const slotLabels = { tank: "タンク", damage1: "DPS1", damage2: "DPS2", support1: "サポート1", support2: "サポート2" };
+  const missingSlots = Object.entries(state.allyComp)
+    .filter(([, key]) => !key)
+    .map(([slot]) => slotLabels[slot] || slot);
+  return {
+    archetype: primaryType,
+    playstyle,
+    caution,
+    mapStyles: mapStylesForArchetype(primaryType),
+    synergyPairs,
+    missingSlots,
+  };
+}
+
+function renderAllySynergyPair(pair) {
+  const portrait = pair.hero.portrait
+    ? `<img src="${safeUrl(pair.hero.portrait)}" alt="">`
+    : `<span class="relation-placeholder">${escapeHtml(pair.hero.name.slice(0, 2))}</span>`;
+  return `
+    <div class="enemy-counter-candidate" title="${escapeAttr(`${pair.hero.name} × ${pair.partner.name}`)}">
+      ${portrait}
+      <span>
+        <strong>${escapeHtml(pair.hero.name)} × ${escapeHtml(pair.partner.name)}</strong>
+        <small>${escapeHtml(pair.reason)}</small>
+      </span>
+    </div>
   `;
 }
 
