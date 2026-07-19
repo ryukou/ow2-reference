@@ -958,6 +958,10 @@ a {
   gap: 8px;
 }
 
+.tag-filter {
+  margin: 0 0 12px;
+}
+
 .segmented button {
   min-height: 42px;
   color: var(--muted);

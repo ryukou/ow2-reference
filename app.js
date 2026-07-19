@@ -596,6 +596,64 @@ const HERO_ARCHETYPES = {
   poke: ["sigma", "ashe", "widowmaker", "hanzo", "soldier-76", "sojourn", "cassidy", "baptiste", "zenyatta", "illari", "ana"],
   pick: ["dva", "widowmaker", "hanzo", "ashe", "sombra", "tracer", "shion", "mercy", "kiriko"],
 };
+const PLAYSTYLE_TAG_DEFINITIONS = [
+  { id: "flanker", label: "フランカー" },
+  { id: "hitscan", label: "ヒットスキャン" },
+  { id: "projectile", label: "プロジェクタイル" },
+  { id: "sniper", label: "狙撃" },
+  { id: "beam", label: "ビーム" },
+  { id: "melee", label: "近接" },
+  { id: "shield", label: "シールド" },
+  { id: "brawler", label: "前線" },
+  { id: "main-healer", label: "回復重視" },
+  { id: "utility", label: "補助・CC" },
+  { id: "setup", label: "設置型" },
+];
+const HERO_PLAYSTYLE_TAGS = {
+  dva: ["flanker"],
+  winston: ["flanker"],
+  orisa: ["shield", "brawler"],
+  zarya: ["shield", "beam"],
+  sigma: ["shield", "projectile"],
+  "junker-queen": ["brawler", "melee"],
+  doomfist: ["flanker", "melee"],
+  hazard: ["brawler", "projectile"],
+  mauga: ["brawler", "hitscan"],
+  reinhardt: ["shield", "melee", "brawler"],
+  ramattra: ["shield", "brawler"],
+  "wrecking-ball": ["flanker", "melee"],
+  roadhog: ["brawler", "projectile"],
+  ashe: ["hitscan"],
+  widowmaker: ["sniper", "hitscan"],
+  echo: ["flanker", "projectile"],
+  cassidy: ["hitscan"],
+  genji: ["flanker", "projectile", "melee"],
+  junkrat: ["projectile"],
+  symmetra: ["beam", "setup"],
+  sojourn: ["hitscan", "projectile"],
+  "soldier-76": ["hitscan"],
+  sombra: ["flanker", "hitscan"],
+  torbjorn: ["projectile", "setup"],
+  tracer: ["flanker", "hitscan"],
+  bastion: ["hitscan", "setup"],
+  hanzo: ["projectile"],
+  pharah: ["projectile"],
+  venture: ["flanker", "melee"],
+  mei: ["beam", "projectile"],
+  reaper: ["flanker", "hitscan"],
+  shion: ["flanker", "hitscan"],
+  ana: ["main-healer", "projectile"],
+  illari: ["main-healer", "hitscan"],
+  kiriko: ["utility", "flanker", "projectile"],
+  juno: ["main-healer", "projectile"],
+  zenyatta: ["utility", "projectile"],
+  baptiste: ["main-healer", "projectile"],
+  brigitte: ["utility", "melee", "brawler"],
+  mercy: ["main-healer", "beam"],
+  moira: ["main-healer", "beam"],
+  lifeweaver: ["main-healer", "projectile", "utility"],
+  lucio: ["utility", "flanker", "projectile"],
+};
 const HERO_COMBO_GUIDES = {
   ana: [
     {
@@ -1796,6 +1854,7 @@ const state = {
   query: "",
   favoriteOnly: false,
   favoriteHeroKeys: new Set(),
+  playstyleTags: new Set(),
   mapRuleFilter: "all",
   mapFilter: "all",
   compFilters: {
@@ -1844,10 +1903,34 @@ let pendingHeroKeyFromHash = null;
 document.addEventListener("DOMContentLoaded", () => {
   cacheElements();
   readFavorites();
+  initPlaystyleTagFilter();
   bindEvents();
   syncViewFromLocation();
   bootstrap();
 });
+
+function initPlaystyleTagFilter() {
+  if (!els.playstyleTagFilter) {
+    return;
+  }
+  els.playstyleTagFilter.innerHTML = PLAYSTYLE_TAG_DEFINITIONS.map(
+    (tag) => `<button type="button" data-playstyle-tag="${escapeAttr(tag.id)}" aria-pressed="false">${escapeHtml(tag.label)}</button>`,
+  ).join("");
+  els.playstyleTagFilter.querySelectorAll("[data-playstyle-tag]").forEach((button) => {
+    button.addEventListener("click", () => {
+      const tag = button.dataset.playstyleTag;
+      const isActive = state.playstyleTags.has(tag);
+      if (isActive) {
+        state.playstyleTags.delete(tag);
+      } else {
+        state.playstyleTags.add(tag);
+      }
+      button.classList.toggle("is-active", !isActive);
+      button.setAttribute("aria-pressed", !isActive ? "true" : "false");
+      renderHeroList();
+    });
+  });
+}
 
 function cacheElements() {
   els.syncStatus = document.querySelector("#syncStatus");
@@ -1860,6 +1943,7 @@ function cacheElements() {
   els.heroSearch = document.querySelector("#heroSearch");
   els.roleButtons = document.querySelectorAll("[data-role]");
   els.favoriteFilterButton = document.querySelector("[data-favorite-filter]");
+  els.playstyleTagFilter = document.querySelector("#playstyleTagFilter");
   els.heroMapRuleFilter = document.querySelector("#heroMapRuleFilter");
   els.heroMapFilter = document.querySelector("#heroMapFilter");
   els.heroMapNote = document.querySelector("#heroMapNote");
@@ -4052,6 +4136,13 @@ function getFilteredHeroes() {
   return sortHeroesForList(state.heroes.filter((hero) => {
     if (state.favoriteOnly && !state.favoriteHeroKeys.has(hero.key)) {
       return false;
+    }
+
+    if (state.playstyleTags.size) {
+      const heroTags = HERO_PLAYSTYLE_TAGS[hero.key] || [];
+      if (!heroTags.some((tag) => state.playstyleTags.has(tag))) {
+        return false;
+      }
     }
 
     const roleMatches = state.role === "all" || hero.role === state.role;
